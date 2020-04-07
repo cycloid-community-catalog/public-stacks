@@ -1,0 +1,27 @@
+---
+platform: linux
+image_resource:
+  type: docker-image
+  source:
+    repository: docker
+    tag: 17.12.0-dind
+run:
+  path: /bin/sh
+  args:
+    - '-xc'
+    - |
+      /usr/local/bin/dockerd-entrypoint.sh --log-level error 2> docker.log &
+      timeout -t 60 sh -c "until docker info >/dev/null 2>&1; do echo waiting for docker to come up...; sleep 1; done"
+      mount | grep "none on /tmp type tmpfs" && umount /tmp
+      docker load -q -i image/image.tar
+      docker inspect $REPOSITORY:$TAG
+
+      rc=$?
+      pkill -TERM dockerd
+      exit $rc
+inputs:
+- name: merged-stack
+- name: image
+params:
+  REPOSITORY: image
+  TAG: latest

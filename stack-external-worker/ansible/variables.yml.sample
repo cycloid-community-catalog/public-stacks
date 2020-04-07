@@ -1,0 +1,14 @@
+#. use_local_device (optional): false
+#+ Use local storage drive from the instance. Default use EBS volume /dev/xvdg or /dev/local0. If not found keep the var_lib_device
+
+#. var_lib_device (optional): "nodevice"
+#+ Volume device name to use for worker datas. If "nodevice" and use_local_device=false no dedicated volume will be used.
+
+#. fs_volume_type (optional): btrfs
+#+ Filesystem used to store concourse datas. Possible values "btrfs|ext4"
+
+#. concourse_worker_tag (optional):
+#+ A tag to set during registration to create dedicated workers for some specific jobs. Eg FastStorage, ...
+
+#. concourse_worker_team (optional):
+#+ The name of the team that this worker will be assigned to. Team ID is linked to your Cycloid organization.

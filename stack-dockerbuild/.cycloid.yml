@@ -1,0 +1,48 @@
+# Configuration of the CI pipeline
+version: '2'
+name: 'Stack Docker build'
+canonical: 'stack-dockerbuild'
+status: 'public'
+description: 'Build and test a docker image before pushing it to a registry.'
+keywords:
+  - 'docker'
+  - 'registry'
+  - 'build'
+  - 'container'
+  - 'test'
+  - 'validate'
+technologies:
+  - technology: docker
+    version: n/a
+
+author: 'Cycloid'
+image: ''
+type: 'stack'
+technologies:
+  - technology: Docker
+    version: n/a
+config:
+  default:
+    name: 'Single job'
+    description: 'Used to build, tests and push docker images from branches (single job variant).'
+    pipeline:
+      pipeline:
+        path: 'pipeline/pipeline.yml'
+      variables:
+        path: 'pipeline/variables.sample.yml'
+  split-jobs:
+    name: 'Split jobs'
+    description: 'Used to build, tests and push docker images from branches (split jobs variant).'
+    pipeline:
+      pipeline:
+        path: 'pipeline/pipeline-split-jobs.yml'
+      variables:
+        path: 'pipeline/variables.sample.yml'
+  github-pr:
+    name: 'Github PRs'
+    description: 'Used to build and tests docker images from Github PRs.'
+    pipeline:
+      pipeline:
+        path: 'pipeline/pipeline-github-pr.yml'
+      variables:
+        path: 'pipeline/variables-github-pr.sample.yml'

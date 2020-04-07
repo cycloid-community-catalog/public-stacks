@@ -1,0 +1,36 @@
+--admin-firstname='{{ magento_admin_firstname }}' \
+--admin-lastname='{{ magento_admin_lastname }}' \
+--admin-email='{{ magento_admin_email }}' \
+--admin-user='{{ magento_admin_user }}' \
+--admin-password='{{ magento_admin_password }}' \
+--db-host='{{ magento_db_host }}' \
+--db-name='{{ magento_db_name }}' \
+--db-user='{{ magento_db_user }}' \
+--db-password='{{ magento_db_password }}' \
+{% if magento_base_url is defined and magento_base_url!='' %}
+--base-url='{{ magento_base_url }}' \
+{% endif %}
+{% if magento_db_prefix is defined and magento_db_prefix!='' %}
+--db-prefix='{{ magento_db_prefix }}' \
+{% endif %}
+{% if magento_language is defined and magento_language!='' %}
+--language='{{ magento_language }}' \
+{% endif %}
+{% if magento_currency is defined and magento_currency!='' %}
+--currency='{{ magento_currency }}' \
+{% endif %}
+{% if magento_timezone is defined and magento_timezone!='' %}
+--timezone='{{ magento_timezone }}' \
+{% endif %}
+{% if magento_use_rewrites is defined and magento_use_rewrites!='' %}
+--use-rewrites='{{ magento_use_rewrites }}' \
+{% endif %}
+{% if magento_use_secure is defined and magento_use_secure!='' %}
+--use-secure='{{ magento_use_secure }}' \
+{% endif %}
+{% if magento_base_url_secure is defined and magento_base_url_secure!='' %}
+--base-url-secure='{{ magento_base_url_secure }}' \
+{% endif %}
+{% if magento_use_secure_admin is defined and magento_use_secure_admin!='' %}
+--use-secure-admin='{{ magento_use_secure_admin }}' \
+{% endif %}

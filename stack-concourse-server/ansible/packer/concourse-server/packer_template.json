@@ -1,0 +1,115 @@
+{
+  "variables": {
+    "exposed_team": "{{env `BUILD_TEAM_NAME`}}",
+    "env": "{{env `env`}}",
+    "customer": "{{env `customer`}}",
+    "inventory_groups": "{{env `inventory_groups`}}",
+    "public_key": "{{env `public_key`}}",
+    "role": "{{env `role`}}",
+    "project": "{{env `project`}}",
+    "skip_tags": "{{env `skip_tags`}}",
+    "ansible_version": "{{env `ansible_version`}}"
+  },
+
+  "builders": [
+        {
+           "type": "amazon-ebs",
+           "region": "{{ user `aws_region`}}",
+           "source_ami_filter": {
+             "filters": {
+               "architecture": "x86_64",
+               "virtualization-type": "hvm",
+               "name": "*debian-stretch-*",
+               "root-device-type": "ebs"
+             },
+             "owners": ["379101102735"],
+             "most_recent": true
+           },
+           "instance_type": "t2.nano",
+           "ami_name": "{{user `project`}}_{{user `role`}}_{{user `env`}}_{{timestamp}}",
+           "ssh_username": "admin",
+           "run_tags": {
+               "env": "{{user `env`}}",
+               "project": "{{user `project`}}",
+               "customer": "{{user `customer`}}",
+               "role": "{{user `role`}}",
+               "cycloid.io": "true",
+               "packer_build": "true",
+               "monitoring-discovery": "false"
+           },
+           "tags": {
+               "Name": "{{user `project`}}_{{user `role`}}_{{user `env`}}-{{timestamp}}",
+               "env": "{{user `env`}}",
+               "project": "{{user `project`}}",
+               "customer": "{{user `customer`}}",
+               "role": "{{user `role`}}",
+               "cycloid.io": "true",
+               "monitoring-discovery": "false"
+          }
+       }
+  ],
+
+
+  "provisioners": [
+    {
+        "type": "file",
+        "source": "first-boot.yml.tpl",
+        "destination": "/tmp/first-boot.yml.tpl"
+    },
+    {
+        "type": "file",
+        "source": "user-data.sh.tpl",
+        "destination": "/tmp/user-data.sh.tpl"
+    },
+    {
+        "type": "shell",
+        "inline": [
+            "echo 'Waiting for cloudinit to be done... Can take up to 300 sec'",
+            "# Due to https://github.com/mitchellh/packer/issues/41 wait cloud init",
+            "for i in $(seq 1 300); do [ -f /var/lib/cloud/instance/boot-finished ] && break || sleep 1; done",
+            "echo '{{user `public_key`}}' > /home/admin/.ssh/authorized_keys",
+            "sudo apt-get update -qq > /dev/null",
+            "sudo apt-get install -yqq build-essential libssl-dev libffi-dev python-dev python-setuptools git curl > /dev/null",
+            "sudo easy_install --quiet pip",
+            "sudo pip -q install ansible=={{user `ansible_version`}}",
+            "echo 'Host *' >> /home/admin/.ssh/config",
+            "echo 'StrictHostKeyChecking no' >> /home/admin/.ssh/config",
+            "# wait aws role attach to the instance",
+            "sleep 60"
+        ]
+    },
+    {
+        "type": "ansible-local",
+        "command": "ANSIBLE_STDOUT_CALLBACK=actionable ANSIBLE_FORCE_COLOR=1 PYTHONUNBUFFERED=1 ansible-playbook",
+        "playbook_file": "local.yml",
+        "playbook_dir": "../../",
+        "extra_arguments": [
+            "--diff",
+            "-e 'env={{user `env`}}'",
+            "-e 'project={{user `project`}}'",
+            "-e 'role={{user `role`}}'"
+        ],
+        "inventory_groups": "{{user `inventory_groups`}}"
+    },
+    {
+        "type": "ansible-local",
+        "command": "ANSIBLE_STDOUT_CALLBACK=actionable ANSIBLE_FORCE_COLOR=1 PYTHONUNBUFFERED=1 ansible-playbook",
+        "galaxy_file": "../../requirements.yml",
+        "playbook_file": "../../concourse-server.yml",
+        "playbook_dir": "../../",
+        "staging_directory": "/home/admin/{{user `project`}}",
+        "extra_arguments": [
+            "--diff",
+            "-e 'env={{user `env`}}'",
+            "-e 'concourse_exposed_team={{user `exposed_team`}}'",
+            "-e 'ec2_tag_env={{user `env`}}'",
+            "-e 'ec2_tag_project={{user `project`}}'",
+            "-e 'ec2_tag_role={{user `role`}}'",
+            "-e 'role={{user `role`}}'",
+            "-e 'project={{user `project`}}'",
+            "--skip-tags='{{user `skip_tags`}}'"
+        ],
+        "inventory_groups": "{{user `inventory_groups`}}"
+    }
+  ]
+}

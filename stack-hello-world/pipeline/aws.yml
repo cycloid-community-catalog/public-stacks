@@ -1,0 +1,255 @@
+# YAML anchors
+shared:
+  - &task-merge-stack-and-config
+    task: merge-stack-and-config
+    config:
+      platform: linux
+      image_resource:
+        type: docker-image
+        source:
+          repository: cycloid/cycloid-toolkit
+          tag: latest
+      run:
+        path: /usr/bin/merge-stack-and-config
+      inputs:
+        - name: git_config
+          path: "config"
+        - name: git_stack
+          path: "stack"
+      outputs:
+        - name: merged-stack/terraform
+          path: "merged-stack"
+    params:
+      CONFIG_PATH: ((project))/terraform/((env))
+      STACK_PATH: terraform-aws
+
+groups:
+  - name: all
+    jobs:
+    - build
+    - unittest
+    - terraform-plan
+    - terraform-apply
+    - functional-tests
+  - name: destroy
+    jobs:
+    - terraform-destroy
+
+resource_types:
+
+  - name: terraform
+    type: docker-image
+    source:
+      repository: ljfranklin/terraform-resource
+      tag: '0.12.6'
+
+resources:
+  - name: git_code
+    type: git
+    source:
+      uri: https://github.com/cycloid-community-catalog/stack-hello-world
+      branch: code-aws
+
+  - name: git_stack
+    type: git
+    source:
+      uri: https://github.com/cycloid-community-catalog/stack-hello-world
+      branch: master
+      paths:
+        - terraform-aws/*
+
+  - name: git_config
+    type: git
+    source:
+      uri: ((config_git_repository))
+      branch: ((config_git_branch))
+      private_key: ((config_git_private_key))
+
+  - name: s3_release
+    type: s3
+    source:
+      bucket: ((terraform_storage_bucket_name))
+      versioned_file: ((release_bucket_object_path))
+      private: true
+      region_name: ((aws_default_region))
+      access_key_id: ((aws_access_key))
+      secret_access_key: ((aws_secret_key))
+
+  - name: tfstate
+    type: terraform
+    source:
+      env_name: ((env))
+      backend_type: s3
+      backend_config:
+        bucket: ((terraform_storage_bucket_name))
+        key: ((project))-((env)).tfstate
+        workspace_key_prefix: ((project))
+        region: ((aws_default_region))
+        access_key: ((aws_access_key))
+        secret_key: ((aws_secret_key))
+      vars:
+        access_key: ((aws_access_key))
+        secret_key: ((aws_secret_key))
+        env: ((env))
+        project: ((project))
+        customer: ((customer))
+        aws_region: ((aws_default_region))
+
+jobs:
+  - name: build
+    max_in_flight: 1
+    build_logs_to_retain: 10
+    plan:
+    - do:
+      - get: git_code
+        trigger: true
+
+      - task: build-release
+        config:
+          platform: linux
+          image_resource:
+            type: docker-image
+            source:
+              repository: cycloid/cycloid-toolkit
+              tag: latest
+          run:
+            path: /bin/bash
+            args:
+            - -exc
+            - |
+              DIR=${PWD}
+              cd ${DIR}/code/
+              zip -r ${DIR}/release/((project)).zip *
+          inputs:
+          - name: git_code
+            path: code
+          outputs:
+          - name: release
+            path: "release"
+
+      - put: s3_release
+        params:
+          acl: private
+          file: release/((project)).zip
+
+  - name: unittest
+    max_in_flight: 1
+    build_logs_to_retain: 10
+    plan:
+    - do:
+      - get: git_code
+        passed: [build]
+      - get: s3_release
+        trigger: true
+        passed: [build]
+
+      - task: test
+        config:
+          platform: linux
+          image_resource:
+            type: docker-image
+            source:
+              repository: cycloid/cycloid-toolkit
+              tag: latest
+          run:
+            path: /bin/bash
+            args:
+            - -exc
+            - |
+              unzip code/((project)).zip
+          inputs:
+          - name: s3_release
+            path: code
+
+  - name: terraform-plan
+    max_in_flight: 1
+    build_logs_to_retain: 10
+    plan:
+    - do:
+      - get: git_code
+        passed: [unittest]
+      - get: s3_release
+        passed: [unittest]
+        trigger: true
+      - get: git_stack
+        trigger: true
+      - get: git_config
+        trigger: true
+      - *task-merge-stack-and-config
+      - put: tfstate
+        params:
+          plan_only: true
+          terraform_source: merged-stack/terraform
+
+  - name: terraform-apply
+    max_in_flight: 1
+    build_logs_to_retain: 10
+    plan:
+    - do:
+      - get: git_code
+        passed: [terraform-plan]
+      - get: s3_release
+        passed: [terraform-plan]
+      - get: git_stack
+        passed: [terraform-plan]
+      - get: tfstate
+        passed: [terraform-plan]
+      - get: git_config
+        passed: [terraform-plan]
+      - *task-merge-stack-and-config
+      - put: tfstate
+        params:
+          plan_run: true
+          terraform_source: merged-stack/terraform
+
+  - name: functional-tests
+    max_in_flight: 1
+    build_logs_to_retain: 10
+    plan:
+    - do:
+      - get: tfstate
+        passed: [terraform-apply]
+        trigger: true
+      - task: test
+        config:
+          platform: linux
+          image_resource:
+            type: docker-image
+            source:
+              repository: cycloid/cycloid-toolkit
+              tag: latest
+          run:
+            path: /bin/bash
+            args:
+            - -exc
+            - |
+              export LAMBDA_ARN=$(cat tfstate/metadata | jq -r .lambda_function_arn)
+              aws lambda invoke --function-name $LAMBDA_ARN  result
+              cat result | jq
+          inputs:
+          - name: tfstate
+          params:
+            AWS_ACCESS_KEY_ID: ((aws_access_key))
+            AWS_SECRET_ACCESS_KEY: ((aws_secret_key))
+            AWS_DEFAULT_REGION: ((aws_default_region))
+
+  - name: terraform-destroy
+    max_in_flight: 1
+    build_logs_to_retain: 10
+    plan:
+    - do:
+      - get: git_stack
+        passed: [terraform-apply]
+      - get: tfstate
+        passed: [terraform-apply]
+      - get: s3_release
+        passed: [terraform-apply]
+      - get: git_config
+        passed: [terraform-apply]
+      - *task-merge-stack-and-config
+      - put: tfstate
+        params:
+          action: destroy
+          terraform_source: merged-stack/terraform
+        get_params:
+          action: destroy

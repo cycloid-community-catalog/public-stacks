@@ -1,0 +1,110 @@
+groups:
+
+- name: overview
+  jobs:
+  - terraform-plan
+  - terraform-apply
+
+- name: destroy
+  jobs:
+  - terraform-destroy
+
+resource_types:
+
+- name: terraform
+  type: docker-image
+  source:
+    repository: ljfranklin/terraform-resource
+    tag: ((terraform_version))
+
+resources:
+
+- name: tfstate
+  type: terraform
+  source:
+    env_name: ((env))
+    backend_type: s3
+    backend_config:
+      bucket: ((terraform_storage_bucket_name))
+      key: ((project))-((env)).tfstate
+      workspace_key_prefix: ((project))
+      region: ((aws_default_region))
+      access_key: ((aws_access_key))
+      secret_key: ((aws_secret_key))
+      endpoint: ((terraform_s3_endpoint))
+      skip_credentials_validation: ((terraform_s3_skip_credentials_validation))
+      force_path_style: ((terraform_s3_force_path_style))
+    vars:
+      access_key: ((aws_access_key))
+      secret_key: ((aws_secret_key))
+      env: ((env))
+      project: ((project))
+      customer: ((customer))
+      aws_region: ((aws_default_region))
+    env:
+      AWS_ACCESS_KEY_ID: ((aws_access_key))
+      AWS_DEFAULT_REGION: ((aws_default_region))
+      AWS_SECRET_ACCESS_KEY: ((aws_secret_key))
+
+# The Terraform config (will be merged with the stack)
+- name: git_terraform
+  type: git
+  source:
+    uri: ((git_repository))
+    branch: ((git_branch))
+    private_key: ((git_private_key))
+    paths:
+      - ((git_terraform_path))
+
+jobs:
+
+# Merge and trigger a plan whenever there is a commit in Terraform stack or config
+- name: terraform-plan
+  serial: True
+  max_in_flight: 1
+  build_logs_to_retain: 10
+  plan:
+    - do:
+      - get: git_terraform
+        trigger: true
+
+      - put: tfstate
+        params:
+          plan_only: true
+          terraform_source: git_terraform/((git_terraform_path))/
+
+# Merge and trigger an apply manually (no autostart of this job)
+- name: terraform-apply
+  serial: True
+  max_in_flight: 1
+  build_logs_to_retain: 10
+  plan:
+    - do:
+      - get: git_terraform
+        trigger: false
+        passed:
+          - terraform-plan
+      - get: tfstate
+        trigger: false
+        passed:
+          - terraform-plan
+
+      - put: tfstate
+        params:
+          plan_run: true
+          terraform_source: git_terraform/((git_terraform_path))/
+
+- name: terraform-destroy
+  max_in_flight: 1
+  build_logs_to_retain: 10
+  plan:
+    - do:
+        - get: git_terraform
+          trigger: false
+
+        - put: tfstate
+          params:
+            action: destroy
+            terraform_source: git_terraform/((git_terraform_path))/
+          get_params:
+            action: destroy

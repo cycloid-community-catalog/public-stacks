@@ -1,0 +1,40 @@
+---
+# Configuration of the Cycloid stack
+name: 'ses'
+canonical: 'ses'
+status: 'public'
+description: |
+  Simple Email Service stack will create an SES iam user and optionally a Redis or SQS queue if needed to manage bounced emails.
+keywords:
+  - 'ses'
+  - 'sqs'
+  - 'email'
+  - 'redis'
+  - 'elasticache'
+  - 'provider:aws'
+author: 'Cycloid'
+image: |
+  https://raw.githubusercontent.com/cycloid-community-catalog/stack-ses/master/icon.png
+technologies:
+  - technology: Amazon SES
+    version: n/a
+  - technology: Amazon Elasticache Redis
+    version: n/a
+  - technology: Amazon SQS
+    version: n/a
+  - technology: terraform
+    version: 0.12.10
+
+config:
+  # Configuration of the CI pipeline
+  pipeline:
+    pipeline:
+      path: 'pipeline/pipeline.yml'
+    variables:
+      path: 'pipeline/variables.sample.yml'
+
+  # Configuration of terraform to setup the infrastructure
+  terraform:
+    ses:
+      path: 'terraform/ses.tf.sample'
+      destination: '($ project $)/terraform/($ environment $)/ses.tf'

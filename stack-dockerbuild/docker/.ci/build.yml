@@ -1,0 +1,27 @@
+---
+# From https://github.com/concourse/builder-task/blob/master/example.yml
+
+platform: linux
+
+image_resource:
+  type: registry-image
+  source: {repository: concourse/builder-task}
+
+params:
+  REPOSITORY: concourse/builder-task
+  TAG: latest
+  CONTEXT: builder-task
+  DOCKERFILE: Dockerfile
+  BUILD_ARGS_FILE: build_args_file
+
+inputs:
+- name: merged-stack
+
+outputs:
+- name: image
+
+caches:
+- path: cache
+
+run: {path: build}
+#run: {path: builder-task/build}

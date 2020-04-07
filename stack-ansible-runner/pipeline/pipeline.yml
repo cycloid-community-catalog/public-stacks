@@ -1,0 +1,47 @@
+groups:
+
+- name: overview
+  jobs:
+  - ansible
+
+resource_types:
+
+resources:
+
+# The ansible config (will be merged with the stack)
+- name: git_ansible
+  type: git
+  source:
+    uri: ((git_repository))
+    branch: ((git_branch))
+    private_key: ((git_private_key))
+    paths:
+      - ((git_ansible_path))
+
+jobs:
+
+- name: ansible
+  serial: True
+  build_logs_to_retain: 10
+  plan:
+  - do:
+    - get: git_ansible
+      params: {depth: 1}
+      trigger: true
+
+    - task: run-ansible
+      config:
+        platform: linux
+        image_resource:
+          type: docker-image
+          source:
+            repository: cycloid/cycloid-toolkit
+            tag: ((ansible_version))
+        run:
+          path: /usr/bin/ansible-runner
+        caches:
+          - path: ansible-playbook/roles
+        inputs:
+        - name: git_ansible
+          path: ansible-playbook
+      params: ((ansible_params))

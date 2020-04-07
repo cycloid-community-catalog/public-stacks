@@ -1,0 +1,55 @@
+---
+# Configuration of the Cycloid stack
+version: '2'
+name: 'terraform-runner'
+canonical: 'stack-terraform-runner'
+status: 'public'
+description: |
+  Allow you to do simple terraform actions: plan, create, destroy.
+keywords:
+  - 'terraform-runner'
+  - 'terraform'
+  - 'provider:aws'
+  - 'provider:gcp'
+  - 'provider:azure'
+author: 'Cycloid'
+image: |
+  https://raw.githubusercontent.com/cycloid-community-catalog/stack-terraform-runner/master/icon.png
+technologies:
+  - technology: terraform
+    version: n/a
+
+config:
+  default:
+    name: 'AWS'
+    description: 'Using AWS S3 terraform backend.'
+    pipeline:
+      pipeline:
+        path: 'pipeline/pipeline.yml'
+      variables:
+        path: 'pipeline/variables.sample.yml'
+  s3-compatible:
+    name: 'S3 API-compatible'
+    description: 'Using an S3 API-compatible terraform backend like minio.io'
+    pipeline:
+      pipeline:
+        path: 'pipeline/pipeline-s3-compatible.yml'
+      variables:
+        path: 'pipeline/variables-s3-compatible.sample.yml'
+  gcp:
+    name: 'GCP'
+    description: 'Using Google GCS terraform backend.'
+    pipeline:
+      pipeline:
+        path: 'pipeline/pipeline-gcp.yml'
+      variables:
+        path: 'pipeline/variables-gcp.sample.yml'
+  azure:
+    name: 'Azure'
+    description: 'Using AzureRM terraform backend.'
+    pipeline:
+      pipeline:
+        path: 'pipeline/pipeline-azure.yml'
+      variables:
+        path: 'pipeline/variables-azure.sample.yml'
+

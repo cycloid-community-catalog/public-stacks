@@ -1,0 +1,42 @@
+---
+# Configuration of the Cycloid stack
+name: 'External worker'
+canonical: 'stack-external-worker'
+status: 'public'
+description: |
+  This stack will deploy an Amazon ASG with external workers for Cycloid.io.
+keywords:
+  - 'workers'
+  - 'worker'
+  - 'concourse'
+  - 'external'
+  - 'cycloid'
+  - 'provider:aws'
+author: 'Cycloid'
+image: |
+  https://raw.githubusercontent.com/cycloid-community-catalog/stack-external-worker/master/icon.png
+technologies:
+  - technology: Amazon Auto Scaling Group
+    version: n/a
+  - technology: concourse
+    version: n/a
+
+config:
+  # Configuration of the CI pipeline
+  pipeline:
+    pipeline:
+      path: 'pipeline/pipeline.yml'
+    variables:
+      path: 'pipeline/variables.sample.yml'
+
+  # Configuration of ansible for provisionning
+  ansible:
+    external-worker:
+      path: 'ansible/variables.yml.sample'
+      destination: '($ project $)/ansible/($ environment $)-worker.yml'
+
+  # Configuration of terraform to setup the infrastructure
+  terraform:
+    external-worker:
+      path: 'terraform/external-worker.tf.sample'
+      destination: '($ project $)/terraform/($ environment $)/external-worker.tf'

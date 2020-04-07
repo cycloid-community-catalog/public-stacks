@@ -1,0 +1,69 @@
+---
+dependency:
+  name: galaxy
+  options:
+    # vvv: True
+    role-file: requirements.yml
+driver:
+  name: docker
+lint:
+  name: yamllint
+  # https://yamllint.readthedocs.io/en/latest/configuration.html#ignoring-paths
+  options:
+    config-data: "{extends: relaxed, rules: {line-length: {max: 200}}}"
+platforms:
+  - name: instance
+    #image: docker:dind
+    image: debian:stretch
+    published_ports:
+      - "9100:9100"
+      - "80:80"
+    privileged: yes
+    command: "/bin/systemd"
+    groups:
+     - tag_project_lemp
+     - tag_role_front
+     - tag_cycloid_io_true
+     - tag_env_test
+
+provisioner:
+  name: ansible
+  env:
+    MOLECULE_DEBUG: "true"
+    #ANSIBLE_KEEP_REMOTE_FILES: "1"
+  lint:
+    name: ansible-lint
+  playbooks:
+    converge: ../../lemp.yml
+  options:
+    # vault-password-file: ../../.vault-password
+    extra-vars:
+      env: test
+      project: lemp
+      customer: cycloid
+      role: front
+      telegraf_install: true
+    #skip-tags: molecule-notest
+    #vvv: "True"
+
+
+scenario:
+  name: default
+  # Override test sequence
+  test_sequence:
+  #- lint
+  - destroy
+  - dependency
+  - syntax
+  - create
+  - prepare
+  - converge
+  #- idempotence
+  #- side_effect
+  - verify
+  - destroy
+
+verifier:
+  name: testinfra
+  lint:
+    name: flake8

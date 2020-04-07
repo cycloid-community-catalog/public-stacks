@@ -1,0 +1,50 @@
+---
+dependency:
+  name: galaxy
+  options:
+    role-file: requirements.yml
+    v: true
+driver:
+  name: docker
+lint:
+  name: yamllint
+  options:
+    # 80 lines is too much
+    config-data: "{extends: relaxed, rules: {line-length: {max: 100}}}"
+platforms:
+  - name: instance
+    image: debian:stretch
+    privileged: true
+    command: "/bin/systemd"
+    groups:
+      - tag_env_test
+      - tag_project_jenkins
+      - tag_role_jenkins
+      - tag_cycloid_io_true
+provisioner:
+  name: ansible
+  lint:
+    name: ansible-lint
+  playbooks:
+    converge: ../../jenkins.yml
+  options:
+    extra-vars:
+      env: test
+      project: jenkins
+verifier:
+  name: testinfra
+  lint:
+    name: flake8
+scenario:
+  name: default
+  # Override test sequence
+  test_sequence:
+    - lint
+    - destroy
+    - dependency
+    - syntax
+    - create
+    - prepare
+    - converge
+    - verify
+    - destroy

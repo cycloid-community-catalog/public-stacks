@@ -1,0 +1,129 @@
+heat_template_version: 2014-10-16
+description: Create Cycloid workers
+parameters:
+  project_tag:
+    type: string
+  customer_tag:
+    type: string
+  flavor:
+    type: string
+  image_id:
+    type: string
+  key_name:
+    type: string
+  system_disk_size:
+    type: number
+  worker_disk_size:
+    type: number
+  network_id:
+    type: string
+  security_group_id:
+    type: string
+  scheduler_api_address:
+    type: string
+  scheduler_host:
+    type: string
+  scheduler_port:
+    type: string
+  tsa_public_key:
+    type: string
+  vault_role_id:
+    type: string
+  vault_secret_id:
+    type: string
+  vault_url:
+    type: string
+  team_id:
+    type: string
+  environment_tag:
+    type: string
+  role_tag:
+    type: string
+  stack_branch:
+    type: string
+  worker_version:
+    type: string
+  debug_mode:
+    type: string
+
+resources:
+    server:
+      type: OS::Nova::Server
+      properties:
+        block_device_mapping_v2:
+          - device_name: vda
+            delete_on_termination: true
+            image: { get_param: image_id}
+            volume_size: { get_param: system_disk_size }
+          - device_name: vdb
+            boot_index: -1
+            delete_on_termination: true
+            volume_id: { get_resource: data_volume }
+        flavor: { get_param: flavor }
+        key_name: { get_param: key_name }
+        # Unable to make it work on FE, had API not found (HTTP 404) error
+        # tags:
+        #   - list_join: ['=', [ {get_param: role_tag}, 'role']]
+        #   - list_join: ['=', [ {get_param: project_tag}, 'project']]
+        #   - list_join: ['=', [ {get_param: environment_tag}, 'env']]
+        #   - list_join: ['=', [ {get_param: customer_tag}, 'customer']]
+        networks:
+           - network: { get_param: network_id }
+        security_groups:
+           - { get_param: security_group_id }
+        user_data_format: "RAW"
+        user_data:
+          str_replace:
+            template: |
+              #!/bin/bash
+              set -xe
+
+              export LOG_FILE="/var/log/user-data.log"
+              exec &> >(tee -a ${LOG_FILE})
+
+              export PROJECT="%PROJECT%"
+              export CUSTOMER="%CUSTOMER%"
+              export ENV="%ENV%"
+              export ROLE="%ROLE%"
+              export SCHEDULER_API_ADDRESS="%SCHEDULER_API_ADDRESS%"
+              export SCHEDULER_HOST="%SCHEDULER_HOST%"
+              export SCHEDULER_PORT="%SCHEDULER_PORT%"
+              export TSA_PUBLIC_KEY="%TSA_PUBLIC_KEY%"
+              export TEAM_ID="%TEAM_ID%"
+              export STACK_BRANCH="%STACK_BRANCH%"
+              export VERSION="%VERSION%"
+              export DEBUG="%DEBUG%"
+              export VAULT_URL="%VAULT_URL%"
+              export VAULT_SECRET_ID="%VAULT_SECRET_ID%"
+              export VAULT_ROLE_ID="%VAULT_ROLE_ID%"
+
+              # As those are not autoscaling instances (because Flexible engine does not support templating in user_data)
+              # for autoscaling groups. We decided to keep instances running
+              touch /tmp/keeprunning
+
+              # Run the startup installation script.
+              # The $RANDOM variable is here used to avoid remote network caching.
+              curl -sSL "https://raw.githubusercontent.com/cycloid-community-catalog/stack-external-worker/${STACK_BRANCH}/extra/startup.sh?${RANDOM}" | bash -s flexible-engine
+
+            params:
+              "%CUSTOMER%": { get_param: customer_tag }
+              "%PROJECT%": { get_param: project_tag }
+              "%ENV%": { get_param: environment_tag }
+              "%ROLE%": { get_param: role_tag }
+              "%SCHEDULER_API_ADDRESS%": { get_param: scheduler_api_address }
+              "%SCHEDULER_HOST%": { get_param: scheduler_host }
+              "%SCHEDULER_PORT%": { get_param: scheduler_port }
+              "%TSA_PUBLIC_KEY%": { get_param: tsa_public_key }
+              # "%WORKER_KEY%": { get_param: worker_key }
+              "%TEAM_ID%": { get_param: team_id }
+              "%STACK_BRANCH%": { get_param: stack_branch }
+              "%VERSION%": { get_param: worker_version }
+              "%DEBUG%": { get_param: debug_mode }
+              "%VAULT_ROLE_ID%": { get_param: vault_role_id }
+              "%VAULT_SECRET_ID%": { get_param: vault_secret_id }
+              "%VAULT_URL%": { get_param: vault_url }
+
+    data_volume:
+      type: OS::Cinder::Volume
+      properties:
+        size: { get_param: worker_disk_size}

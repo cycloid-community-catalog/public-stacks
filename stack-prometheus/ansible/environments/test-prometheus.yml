@@ -1,0 +1,6 @@
+# Empty config file to test the role with default values in our CI
+
+prometheus_telegraf_rules_config:
+  CPUUsage:
+    - name: CPUUsageProd
+    - name: CPUUsageDev

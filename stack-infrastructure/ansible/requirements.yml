@@ -1,0 +1,31 @@
+---
+- src: https://github.com/cycloidio/ansible-backup-snapshot
+  version: master
+  name: cycloid.backup-snapshot
+  scm: git
+
+- src: https://github.com/cycloidio/ansible-customer-ssh
+  version: master
+  name: cycloid.customer-ssh
+  scm: git
+
+#- src: https://github.com/cycloidio/ansible-amazon
+#  version: master
+#  name: cycloid.amazon
+#  scm: git
+
+- src: https://github.com/cycloidio/ansible-base-aws
+  version: master
+  name: cycloid.base-aws
+  scm: git
+
+# Monitoring / graph
+- src: https://github.com/cycloidio/ansible-telegraf
+  version: master
+  name: cycloid.telegraf
+  scm: git
+
+- src: https://github.com/dj-wasabi/ansible-telegraf
+  version: master
+  name: dj-wasabi.telegraf
+  scm: git

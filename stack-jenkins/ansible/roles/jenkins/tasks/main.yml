@@ -1,0 +1,39 @@
+---
+- name: install jenkins container
+  block:
+    - name: create jenkins volume storage
+      docker_volume:
+        name: jenkins-storage
+        state: present
+
+    - name: create jenkins container
+      include_role:
+        name: mhutter.docker-systemd-service
+      vars:
+        container_name: jenkins
+        container_image: "jenkins/jenkins:{{ jenkins_version }}"
+        container_volumes:
+          - jenkins-storage:/var/jenkins_home
+        container_ports:
+          - "{{ jenkins_port }}:8080"
+        container_env:
+          # since we create our user without the setup
+          JAVA_OPTS: -Djenkins.install.runSetupWizard=false
+        container_labels:
+          - ansible.managed=true
+          - systemd.managed=true
+          - cycloid.io=true
+        # systemd
+        enable: true
+        masked: false
+        state: started
+
+    - name: wait for jenkins availability
+      uri:
+        url: "http://localhost:{{ jenkins_port }}/"
+        status_code:
+          - 200
+          - 403
+      register: resp
+      until: resp.status == 200 or resp.status == 403
+      delay: 5

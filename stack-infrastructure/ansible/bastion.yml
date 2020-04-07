@@ -1,0 +1,20 @@
+- hosts: "tag_role_bastion:&tag_env_{{ env }}"
+  become: yes
+  gather_facts: true
+
+  vars_files:
+    - "environments/default_bastion.yml"
+    - ["environments/{{ env }}-bastion.yml", "environments/empty.yml"]
+
+  tasks:
+    - setup:
+  roles:
+    - {role: cycloid.base-aws, tags: base}
+    #- {role: cycloid.amazon, tags: amazon}
+    - {role: cycloid.backup-snapshot, tags: backups}
+    - role: cycloid.customer-ssh
+      home_directory: "/home/{{ customer }}"
+      user: "{{ customer }}"
+      tags: team-ssh
+
+    - {role: cycloid.telegraf, tags: telegraf}

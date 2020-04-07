@@ -1,0 +1,530 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "numberOfWorkers": {
+      "type": "int",
+      "defaultValue": 1,
+      "metadata": {
+        "description": "Number of Cycloid CI workers."
+      }
+    },
+    "schedulerApiAddress": {
+      "type": "string",
+      "defaultValue": "https://scheduler.cycloid.io",
+      "metadata": {
+        "description": "Cycloid CI scheduler http api address."
+      }
+    },
+    "schedulerHost": {
+      "type": "string",
+      "defaultValue": "scheduler.cycloid.io",
+      "metadata": {
+        "description": "Cycloid CI scheduler address."
+      }
+    },
+    "schedulerPort": {
+      "type": "int",
+      "defaultValue": 32223,
+      "metadata": {
+        "description": "Cycloid CI scheduler port."
+      }
+    },
+    "teamID": {
+      "type": "string",
+      "metadata": {
+        "description": "Cycloid CI team ID."
+      }
+    },
+    "tsaPublicKey": {
+      "type": "string",
+      "defaultValue": "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQC+To6R1hDAO00Xrt8q5Md38J9dh+aMIbV2GTqQkFcKwVAB6czbPPcitPWZ7y3Bw1dKMC8R7DGRAt01yWlkYo/voRp5prqKMc/uzkObhHNy42eJgZlStKU1IMw/fx0Rx+6Y3NClCCOecx415dkAH+PFudKosq4pFB9KjfOp3tMHqirMSF7dsbM3910gcPBL2NFHkOZ4cNfeSztXEg9wy4SExX3CHiUyLiShpwXa+C2f6IPdOJt+9ueXQIL0hcMmd12PRL5UU6/e5U5kldM4EWiJoohVbfoA1CRFF9QwJt6H3IiZPmd3sWqIVVy6Vssn5okjYLRwCwEd8+wd8tI6OnNb",
+      "metadata": {
+        "description": "Cycloid CI tsa public key."
+      }
+    },
+    "workerKey": {
+      "type": "string",
+      "metadata": {
+        "description": "Cycloid CI worker private key. Base64 encoded."
+      }
+    },
+    "vmSize": {
+      "type": "string",
+      "defaultValue": "Standard_F4s_v2",
+      "allowedValues": [
+        "Standard_B1ls",
+        "Standard_B1s",
+        "Standard_B1ms",
+        "Standard_B2s",
+        "Standard_B2ms",
+        "Standard_B4ms",
+        "Standard_B8ms",
+        "Standard_B12ms",
+        "Standard_B16ms",
+        "Standard_B20ms",
+        "Standard_D2s_v3",
+        "Standard_D4s_v3",
+        "Standard_D8s_v3",
+        "Standard_D16s_v3",
+        "Standard_D32s_v3",
+        "Standard_D48s_v3",
+        "Standard_D64s_v3",
+        "Standard_D2as_v3",
+        "Standard_D4as_v3",
+        "Standard_D8as_v3",
+        "Standard_D16as_v3",
+        "Standard_D32as_v3",
+        "Standard_D48as_v3",
+        "Standard_D64as_v3",
+        "Standard_D2_v3",
+        "Standard_D4_v3",
+        "Standard_D8_v3",
+        "Standard_D16_v3",
+        "Standard_D32_v3",
+        "Standard_D48_v3",
+        "Standard_D64_v3",
+        "Standard_D2a_v3",
+        "Standard_D4a_v3",
+        "Standard_D8a_v3",
+        "Standard_D16a_v3",
+        "Standard_D32a_v3",
+        "Standard_D48a_v3",
+        "Standard_D64a_v3",
+        "Standard_DS1_v2",
+        "Standard_DS2_v2",
+        "Standard_DS3_v2",
+        "Standard_DS4_v2",
+        "Standard_DS5_v2",
+        "Standard_D1_v2",
+        "Standard_D2_v2",
+        "Standard_D3_v2",
+        "Standard_D4_v2",
+        "Standard_D5_v2",
+        "Standard_A1_v2",
+        "Standard_A2_v2",
+        "Standard_A4_v2",
+        "Standard_A8_v2",
+        "Standard_A2m_v2",
+        "Standard_A4m_v2",
+        "Standard_A8m_v2",
+        "Standard_DC2s",
+        "Standard_DC4s",
+        "Standard_F2s_v2",
+        "Standard_F4s_v2",
+        "Standard_F8s_v2",
+        "Standard_F16s_v2",
+        "Standard_F32s_v2",
+        "Standard_F48s_v2",
+        "Standard_F64s_v2",
+        "Standard_F72s_v2",
+        "Standard_E2s_v3",
+        "Standard_E4s_v3",
+        "Standard_E8s_v3",
+        "Standard_E16s_v3",
+        "Standard_E20s_v3",
+        "Standard_E32s_v3",
+        "Standard_E48s_v3",
+        "Standard_E64s_v3",
+        "Standard_E64is_v3",
+        "Standard_E2as_v3",
+        "Standard_E4as_v3",
+        "Standard_E8as_v3",
+        "Standard_E16as_v3",
+        "Standard_E32as_v3",
+        "Standard_E48as_v3",
+        "Standard_E64as_v3",
+        "Standard_E2_v3",
+        "Standard_E4_v3",
+        "Standard_E8_v3",
+        "Standard_E16_v3",
+        "Standard_E20_v3",
+        "Standard_E32_v3",
+        "Standard_E48_v3",
+        "Standard_E64_v3",
+        "Standard_E64i_v3",
+        "Standard_E2a_v3",
+        "Standard_E4a_v3",
+        "Standard_E8a_v3",
+        "Standard_E16a_v3",
+        "Standard_E32a_v3",
+        "Standard_E48a_v3",
+        "Standard_E64a_v3",
+        "Standard_M208ms_v2",
+        "Standard_M208s_v2",
+        "Standard_M416ms_v2",
+        "Standard_M416s_v2",
+        "Standard_M8ms",
+        "Standard_M16ms",
+        "Standard_M32ts",
+        "Standard_M32ls",
+        "Standard_M32ms",
+        "Standard_M64s",
+        "Standard_M64ls",
+        "Standard_M64ms",
+        "Standard_M128s",
+        "Standard_M128ms",
+        "Standard_M64",
+        "Standard_M64m",
+        "Standard_M128",
+        "Standard_M128m",
+        "Standard_DS11_v2",
+        "Standard_DS12_v2",
+        "Standard_DS13_v2",
+        "Standard_DS14_v2",
+        "Standard_DS15_v2",
+        "Standard_D11_v2",
+        "Standard_D12_v2",
+        "Standard_D13_v2",
+        "Standard_D14_v2",
+        "Standard_D15_v2",
+        "Standard_L8s_v2",
+        "Standard_L16s_v2",
+        "Standard_L32s_v2",
+        "Standard_L48s_v2",
+        "Standard_L64s_v2",
+        "Standard_L80s_v2",
+        "Standard_NC6",
+        "Standard_NC12",
+        "Standard_NC24",
+        "Standard_NC24r",
+        "Standard_NC6s_v2",
+        "Standard_NC12s_v2",
+        "Standard_NC24s_v2",
+        "Standard_NC24rs_v2",
+        "Standard_NC6s_v3",
+        "Standard_NC12s_v3",
+        "Standard_NC24s_v3",
+        "Standard_NC24rs_v3",
+        "Standard_ND40s_v2",
+        "Standard_ND6s",
+        "Standard_ND12s",
+        "Standard_ND24s",
+        "Standard_ND24rs",
+        "Standard_NV6",
+        "Standard_NV12",
+        "Standard_NV24",
+        "Standard_NV12s_v3",
+        "Standard_NV24s_v3",
+        "Standard_NV48s_v3",
+        "Standard_HB60rs",
+        "Standard_HC44rs",
+        "Standard_H8",
+        "Standard_H16",
+        "Standard_H8m",
+        "Standard_H16m",
+        "Standard_H16r",
+        "Standard_H16mr"
+      ],
+      "metadata": {
+        "description": "Linux virtual machine size for the Cycloid CI worker."
+      }
+    },
+    "dataDiskSize": {
+      "type": "int",
+      "defaultValue": 150,
+      "metadata": {
+        "description": "Size of the concourse data volume for the Cycloid CI worker."
+      }
+    },
+    "diskType": {
+      "type": "string",
+      "defaultValue": "StandardSSD_LRS",
+      "allowedValues": [
+        "Standard_LRS",
+        "StandardSSD_LRS",
+        "Premium_LRS"
+      ],
+      "metadata": {
+        "description": "Disk type for the Cycloid CI worker."
+      }
+    },
+    "authenticationType": {
+      "type": "string",
+      "defaultValue": "sshPublicKey",
+      "allowedValues": [
+        "sshPublicKey",
+        "password"
+      ],
+      "metadata": {
+        "description": "Type of authentication to use on the Cycloid CI worker. SSH key is recommended."
+      }
+    },
+    "adminPasswordOrKey": {
+      "type": "securestring",
+      "metadata": {
+        "description": "SSH Key or password for the Cycloid CI worker `admin` user. SSH key is recommended."
+      }
+    },
+    "virtualNetworkName": {
+      "type": "string",
+      "metadata": {
+        "description": "Virtual network name to use in this subscription/resource group."
+      }
+    },
+    "subnetName": {
+      "type": "string",
+      "metadata": {
+        "description": "Subnet name of the chosen virtual network to use in this subscription/resource group."
+      }
+    },
+    "sgAuthorizedCidrs": {
+      "type": "array",
+      "defaultValue": [],
+      "metadata": {
+        "description": "Authorized CIDRs to access the worker from the outside."
+      }
+    },
+    "customerTag": {
+      "type": "string",
+      "metadata": {
+        "description": "Name of the Cycloid Organization."
+      }
+    },
+    "projectTag": {
+      "type": "string",
+      "defaultValue": "cycloid-ci-workers",
+      "metadata": {
+        "description": "Name of the project."
+      }
+    },
+    "environmentTag": {
+      "type": "string",
+      "defaultValue": "prod",
+      "metadata": {
+        "description": "Name of the project's environment."
+      }
+    },
+    "roleTag": {
+      "type": "string",
+      "defaultValue": "workers",
+      "metadata": {
+        "description": "Name for the role tag."
+      }
+    },
+    "stackBranch": {
+      "type": "string",
+      "defaultValue": "master",
+      "metadata": {
+        "description": "Branch of the external-worker stack to use."
+      }
+    },
+    "workerVersion": {
+      "type": "string",
+      "defaultValue": "",
+      "metadata": {
+        "description": "Force a specific worker version. Default it will use the version provided by the scheduler API."
+      }
+    },
+    "debugMode": {
+      "type": "string",
+      "defaultValue": "false",
+      "allowedValues": [
+        "true",
+        "false"
+      ],
+      "metadata": {
+        "description": "Enable of disable debug mode."
+      }
+    }
+  },
+  "variables": {
+    "namePrefix": "[toLower(concat(parameters('customerTag'), '-', parameters('projectTag'), '-', parameters('environmentTag')))]",
+    "imageRef": {
+      "publisher": "Canonical",
+      "offer": "UbuntuServer",
+      "sku": "18.04-LTS",
+      "version": "latest"
+    },
+    "instanceNsgName": "[concat(variables('namePrefix'), '-nsg')]",
+    "nicName": "[concat(variables('namePrefix'), '-nic')]",
+    "ipConfigName": "[concat(variables('namePrefix'), '-ipconfig')]",
+    "adminUsername": "cycloid",
+    "linuxConfiguration": {
+      "disablePasswordAuthentication": true,
+      "ssh": {
+        "publicKeys": [
+          {
+            "path": "[concat('/home/', variables('adminUsername'), '/.ssh/authorized_keys')]",
+            "keyData": "[parameters('adminPasswordOrKey')]"
+          }
+        ]
+      }
+    }
+  },
+  "resources": [
+    {
+      "type": "Microsoft.Network/networkSecurityGroups",
+      "apiVersion": "2019-04-01",
+      "location": "[resourceGroup().location]",
+      "name": "[variables('instanceNsgName')]",
+      "properties": {
+        "securityRules": [
+          {
+            "name": "in-ssh-allow",
+            "properties": {
+              "description": "Allows SSH traffic from the outside",
+              "protocol": "Tcp",
+              "sourcePortRange": "*",
+              "sourceAddressPrefixes": "[parameters('sgAuthorizedCidrs')]",
+              "destinationPortRange": "22",
+              "destinationAddressPrefix": "*",
+              "access": "Allow",
+              "priority": 100,
+              "direction": "Inbound"
+            }
+          },
+          {
+            "name": "in-ssh-vnet-allow",
+            "properties": {
+              "description": "Allows SSH traffic from the same virtual network",
+              "protocol": "Tcp",
+              "sourcePortRange": "*",
+              "sourceAddressPrefix": "VirtualNetwork",
+              "destinationPortRange": "22",
+              "destinationAddressPrefix": "*",
+              "access": "Allow",
+              "priority": 101,
+              "direction": "Inbound"
+            }
+          },
+          {
+            "name": "in-metrics-allow",
+            "properties": {
+              "description": "Allows metrics server to collect metrics from the outside",
+              "protocol": "Tcp",
+              "sourcePortRange": "*",
+              "sourceAddressPrefixes": "[parameters('sgAuthorizedCidrs')]",
+              "destinationPortRange": "9100",
+              "destinationAddressPrefix": "*",
+              "access": "Allow",
+              "priority": 200,
+              "direction": "Inbound"
+            }
+          },
+          {
+            "name": "in-metrics-vnet-allow",
+            "properties": {
+              "description": "Allows metrics server to collect metrics from the same virtual network",
+              "protocol": "Tcp",
+              "sourcePortRange": "*",
+              "sourceAddressPrefix": "VirtualNetwork",
+              "destinationPortRange": "9100",
+              "destinationAddressPrefix": "*",
+              "access": "Allow",
+              "priority": 201,
+              "direction": "Inbound"
+            }
+          },
+          {
+            "name": "in-deny",
+            "properties": {
+              "protocol": "*",
+              "sourcePortRange": "*",
+              "destinationPortRange": "*",
+              "sourceAddressPrefix": "*",
+              "destinationAddressPrefix": "*",
+              "access": "Deny",
+              "priority": 900,
+              "direction": "Inbound"
+            }
+          }
+        ]
+      },
+      "tags": {
+        "name": "[variables('instanceNsgName')]",
+        "cycloid.io": "true",
+        "project": "[parameters('projectTag')]",
+        "customer": "[parameters('customerTag')]",
+        "env": "[parameters('environmentTag')]"
+      }
+    },
+    {
+      "type": "Microsoft.Compute/virtualMachineScaleSets",
+      "apiVersion": "2019-07-01",
+      "location": "[resourceGroup().location]",
+      "name": "[variables('namePrefix')]",
+      "dependsOn": [
+        "[resourceId('Microsoft.Network/networkSecurityGroups', variables('instanceNsgName'))]"
+      ],
+      "sku": {
+        "name": "[parameters('vmSize')]",
+        "tier": "Standard",
+        "capacity": "[parameters('numberOfWorkers')]"
+      },
+      "properties": {
+        "overprovision": true,
+        "upgradePolicy": {
+          "mode": "Automatic"
+        },
+        "virtualMachineProfile": {
+          "storageProfile": {
+            "imageReference": "[variables('imageRef')]",
+            "osDisk": {
+              "createOption": "FromImage",
+              "caching": "ReadWrite",
+              "managedDisk": {
+                "storageAccountType": "[parameters('diskType')]"
+              }
+            },
+            "dataDisks": [
+              {
+                "lun": 0,
+                "caching": "ReadWrite",
+                "createOption": "Empty",
+                "diskSizeGB": "[parameters('dataDiskSize')]",
+                "managedDisk": {
+                  "storageAccountType": "[parameters('diskType')]"
+                }
+              }
+            ]
+          },
+          "osProfile": {
+            "computerNamePrefix": "[variables('namePrefix')]",
+            "adminUsername": "[variables('adminUsername')]",
+            "adminPassword": "[parameters('adminPasswordOrKey')]",
+            "linuxConfiguration": "[if(equals(parameters('authenticationType'), 'password'), json('null'), variables('linuxConfiguration'))]",
+            "customData": "[base64(concat('#!/bin/bash -xe', '\n', 'export LOG_FILE=\"/var/log/user-data.log\"', '\n', 'exec &> >(tee -a ${LOG_FILE})', '\n', '\n','export PROJECT=', parameters('projectTag'), '\n', 'export ENV=', parameters('environmentTag'), '\n', 'export ROLE=', parameters('roleTag'), '\n', 'export SCHEDULER_API_ADDRESS=\"', parameters('schedulerApiAddress'), '\"\n', 'export SCHEDULER_HOST=', parameters('schedulerHost'), '\n', 'export SCHEDULER_PORT=', string(parameters('schedulerPort')), '\n', 'export TSA_PUBLIC_KEY=\"', parameters('tsaPublicKey'), '\"\n', 'export WORKER_KEY=\"', parameters('workerKey'), '\"\n', 'export TEAM_ID=', parameters('teamID'), '\n', 'export STACK_BRANCH=', parameters('stackBranch'), '\n', 'export VERSION=', parameters('workerVersion'), '\n', 'export DEBUG=', parameters('debugMode'), '\n', '\n', 'curl -sSL \"https://raw.githubusercontent.com/cycloid-community-catalog/stack-external-worker/${STACK_BRANCH}/extra/startup.sh?${RANDOM}\" | bash -s azure'))]"
+          },
+          "networkProfile": {
+            "networkInterfaceConfigurations": [
+              {
+                "name": "[variables('nicName')]",
+                "properties": {
+                  "primary": true,
+                  "networkSecurityGroup": {
+                    "id": "[resourceId('Microsoft.Network/networkSecurityGroups', variables('instanceNsgName'))]"
+                  },
+                  "ipConfigurations": [
+                    {
+                      "name": "[variables('ipConfigName')]",
+                      "properties": {
+                        "subnet": {
+                          "id": "[resourceId('Microsoft.Network/virtualNetworks/subnets', parameters('virtualNetworkName'), parameters('subnetName'))]"
+                        },
+                        "publicIPAddressConfiguration": {
+                          "name": "pub1",
+                          "properties": {
+                            "idleTimeoutInMinutes": 15
+                          }
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        }
+      },
+      "tags": {
+        "name": "[variables('namePrefix')]",
+        "cycloid.io": "true",
+        "project": "[parameters('projectTag')]",
+        "customer": "[parameters('customerTag')]",
+        "env": "[parameters('environmentTag')]"
+      }
+    }
+  ],
+  "outputs": {}
+}

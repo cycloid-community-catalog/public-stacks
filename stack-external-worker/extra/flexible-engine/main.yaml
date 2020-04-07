@@ -1,0 +1,139 @@
+heat_template_version: 2016-04-08
+description: Create Cycloid workers
+parameters:
+  project_tag:
+    type: string
+    default: cycloid-worker
+    description: Give a name for this project
+  customer_tag:
+    type: string
+    default: cycloid
+    description: Name of the Cycloid Organization, used as customer variable name
+  flavor:
+    type: string
+    default: s3.large.2
+    description: Compute engine flavor for the Worker
+  image_id:
+    type: string
+    default: 446c5e5f-0987-4a99-9cfa-a3b2f5d64313
+    description: ID of the Operating system image to use for the Worker
+  key_name:
+    type: string
+    default: Cycloid
+    description: The SSH Key Pair to allow SSH access to the instances
+  number_of_workers:
+    type: number
+    default: 1
+    description: Number of Cycloid CI workers.
+  system_disk_size:
+    type: number
+    default: 140
+    description: Size of the disk for Cycloid worker operating system
+  worker_disk_size:
+    type: number
+    default: 150
+    description: Size of the disk volume for Cycloid CI worker
+  network_id:
+    type: string
+    description: Network ID to use in your Virtual Private Cloud (VPC)
+  vpc_id:
+    type: string
+    description: VpcId of your existing Virtual Private Cloud (VPC)
+  ssh_security_group:
+    type: string
+    description: Instances from this security group will be allowed to connect using SSH on Cycloid CI workers
+  scheduler_api_address:
+    type: string
+    default: https://scheduler.cycloid.io
+    description: Cycloid CI scheduler http api address
+  scheduler_host:
+    type: string
+    default: scheduler.cycloid.io
+    description: Cycloid CI scheduler address
+  scheduler_port:
+    type: string
+    default: 32223
+    description: Cycloid CI scheduler port
+  tsa_public_key:
+    type: string
+    default: "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQC+To6R1hDAO00Xrt8q5Md38J9dh+aMIbV2GTqQkFcKwVAB6czbPPcitPWZ7y3Bw1dKMC8R7DGRAt01yWlkYo/voRp5prqKMc/uzkObhHNy42eJgZlStKU1IMw/fx0Rx+6Y3NClCCOecx415dkAH+PFudKosq4pFB9KjfOp3tMHqirMSF7dsbM3910gcPBL2NFHkOZ4cNfeSztXEg9wy4SExX3CHiUyLiShpwXa+C2f6IPdOJt+9ueXQIL0hcMmd12PRL5UU6/e5U5kldM4EWiJoohVbfoA1CRFF9QwJt6H3IiZPmd3sWqIVVy6Vssn5okjYLRwCwEd8+wd8tI6OnNb"
+    description: Cycloid CI tsa public key of the SaaS platform
+  vault_role_id:
+    type: string
+    description: Cycloid credentials/Vault role ID
+  vault_secret_id:
+    type: string
+    description: Cycloid credentials/Vault secret ID
+  vault_url:
+    type: string
+    default: https://vault.cycloid.io
+    description: URL of Cycloid credentials/Vault service
+  team_id:
+    type: string
+    description: Cycloid CI team ID
+  environment_tag:
+    type: string
+    default: prod
+    description: Name of the project's environment
+  role_tag:
+    type: string
+    default: workers
+    description: Name for the role tag
+  stack_branch:
+    type: string
+    default: master
+    description: Branch of the external-worker stack to use
+  worker_version:
+    type: string
+    default: " "
+    description: Force a specific worker version. Default it will use the version provided by the scheduler API.
+  debug_mode:
+    type: string
+    default: "false"
+    description: Enable of disable debug mode.
+
+resources:
+  cycloid-workers-sg:
+    type: OS::Neutron::SecurityGroup
+    properties:
+      description: Cycloid worker security group. Allowing SSH from ssh_security_group
+      name: allow SSH traffic from ssh_security_group
+      rules:
+        - direction: ingress
+          remote_mode: remote_group_id
+          remote_group_id:  { get_param: ssh_security_group }
+          port_range_min: 22
+          port_range_max: 22
+          protocol: tcp
+        - direction: egress
+          remote_ip_prefix: 0.0.0.0/0
+
+  cycloid-workers:
+    type: OS::Heat::ResourceGroup
+    properties:
+      count: { get_param: number_of_workers }
+      resource_def:
+        type: flexible-engine-worker.yaml
+        properties:
+            image_id: { get_param: image_id }
+            key_name: { get_param: key_name }
+            system_disk_size: { get_param: system_disk_size }
+            worker_disk_size: { get_param: worker_disk_size }
+            flavor: { get_param: flavor }
+            project_tag: { get_param: project_tag }
+            environment_tag: { get_param: environment_tag }
+            role_tag: { get_param: role_tag }
+            customer_tag: { get_param: customer_tag }
+            scheduler_api_address: { get_param: scheduler_api_address }
+            scheduler_host: { get_param: scheduler_host }
+            scheduler_port: { get_param: scheduler_port }
+            tsa_public_key: { get_param: tsa_public_key }
+            team_id: { get_param: team_id }
+            stack_branch: { get_param: stack_branch }
+            worker_version: { get_param: worker_version }
+            debug_mode: { get_param: debug_mode }
+            vault_role_id: { get_param: vault_role_id }
+            vault_secret_id: { get_param: vault_secret_id }
+            vault_url: { get_param: vault_url }
+            network_id: { get_param: network_id }
+            security_group_id: { get_resource: cycloid-workers-sg }

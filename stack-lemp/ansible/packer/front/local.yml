@@ -1,0 +1,26 @@
+---
+
+- hosts: localhost
+  connection: local
+  remote_user: root
+  become: yes
+  tasks:
+    - template:
+        src: /tmp/first-boot.yml.tpl
+        dest: /home/admin/first-boot.yml
+        owner: admin
+        group: admin
+    - template:
+        src: /tmp/user-data.sh.tpl
+        dest: /home/admin/user-data.sh
+        owner: admin
+        group: admin
+
+    # Generate the ansible hosts file like https://www.packer.io/docs/provisioners/ansible-local.html#inventory_groups do.
+    # We do that because we need this inventory file for post ansible run to deploy the code when the AWS instance boot
+    - name: Ensure /etc/ansible/hosts is flushed
+      file: state=absent path=/etc/ansible/hosts
+
+    - name: Generate /etc/ansible/hosts
+      lineinfile: dest=/etc/ansible/hosts regexp="^\[{{ item }}\]" line='[{{ item }}]\n127.0.0.1\n' create=true
+      with_items: "{{ groups }}"

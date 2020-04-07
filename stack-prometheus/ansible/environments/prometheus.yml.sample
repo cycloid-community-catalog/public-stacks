@@ -1,0 +1,105 @@
+# In this file you could override any variables present in default_prometheus.yaml file
+
+#
+# Global config
+#
+
+#. install_prometheus: true
+#+ Install or not Prometheus.
+
+#. prometheus_domain_name: "prometheus.localhost"
+#+ Prometheus dns name to configure.
+
+#. install_alertmanager: true
+#+ Install or not Alertmanager
+
+#. alertmanager_domain_name: "alertmanager.localhost"
+#+ Alertmanager dns name to configure.
+
+#. install_grafana: true
+#+ Install or not Grafana
+
+#. grafana_domain_name: "grafana.localhost"
+#+ Grafana dns name to configure.
+
+#. use_ssl: false
+#+ Use SSL on prometheus stack, if **true** `prometheus.crt` and `prometheus.key` files but be added to `files/nginx/ssl` folder.
+
+
+#
+# Prometheus
+#
+
+#. prometheus_version: v2.12.0
+#+ Version of Prometheus based on docker image tag
+
+#. prometheus_data_retention: 60d
+#+ Amount of datas that prometheus should keep
+
+# For more advanced usage to override prometheus configuration, have a look on default_prometheus.yml file.
+
+
+#
+# Alertmanager
+#
+
+#. alertmanager_version: v0.18.0
+#+ Version of Alertmanager based on docker image tag
+
+#. send_alert_to: 'foo@bar.com'
+#+ Override SMTP configuration used to send emails alerts configured in the default alertmanager receiver.
+
+#. smtp_smarthost: 'smtp.gmail.com:587'
+#+ Configuration of the default alertmanager email receiver.
+
+#. smtp_from: 'foo@bar.com'
+#+ Configuration of the default alertmanager email receiver.
+
+#. smtp_auth_username: 'foo@bar.com'
+#+ Configuration of the default alertmanager email receiver.
+
+#. smtp_auth_password: 'barfoo'
+#+ Configuration of the default alertmanager email receiver.
+
+#. alertmanager_slack_api_url: 'https://hooks.slack.com/services/...'
+#+ Configuration of the alertmanager slack receiver.
+
+#. alertmanager_slack_channel: '#mychannel'
+#+ Configuration of the alertmanager slack receiver.
+
+
+#
+# Grafana
+#
+
+#. grafana_version: 6.2.5
+#+ Version of Grafana based on docker image tag
+
+
+#
+# Nginx
+#
+
+# Configure the basic auth for each services.
+#. nginx_auth_basic_files (optional, dict): ...
+#+ Provide default basic auth : `prometheus / prometheus` and `alertmanager / alertmanager`
+# nginx_auth_basic_files:
+#  # Default : prometheus / prometheus -> prometheus:$apr1$V0rOBZTd$xErJ7mzWne9Dx3mFtUIUl0
+#  prometheus:
+#    - "prometheus:$apr1$V0rOBZTd$xErJ7mzWne9Dx3mFtUIUl0"
+#  # Default : alertmanager / alertmanager -> alertmanager:$apr1$R6kEJoh9$1LZmJt8T3nGb9JUufeq/d/
+#  alertmanager:
+#    - "alertmanager:$apr1$R6kEJoh9$1LZmJt8T3nGb9JUufeq/d/"
+#
+# NOTE : you can also use vault to store a htpasswd credential.
+#  # echo -n 'prometheus:$apr1$V0rOBZTd$xErJ7mzWne9Dx3mFtUIUl0' | ansible-vault encrypt_string
+#  prometheus:
+#    - !vault |
+#            $ANSIBLE_VAULT;1.1;AES256
+#            36356635363631303964303832653961623661663735623236353662633835376530313161343036
+#            3561613263303637666139396666363237646232373338650a383039633532633531666438653264
+#            34623266313231636632663836326665383166643565626330303833373164326134303261616433
+#            6665616230653132330a326536633564333630323862646633373463656634666161643166396333
+#            33343731386330343762653965393865633864653763626130626138646463376333613762303432
+#            33636634613637626335663139366336613462313935333939303465666636363930663363666332
+#            363637343733646465376362643933623137

@@ -1,0 +1,12 @@
+---
+
+# FIXME is it ok to run magento install during each deploy ?
+- name: magento setup:install
+  shell: >
+    php bin/magento setup:install
+    {{ magento_install_options }}
+  args:
+    chdir: "{{ ansistrano_release_path.stdout }}"
+  become: yes
+  become_user: "{{ ansistrano_user }}"
+  run_once: true

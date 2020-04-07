@@ -1,0 +1,33 @@
+---
+- hosts: tag_role_{{ role }}:&tag_project_{{ project }}:&tag_cycloid_io_true:&tag_env_{{ env }}
+  become: true
+  serial: 50%
+
+  vars_files:
+    - "environments/default-jenkins.yml"
+    - ["environments/{{ env }}-jenkins.yml", "environments/empty.yml"]
+
+  pre_tasks:
+    - name: install system dependencies
+      package:
+        name: "{{ item }}"
+        state: present
+      with_items:
+        - python-pip
+    - name: install python dependencies
+      pip:
+        name: "{{ item.name }}"
+        state: "{{ item.state }}"
+      with_items:
+        - {name: docker, state: forcereinstall, version: 4.1.0}
+
+  roles:
+    # Install docker
+    - role: geerlingguy.docker
+      tags:
+        - docker
+
+    - role: jenkins
+      tags:
+        - jenkins
+        - docker

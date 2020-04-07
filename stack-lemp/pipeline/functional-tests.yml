@@ -1,0 +1,18 @@
+---
+platform: linux
+image_resource:
+  type: docker-image
+  source:
+    repository: cycloid/busybox
+    tag: latest
+run:
+  path: /bin/bash
+  args:
+  - -xec
+  - |
+    DIR=${PWD}
+    echo "Dummy functional tests"
+    #if [ "$(curl -s -o /dev/null -w '%{http_code}' http://${env}.foo.com/health-check)" -ne "200" ]
+    #then
+    #  exit 1
+    #fi

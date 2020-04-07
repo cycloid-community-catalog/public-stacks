@@ -1,0 +1,47 @@
+---
+# Configuration of the Cycloid stack
+version: '2'
+name: 'k8s-runner'
+canonical: 'stack-k8s-runner'
+status: 'public'
+description: |
+  Used to manage resources deployed on a Kubernetes cluster with plain YAML or JSON manifests.
+keywords:
+  - 'kubernetes'
+  - 'eks'
+  - 'gke'
+  - 'onprem'
+  - 'provider:aws'
+  - 'provider:gcp'
+author: 'Cycloid'
+image: |
+  https://raw.githubusercontent.com/cycloid-community-catalog/stack-k8s-runner/master/icon.png
+technologies:
+  - technology: Kubernetes
+    version: n/a
+
+config:
+  default:
+    name: 'Classic Kubernetes'
+    description: 'For on-premises style Kubernetes clusters.'
+    pipeline:
+      pipeline:
+        path: 'pipeline/pipeline.yml'
+      variables:
+        path: 'pipeline/variables.sample.yml'
+  eks:
+    name: 'Amazon EKS'
+    description: 'For AWS Elastic Kubernetes Service clusters.'
+    pipeline:
+      pipeline:
+        path: 'pipeline/pipeline-eks.yml'
+      variables:
+        path: 'pipeline/variables-eks.sample.yml'
+  gke:
+    name: 'Google GKE'
+    description: 'For Google Kubernetes Engine clusters.'
+    pipeline:
+      pipeline:
+        path: 'pipeline/pipeline-gke.yml'
+      variables:
+        path: 'pipeline/variables-gke.sample.yml'

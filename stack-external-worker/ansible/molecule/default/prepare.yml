@@ -1,0 +1,43 @@
+---
+
+- name: Install depends
+  hosts: instance
+  gather_facts: no
+  tasks:
+    - name: install apt depends
+      apt:
+        name: "{{ packages }}"
+        state: present
+      vars:
+        packages:
+        - net-tools
+        - lsb-release
+        - curl
+        - procps
+        - btrfs-tools
+
+    - name: Create udev dir for ebs-automatic-nvme-mapping
+      file:
+        path: /etc/udev/rules.d
+        state: directory
+
+    - name: Create a disk image
+      command: dd if=/dev/zero of=/opt/xvdf.img bs=1M count=2200
+
+    # 7: major type loopback
+    - name: Create device
+      command: mknod /dev/xvdf -m0660 b 7 0
+
+    - name: xvdf dettach
+      command: losetup --detach /dev/xvdf
+      ignore_errors: yes
+
+    - name: Loopback attach
+      command: losetup /dev/xvdf /opt/xvdf.img
+
+    # for ext4 validation
+    #- name: mkfs.ext4 xvdf
+    #  command: "mkfs.ext4 -m0 -L ephemeral0 /dev/xvdf"
+
+    - name: mkfs.btrfs xvdf
+      command: "mkfs.btrfs -L ephemeral0 /dev/xvdf -f"

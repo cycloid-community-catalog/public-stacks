@@ -1,0 +1,33 @@
+---
+# Configuration of the Cycloid stack
+name: 'Amazon EKS'
+canonical: 'stack-eks'
+status: 'public'
+description: |
+  Used to deploy an Amazon Elastic Kubernetes Service cluster with one or more node groups.
+keywords:
+  - 'kubernetes'
+  - 'eks'
+  - 'provider:aws'
+author: 'Cycloid'
+image: |
+  https://raw.githubusercontent.com/cycloid-community-catalog/stack-eks/master/icon.png
+technologies:
+  - technology: Amazon Elastic Kubernetes Service
+    version: 1.14
+  - technology: Amazon EKS-Optimized AMI
+    version: 1.14
+
+config:
+  # Configuration of the CI pipeline
+  pipeline:
+    pipeline:
+      path: 'pipeline/pipeline.yml'
+    variables:
+      path: 'pipeline/variables.sample.yml'
+
+  # Configuration of terraform to setup the infrastructure
+  terraform:
+    eks:
+      path: 'terraform/eks.tf.sample'
+      destination: '($ project $)/terraform/($ environment $)/eks.tf'

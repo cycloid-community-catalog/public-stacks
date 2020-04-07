@@ -1,0 +1,36 @@
+# Configuration of the CI pipeline
+name: 'Amazon Elasticsearch'
+canonical: 'infra-amazon-elk'
+status: 'public'
+description: 'Create an Amazon ELK infrastructure with Amazon ElasticSearch + Kibana.'
+keywords:
+  - 'elasticsearch'
+  - 'kibana'
+  - 'aws'
+  - 'terraform'
+author: 'Cycloid'
+image: 'https://raw.githubusercontent.com/cycloid-community-catalog/infra-amazon-elk/master/icon.png'
+type: 'infra'
+technologies:
+  - technology: terraform
+    version: n/a
+  - technology: Amazon elasticsearch
+    version: n/a
+  - technology: kibana
+    version: n/a
+config:
+  # Configuration of the CI pipeline
+  pipeline:
+    pipeline:
+      path: 'pipeline/elk.yml'
+    variables:
+      path: 'pipeline/variables.sample.yml'
+
+  # Configuration of ansible for provisionning
+  ansible: {}
+
+  # Configuration of terraform to setup the infrastructure
+  terraform:
+    elk:
+      path: 'terraform/elk.tf.sample'
+      destination: '($ project $)/terraform/($ environment $)/elk.tf'

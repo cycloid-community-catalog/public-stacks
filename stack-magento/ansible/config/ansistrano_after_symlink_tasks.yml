@@ -1,0 +1,39 @@
+---
+
+- name: magento setup:upgrade
+  shell: php bin/magento setup:upgrade
+  args:
+    chdir: "{{ ansistrano_deploy_to }}/{{ ansistrano_current_dir }}"
+  become: yes
+  become_user: "{{ ansistrano_user }}"
+
+- name: magento static-content:deploy
+  shell: php bin/magento setup:static-content:deploy {{ item }}
+  args:
+    chdir: "{{ ansistrano_deploy_to }}/{{ ansistrano_current_dir }}"
+  become: yes
+  become_user: "{{ ansistrano_user }}"
+  with_items: "{{magento_static_content_deploy}}"
+
+- name: magento cache:clean
+  shell: php bin/magento cache:clean
+  args:
+    chdir: "{{ ansistrano_deploy_to }}/{{ ansistrano_current_dir }}"
+  become: yes
+  become_user: "{{ ansistrano_user }}"
+
+- name: "Setup Magento2 crons : Create maintenance cron"
+  cron: name="Magento maintenance cron"
+        user="{{ansistrano_user}}"
+        job="{{ ansistrano_deploy_to }}/{{ ansistrano_current_dir }}/bin/magento cron:run | grep -v 'Ran jobs by schedule' >> {{ ansistrano_deploy_to }}/{{ ansistrano_current_dir }}/var/log/magento.cron.log"
+  when: magento2_enable_crons
+
+- name: "Setup Magento2 crons : Create update cron"
+  cron: name="Magento update cron"
+        user="{{ansistrano_user}}" job="{{ ansistrano_deploy_to }}/{{ ansistrano_current_dir }}/update/cron.php >> {{ ansistrano_deploy_to }}/{{ ansistrano_current_dir }}/log/update.cron.log"
+  when: magento2_enable_crons
+
+- name: "Setup Magento2 crons : Create Magento setup cron"
+  cron: name="Magento setup cron"
+        user="{{ansistrano_user}}" job="{{ ansistrano_deploy_to }}/{{ ansistrano_current_dir }}/bin/magento setup:cron:run >> {{ ansistrano_deploy_to }}/{{ ansistrano_current_dir }}/var/log/setup.cron.log"
+  when: magento2_enable_crons

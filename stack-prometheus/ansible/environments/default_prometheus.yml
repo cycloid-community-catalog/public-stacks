@@ -1,0 +1,681 @@
+role: prometheus
+
+aws_default_region: "{{ lookup('env','AWS_DEFAULT_REGION') | default('eu-west-1')}}"
+aws_access_key_id: "{{ lookup('env','AWS_ACCESS_KEY_ID') | default(omit)}}"
+aws_secret_access_key: "{{ lookup('env','AWS_SECRET_ACCESS_KEY') | default(omit)}}"
+
+#
+# General
+#
+
+# Prometheus
+install_prometheus: true
+prometheus_domain_name: "prometheus.localhost"
+
+# Alertmanager
+install_alertmanager: true
+alertmanager_domain_name: "alertmanager.localhost"
+
+# Grafana
+install_grafana: true
+grafana_domain_name: "grafana.localhost"
+
+# Use SSL on prometheus stack
+use_ssl: false
+external_url_schema: "{% if use_ssl %}https{% else %}http{% endif %}"
+
+smtp_smarthost: 'smtp.gmail.com:587'
+smtp_from: 'foo@bar.com'
+smtp_auth_username: 'foo@bar.com'
+smtp_auth_password: 'barfoo'
+send_alert_to: 'foo@bar.com'
+
+
+#
+# Prometheus
+#
+
+prometheus_version: v2.12.0
+prometheus_hostname: "{{ prometheus_domain_name }}"
+prometheus_data_retention: 60d
+
+# Override to keep less longer datas default 15d
+prometheus_commandline_args:
+  config.file: "/prometheus-data/prometheus.yml"
+  storage.tsdb.path: "/prometheus-data/data"
+  storage.tsdb.retention.time: "{{ prometheus_data_retention }}"
+  web.external-url: "{{ external_url_schema }}://{{ prometheus_hostname }}"
+
+prometheus_scrape_interval: 1m
+prometheus_evaluation_interval: 1m
+
+default_alert_rules: false
+prometheus_rule_files:
+  - templates/rules/telegraf.rules
+
+  # - templates/rules/telegraf-elasticsearch.rules
+  # - templates/rules/telegraf-redis.rules
+  # - templates/rules/opsgenie.rules
+  # - templates/rules/mongodb_exporter.rules
+
+  # Provide my own local rules
+  # - '{{ playbook_dir }}/templates/rules/*.rules'
+
+# Example of alertmanager override config
+# prometheus_alerting:
+#   alertmanagers:
+#   - scheme: https
+#     basic_auth:
+#       username: cycloid
+#       password: "{{ vault_alertmanager_password }}"
+#     static_configs:
+#     - targets:
+#       - "myalertmanager.com"
+
+prometheus_scrape_configs_global:
+  ## Prometheus
+  - job_name: 'prometheus'
+    static_configs:
+      - targets: ['localhost:9090']
+        labels:
+          Name: "prometheus"
+          project: "{{ project }}"
+          env: "{{ env }}"
+          role: "{{ role }}"
+          customer: "{{ customer }}"
+
+    metric_relabel_configs:
+    # Not store unwanted metrics
+    - source_labels: [__name__]
+      action: drop
+      regex: go_(.*)
+
+  ## telegraf / node_exporter
+  - job_name: 'telegraf / node_exporter'
+    scheme: http
+    ec2_sd_configs:
+    - region: "{{ aws_default_region }}"
+      # Need https://www.robustperception.io/automatically-monitoring-ec2-instances/
+      # Using role or accesskey
+      #access_key: "{{ aws_access_key_id }}"
+      #secret_key: "{{ aws_secret_access_key }}"
+      port: 9100
+
+    relabel_configs:
+    # Filer instance by labels whitelist
+    #- source_labels: [__meta_ec2_tag_customer, __meta_ec2_tag_project, __meta_ec2_tag_env, __meta_ec2_tag_role]
+    #  action: keep
+    #  regex: cycloid;demo;preprod;front
+
+    # Filter of instances blacklist
+    # - source_labels: [__meta_ec2_tag_customer, __meta_ec2_tag_project]
+    #   action: drop
+    #   regex: cycloid;kubernetes
+
+    - source_labels: [__meta_ec2_tag_monitoring_discovery]
+      action: drop
+      regex: false
+
+    - source_labels: [__meta_ec2_private_ip]
+      regex: '^(.+)$'
+      replacement: '${1}:9100'
+      target_label: __address__
+    # Relabel target with public IP if there is one
+    # Use this rule in case you want prometheus to prefer query telegraf exporter on the public IP
+    #- source_labels: [__meta_ec2_public_ip]
+    #  regex: '^(.+)$'
+    #  replacement: '${1}:9100'
+    #  target_label: __address__
+
+    # Force labels on metrics
+    # Instance label : Public IP, if not, default private IP
+    - source_labels: [__meta_ec2_private_ip]
+      action: replace
+      target_label: instance
+    - source_labels: [__meta_ec2_public_ip]
+      regex: '^(.+)$'
+      replacement: '${1}'
+      target_label: instance
+    # In case you prefer instance id
+    #- source_labels: [__meta_ec2_instance_id]
+    #  target_label: instance
+
+    # Get some ec2 labels
+    - source_labels: [__meta_ec2_tag_Name]
+      target_label: Name
+    - source_labels: [__meta_ec2_tag_project]
+      target_label: project
+    - source_labels: [__meta_ec2_tag_env]
+      target_label: env
+    - source_labels: [__meta_ec2_tag_role]
+      target_label: role
+    - source_labels: [__meta_ec2_tag_customer]
+      target_label: customer
+    - source_labels: [__meta_ec2_availability_zone]
+      target_label: availability_zone
+    - source_labels: [__meta_ec2_instance_id]
+      target_label: instance_id
+
+    # backward compatibility with old client tag
+    - source_labels: [__meta_ec2_tag_client]
+      regex: '(.+)'
+      target_label: customer
+
+    metric_relabel_configs:
+    # Don't store unwanted metrics
+    - source_labels: [__name__]
+      action: drop
+      regex: go_(.*)
+
+    # Overrides mechanism of ec2 labels on the metric scope
+    - source_labels: [cycloid_tag_Name]
+      regex: '(.+)'
+      target_label: Name
+    - source_labels: [cycloid_tag_project]
+      regex: '(.+)'
+      target_label: project
+    - source_labels: [cycloid_tag_env]
+      regex: '(.+)'
+      target_label: env
+    - source_labels: [cycloid_tag_role]
+      regex: '(.+)'
+      target_label: role
+    - source_labels: [cycloid_tag_customer]
+      regex: '(.+)'
+      target_label: customer
+    - source_labels: [cycloid_tag_availability_zone]
+      regex: '(.+)'
+      target_label: availability_zone
+    - source_labels: [cycloid_tag_instance_id]
+      regex: '(.+)'
+      target_label: instance_id
+
+    # Remove cycloid_tag_* labels
+    - regex: 'cycloid_tag_.*'
+      action: labeldrop
+
+  ## mongodb_exporter
+  - job_name: 'mongodb_exporter'
+    scheme: http
+    ec2_sd_configs:
+    - region: "{{ aws_default_region }}"
+      port: '{{ mongodb_exporter_port }}'
+
+    relabel_configs:
+    # Only keep targets with mongodb role tag
+    - source_labels: [__meta_ec2_tag_role]
+      action: keep
+      regex: mongodb
+
+    - source_labels: [__meta_ec2_tag_monitoring_discovery]
+      action: drop
+      regex: false
+
+    - source_labels: [__meta_ec2_private_ip]
+      regex: '^(.+)$'
+      replacement: '${1}:{{ mongodb_exporter_port }}'
+      target_label: __address__
+
+    # Force labels on metrics
+    # Instance label : Public IP, if not, default private IP
+    - source_labels: [__meta_ec2_private_ip]
+      action: replace
+      target_label: instance
+    - source_labels: [__meta_ec2_public_ip]
+      regex: '^(.+)$'
+      replacement: '${1}'
+      target_label: instance
+
+    # Get some ec2 labels
+    - source_labels: [__meta_ec2_tag_Name]
+      target_label: Name
+    - source_labels: [__meta_ec2_tag_project]
+      target_label: project
+    - source_labels: [__meta_ec2_tag_env]
+      target_label: env
+    - source_labels: [__meta_ec2_tag_role]
+      target_label: role
+    - source_labels: [__meta_ec2_tag_customer]
+      target_label: customer
+    - source_labels: [__meta_ec2_availability_zone]
+      target_label: availability_zone
+    - source_labels: [__meta_ec2_instance_id]
+      target_label: instance_id
+    
+    # backward compatibility with old client tag
+    - source_labels: [__meta_ec2_tag_client]
+      regex: '(.+)'
+      target_label: customer
+
+    metric_relabel_configs:
+    # Don't store unwanted metrics
+    - source_labels: [__name__]
+      action: drop
+      regex: go_(.*)
+
+    # Overrides mechanism of ec2 labels on the metric scope
+    - source_labels: [cycloid_tag_Name]
+      regex: '(.+)'
+      target_label: Name
+    - source_labels: [cycloid_tag_project]
+      regex: '(.+)'
+      target_label: project
+    - source_labels: [cycloid_tag_env]
+      regex: '(.+)'
+      target_label: env
+    - source_labels: [cycloid_tag_role]
+      regex: '(.+)'
+      target_label: role
+    - source_labels: [cycloid_tag_customer]
+      regex: '(.+)'
+      target_label: customer
+    - source_labels: [cycloid_tag_availability_zone]
+      regex: '(.+)'
+      target_label: availability_zone
+    - source_labels: [cycloid_tag_instance_id]
+      regex: '(.+)'
+      target_label: instance_id
+
+    # Remove cycloid_tag_* labels
+    - regex: 'cycloid_tag_.*'
+      action: labeldrop
+
+prometheus_scrape_configs_alertmanager:
+
+  - job_name: 'alertmanager'
+    static_configs:
+      - targets: ['{{ ansible_default_ipv4.address }}:9093']
+
+    metric_relabel_configs:
+    # Don't store unwanted metrics
+    - source_labels: [__name__]
+      action: drop
+      regex: go_(.*)
+
+    # Force labels on metrics
+    # Instance label : Public IP, if not, default private IP
+    - source_labels: [__address__]
+      action: replace
+      target_label: instance
+
+# merge alertmanager if needed
+prometheus_scrape_configs: "{% if install_alertmanager %}{{ prometheus_scrape_configs_global + prometheus_scrape_configs_alertmanager }}{% else %}{{ prometheus_scrape_configs_global }}{% endif %}"
+
+
+#
+# Alertmanager
+#
+
+alertmanager_version: v0.18.0
+alertmanager_hostname: "{{ alertmanager_domain_name }}"
+
+alertmanager_commandline_args:
+  config.file: "/alertmanager/alertmanager.yml"
+  web.external-url: "{{ external_url_schema }}://{{ alertmanager_hostname }}"
+
+alertmanager_slack_api_url: "https://hooks.slack.com/services/..."
+alertmanager_slack_channel: "#mychannel"
+
+alertmanager_global:
+  # ResolveTimeout is the time after which an alert is declared resolved
+  # if it has not been updated.
+  resolve_timeout: 15m
+
+  # The smarthost and SMTP sender used for mail notifications.
+  smtp_smarthost: "{{ smtp_smarthost }}"
+  smtp_from: "{{ smtp_from }}"
+  smtp_auth_username: "{{ smtp_auth_username }}"
+  smtp_auth_password: "{{ smtp_auth_password }}"
+
+  # The API URL to use for Slack notifications.
+  slack_api_url: "{{ alertmanager_slack_api_url }}"
+
+alertmanager_route:
+  receiver: default
+  group_by:
+    - customer
+    - project
+    - env
+    - alertname
+  group_wait: 30s
+  group_interval: 5m
+  repeat_interval: 15m
+  routes:
+  - match:
+      receiver: 'null'
+    receiver: dev_null
+
+  - match:
+      receiver: slack
+    receiver: slack
+
+  - match:
+      receiver: slack_continue
+    receiver: slack
+    # Whether an alert should continue matching subsequent sibling nodes.
+    continue: true
+
+  - match:
+      receiver: email
+      severity: critical
+    receiver: default
+
+alertmanager_receivers:
+  - name: 'default'
+    email_configs:
+    - to: "{{ send_alert_to }}"
+      # Whether or not to notify about resolved alerts.
+      send_resolved: true
+
+  - name: 'slack'
+    slack_configs:
+    - channel: "{{ alertmanager_slack_channel }}"
+      # Whether or not to notify about resolved alerts.
+      send_resolved: true
+
+      # https://prometheus.io/docs/alerting/configuration/#slack_config
+
+      # # API request data as defined by the Slack webhook API.
+      # [ icon_emoji: <tmpl_string> ]
+      # [ icon_url: <tmpl_string> ]
+      # [ link_names: <boolean> | default = false ]
+      # [ username: <tmpl_string> | default = '{{ template "slack.default.username" . }}' ]
+      # # The following parameters define the attachment.
+      # actions:
+      #   [ <action_config> ... ]
+      # [ callback_id: <tmpl_string> | default = '{{ template "slack.default.callbackid" . }}' ]
+      # [ color: <tmpl_string> | default = '{{ if eq .Status "firing" }}danger{{ else }}good{{ end }}' ]
+      # [ fallback: <tmpl_string> | default = '{{ template "slack.default.fallback" . }}' ]
+      # fields:
+      #   [ <field_config> ... ]
+      # [ footer: <tmpl_string> | default = '{{ template "slack.default.footer" . }}' ]
+      # [ pretext: <tmpl_string> | default = '{{ template "slack.default.pretext" . }}' ]
+      # [ short_fields: <boolean> | default = false ]
+      # [ text: <tmpl_string> | default = '{{ template "slack.default.text" . }}' ]
+      # [ title: <tmpl_string> | default = '{{ template "slack.default.title" . }}' ]
+      # [ title_link: <tmpl_string> | default = '{{ template "slack.default.titlelink" . }}' ]
+      # [ image_url: <tmpl_string> ]
+      # [ thumb_url: <tmpl_string> ]
+
+  - name: 'dev_null'
+    # Deliberately left empty to not deliver anywhere.
+    # webhook_configs:
+    # - url: http://127.0.0.1
+
+alertmanager_inhibit_rules:
+- source_match:
+    severity: critical
+  target_match:
+    severity: warning
+  equal:
+  - instance
+  - customer
+  - project
+  - env
+  - alertname
+
+
+#
+# grafana
+#
+grafana_version: 6.2.5
+
+# Note : Grafana service is installed with the Docker image grafana/grafana.
+# To provision grafana datasources admin account is used by ansible.
+grafana_admin_password: "given_by_the_pipeline"
+
+grafana_database_host: "{{ rds_address | default('localhost') }}:3306"
+grafana_database_name: "{{ rds_database | default('grafana') }}"
+grafana_database_user: "{{ rds_username | default('grafana') }}"
+grafana_database_password: "{{ rds_password | default('s3cr3t') }}"
+grafana_database_type: "{{ rds_engine | default('sqlite3') }}"
+
+grafana_dashboards_files:
+  - '{{ playbook_dir }}/files/grafana/dashboards/*.json'
+
+grafana_provisioning_files:
+  - '{{ playbook_dir }}/files/grafana/provisioning/dashboards/*.yml'
+  - '{{ playbook_dir }}/files/grafana/provisioning/datasources/*.yml'
+  - '{{ playbook_dir }}/files/grafana/provisioning/notifiers/*.yml'
+
+
+#
+# Telegraf
+#
+
+# See telegraf inputs for more plugings https://github.com/influxdata/telegraf/tree/master/plugins/inputs
+# Like https://github.com/influxdata/telegraf/tree/master/plugins/inputs/net_response for tcp port checks
+telegraf_plugins_extra:
+  processes:
+  kernel:
+  linux_sysctl_fs:
+  conntrack:
+
+  nginx:
+    config:
+      - urls = ["http://127.0.0.1/nginx_status"]
+
+  # AWS
+  check-lb-certs:
+    plugin: exec
+    config:
+      - commands = ["/usr/bin/check_lb_certs.py"]
+      - data_format = "influx"
+      - interval = "30m"
+  check-ses:
+    plugin: exec
+    config:
+      - commands = ["/usr/bin/check_ses.py"]
+      - data_format = "influx"
+      - interval = "10m"
+  check-instance-events:
+    plugin: exec
+    config:
+      - commands = ["/usr/bin/check_instance_events.py"]
+      - data_format = "influx"
+      - interval = "10m"
+  check-rds-events:
+    plugin: exec
+    config:
+      - commands = ["/usr/bin/check_rds_events.py"]
+      - data_format = "influx"
+      - interval = "10m"
+  # https://github.com/influxdata/telegraf/tree/master/plugins/inputs/cloudwatch
+  cloudwatch_ec2:
+    plugin: cloudwatch
+    config:
+      - 'region = "{{ aws_default_region }}"'
+      - period = "10m"
+      - interval = "10m"
+      - namespace = "AWS/EC2"
+      - "[[inputs.cloudwatch.metrics]]"
+      -   names = ["CPUCreditBalance"]
+      - ## Dimension filters for Metric (optional)
+      -  "[[inputs.cloudwatch.metrics.dimensions]]"
+      -   name = "InstanceId"
+      -   value = "*"
+  cloudwatch_rds:
+    plugin: cloudwatch
+    config:
+      - 'region = "{{ aws_default_region }}"'
+      - period = "10m"
+      - interval = "10m"
+      - namespace = "AWS/RDS"
+      - "[[inputs.cloudwatch.metrics]]"
+      -   names = ["CPUCreditBalance"]
+      - ## Dimension filters for Metric (optional)
+      -  "[[inputs.cloudwatch.metrics.dimensions]]"
+      -   name = "DBInstanceIdentifier"
+      -   value = "*"
+
+
+#
+# Nginx
+#
+
+prometheus_certificate_name: prometheus.crt
+prometheus_certificate_key_name: prometheus.key
+alertmanager_certificate_name: "{{ prometheus_certificate_name }}"
+alertmanager_certificate_key_name: "{{ prometheus_certificate_key_name }}"
+grafana_certificate_name: "{{ prometheus_certificate_name }}"
+grafana_certificate_key_name: "{{ prometheus_certificate_key_name }}"
+
+certificates_src: "{{ playbook_dir }}/files/nginx/ssl/*"
+certificates_dest: "/etc/nginx/ssl/"
+
+nginx_auth_basic_files:
+  # Default : prometheus / prometheus -> prometheus:$apr1$V0rOBZTd$xErJ7mzWne9Dx3mFtUIUl0
+  prometheus:
+    - "prometheus:$apr1$V0rOBZTd$xErJ7mzWne9Dx3mFtUIUl0"
+  # Default : alertmanager / alertmanager -> alertmanager:$apr1$R6kEJoh9$1LZmJt8T3nGb9JUufeq/d/
+  alertmanager:
+    - "alertmanager:$apr1$R6kEJoh9$1LZmJt8T3nGb9JUufeq/d/"
+#   # Default : grafana / grafana -> grafana:$apr1$YSYnc168$x7l8B0.I8e0usgr5ydU.5.
+#   grafana:
+#     - "grafana:$apr1$YSYnc168$x7l8B0.I8e0usgr5ydU.5."
+
+nginx_configs:
+  proxy:
+    - proxy_set_header X-Real-IP  $remote_addr
+    - proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for
+  gzip:
+    - gzip on
+    - gzip_disable msie6
+  aws:
+    - real_ip_header X-Forwarded-For
+    - set_real_ip_from 0.0.0.0/0
+  global:
+    - client_max_body_size 5m
+  misc:
+    - server_names_hash_max_size 512
+    - server_names_hash_bucket_size 128
+
+nginx_remove_sites:
+  - default
+
+nginx_sites_default:
+  00-status:
+    - listen 80
+    - server_name 127.0.0.1
+    - location / {
+       deny all;
+      }
+    - location /nginx_status {
+        stub_status on;
+        access_log   off;
+        allow 127.0.0.1;
+        deny all;
+      }
+
+  07-grafana-80:
+    - listen 80 default_server
+    - server_name {{ grafana_domain_name }}
+    # - auth_basic            "Restricted"
+    # - auth_basic_user_file  auth_basic/grafana
+    - location / {
+        proxy_pass http://127.0.0.1:3000;
+        proxy_set_header   X-FORWARDED_PROTO http;
+        proxy_set_header   X-FORWARDED_PORT 80;
+      }
+
+  08-prometheus-80:
+    - listen 80
+    - server_name {{ prometheus_domain_name }}
+    - auth_basic            "Restricted"
+    - auth_basic_user_file  auth_basic/prometheus
+    - location / {
+        proxy_pass http://127.0.0.1:9090;
+        proxy_set_header   X-FORWARDED_PROTO http;
+        proxy_set_header   X-FORWARDED_PORT 80;
+      }
+
+  09-alertmanager-80:
+    - listen 80
+    - server_name {{ alertmanager_domain_name }}
+    - auth_basic            "Restricted"
+    - auth_basic_user_file  auth_basic/alertmanager
+    - location / {
+        proxy_pass http://127.0.0.1:9093;
+        proxy_set_header   X-FORWARDED_PROTO http;
+        proxy_set_header   X-FORWARDED_PORT 80;
+      }
+
+nginx_sites_default_https:
+  00-status:
+    - listen 80
+    - server_name 127.0.0.1
+    - location / {
+       deny all;
+      }
+    - location /nginx_status {
+        stub_status on;
+        access_log   off;
+        allow 127.0.0.1;
+        deny all;
+      }
+
+  07-grafana-443:
+    - listen 443 ssl
+    - server_name {{ grafana_domain_name }}
+    - ssl_certificate  {{ certificates_dest }}/{{ grafana_certificate_name }}
+    - ssl_certificate_key {{ certificates_dest }}/{{ grafana_certificate_key_name }}
+
+    # - auth_basic            "Restricted"
+    # - auth_basic_user_file  auth_basic/grafana
+    - location / {
+        proxy_pass http://127.0.0.1:3000;
+        proxy_set_header   X-FORWARDED_PROTO http;
+        proxy_set_header   X-FORWARDED_PORT 80;
+      }
+
+  10-force-https:
+     - listen 80 default_server
+     - return 301 https://$server_name$request_uri
+
+  12-prometheus-443:
+     - listen 443 ssl default_server
+     - server_name {{ prometheus_domain_name }}
+     - ssl_certificate  {{ certificates_dest }}/{{ prometheus_certificate_name }}
+     - ssl_certificate_key {{ certificates_dest }}/{{ prometheus_certificate_key_name }}
+     - auth_basic            "Restricted"
+     - auth_basic_user_file  auth_basic/prometheus
+     - location / {
+         proxy_pass http://127.0.0.1:9090;
+         proxy_set_header   X-FORWARDED_PROTO https;
+         proxy_set_header   X-FORWARDED_PORT 443;
+       }
+
+  13-alertmanager-443:
+     - listen 443 ssl
+     - server_name {{ alertmanager_domain_name }}
+     - ssl_certificate  {{ certificates_dest }}/{{ alertmanager_certificate_name }}
+     - ssl_certificate_key {{ certificates_dest }}/{{ alertmanager_certificate_key_name }}
+     - auth_basic            "Restricted"
+     - auth_basic_user_file  auth_basic/alertmanager
+     - location / {
+         proxy_pass http://127.0.0.1:9093;
+         proxy_set_header   X-FORWARDED_PROTO https;
+         proxy_set_header   X-FORWARDED_PORT 443;
+       }
+
+nginx_sites: "{% if not use_ssl %}{{ nginx_sites_default }}{% else %}{{ nginx_sites_default_https }}{% endif %}"
+
+
+# FIXME do we want to setup postfix ? Require SES login
+# Postfix unused for now
+
+#postfix_aliases:
+#  - "root: admin@cycloid.io"
+#  - "admin: admin@cycloid.io"
+#  - "{{customer}}: root"
+
+# postfix_basehostname: "{{ customer }}.cycloid.io"
+# sasl_passwd:
+#     username: "sesACCESSKEY"
+#     password: !vault |
+#           $ANSIBLE_VAULT;1.1;AES256
+#           65636162663731373263353765353762363430633065306635623933303163363536353365353230
+#           3966343664626230663038613937316563633835636264630a613435336364656433613535666565
+#           66386138376635613839323862326438313031396635383535656230316333326630313166663438
+#           3536326438636666360a643438306235356535666131633238366533383364366533356665373231
+#           6361

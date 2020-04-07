@@ -1,0 +1,63 @@
+#
+# Terraform
+#
+
+# GCP access to use to run terraform. Usually admin account to be able to create GCP services.
+
+#. gcp_credentials (required): ((gcp_credentials.json))
+#+ GCP json credentials for Terraform. See value format [here](https://docs.cycloid.io/advanced-guide/integrate-and-use-cycloid-credentials-manager.html#vault-in-the-pipeline).
+gcp_credentials: ((gcp_credentials.json))
+
+#. gcp_project (required): hello-world
+#+ GCP project to use for Terraform.
+gcp_project: hello-world
+
+#. gcp_default_region (required): europe-west1
+#+ GCP region to use for Terraform.
+gcp_default_region: europe-west1
+
+#. terraform_storage_bucket_name (required): ($ organization_canonical $)-terraform-remote-state
+#+ GCP GCS bucket name to store terraform remote state file.
+terraform_storage_bucket_name: ($ organization_canonical $)-terraform-remote-state
+
+#
+# Repos
+#
+
+#. config_git_repository (required): git@github.com:MyUser/config-git.git
+#+ Git repository URL containing the config of the stack.
+config_git_repository: git@github.com:MyUser/config-git.git
+
+#. config_git_branch (required): master
+#+ Branch of the config Git repository.
+config_git_branch: master
+
+#. config_git_private_key (required): ((git_config.ssh_key))
+#+ SSH key pair to fetch the config Git repository.
+config_git_private_key: ((git_config.ssh_key))
+
+
+#
+# Default variables that shouldn't be changed except if needed
+#
+
+#. env (required): ($ environment $)
+#+ Name of the project's environment.
+env: ($ environment $)
+
+#. project (required): ($ project $)
+#+ Name of the project.
+project: ($ project $)
+
+#. customer (required): ($ organization_canonical $)
+#+ Name of the Cycloid Organization, used as customer variable name.
+customer: ($ organization_canonical $)
+
+#. release_bucket_object_path (required): ($ project $)/($ environment $)/($ project $).zip
+#+ GCP GCS bucket path to store release of the code. This will be in the same bucket as the tfstate Terraform file.
+release_bucket_object_path: ($ project $)/($ environment $)/($ project $).zip
+
+#. terraform_storage_bucket_path (required): ($ project $)/($ environment $)
+#+ GCP GCS bucket path to store terraform remote state file.
+terraform_storage_bucket_path: ($ project $)/($ environment $)
+

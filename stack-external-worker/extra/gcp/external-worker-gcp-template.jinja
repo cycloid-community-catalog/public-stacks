@@ -1,0 +1,173 @@
+---
+
+{% set name_prefix = properties["customerTag"] + "-" + properties["projectTag"] + "-" + properties["environmentTag"] %}
+
+resources:
+
+- name: {{ name_prefix }}-firewall-rule
+  type: compute.v1.firewall
+  properties:
+    network: $(ref.{{ name_prefix }}-network.selfLink)
+    sourceRanges: ["0.0.0.0/0"]
+    allowed:
+    - IPProtocol: TCP
+      ports: ["22"]
+
+- name: {{ name_prefix }}-network
+  type: compute.v1.network
+  properties:
+    routingConfig:
+      routingMode: REGIONAL
+    autoCreateSubnetworks: true
+
+
+- name: {{ name_prefix }}-template
+  type: compute.v1.instanceTemplate
+  properties:
+    properties:
+      machineType: {{ properties["instanceType"] }}
+      networkInterfaces:
+      - network: $(ref.{{ name_prefix }}-network.selfLink)
+        accessConfigs:
+        - name: External NAT
+          type: ONE_TO_ONE_NAT
+      scheduling:
+        preemptible: {{ properties["preemptible"] }}
+      disks:
+      - deviceName: boot
+        type: PERSISTENT
+        boot: true
+        autoDelete: true
+        initializeParams:
+          sourceImage: https://www.googleapis.com/compute/v1/projects/debian-cloud/global/images/family/debian-9
+  
+      - deviceName: data-volume
+        type: PERSISTENT
+        autoDelete: true
+        initializeParams:
+          diskType: {{ properties["diskType"] }}
+          diskSizeGb: {{ properties["volumeSize"] }}
+        labels:
+          cycloidio: "true"
+          project: {{ properties["projectTag"] }}
+          customer: {{ properties["customerTag"] }}
+          role: {{ properties["roleTag"] }}
+          env: {{ properties["environmentTag"] }}
+          app: {{ name_prefix }}
+
+      labels:
+        cycloidio: "true"
+        project: {{ properties["projectTag"] }}
+        customer: {{ properties["customerTag"] }}
+        role: {{ properties["roleTag"] }}
+        env: {{ properties["environmentTag"] }}
+        app: {{ name_prefix }}
+      serviceAccounts:
+        - email: default
+          # The following scope allows this instance to create variable resources.
+          scopes:
+            - 'https://www.googleapis.com/auth/cloudruntimeconfig'
+      metadata:
+        items:
+        - key: startup-script
+          value: |
+              #!/bin/bash -xe
+              export LOG_FILE="/var/log/user-data.log"
+              exec &> >(tee -a ${LOG_FILE})
+
+              export RUNTIMECONFIG_NAME="{{ name_prefix }}"
+              export PROJECT="{{ properties["projectTag"] }}"
+              export ENV="{{ properties["environmentTag"] }}"
+              export ROLE="{{ properties["roleTag"] }}"
+              export SCHEDULER_API_ADDRESS="{{ properties["schedulerApiAddress"] }}"
+              export SCHEDULER_HOST="{{ properties["schedulerHost"] }}"
+              export SCHEDULER_PORT="{{ properties["schedulerPort"] }}"
+              export TSA_PUBLIC_KEY="{{ properties["tsaPublicKey"] }}"
+              export WORKER_KEY="{{ properties["workerKey"] }}"
+              export TEAM_ID="{{ properties["teamId"] }}"
+              export STACK_BRANCH="{{ properties["stackBranch"] }}"
+              export VERSION="{{ properties["workerVersion"] }}"
+              export DEBUG="{{ properties["debugMode"] }}"
+
+              # Run the startup installation script.
+              # The $RANDOM variable is here used to avoid remote network caching.
+              curl -sSL "https://raw.githubusercontent.com/cycloid-community-catalog/stack-external-worker/${STACK_BRANCH}/extra/startup.sh?${RANDOM}" | bash -s gcp
+
+- name: {{ name_prefix }}-igm
+  type: compute.v1.regionInstanceGroupManager
+  properties:
+    region: {{ properties["region"] }}
+    baseInstanceName: {{ name_prefix }}-vm
+    instanceTemplate: $(ref.{{ name_prefix }}-template.selfLink)
+    targetSize: 1
+    autoHealingPolicies:
+    - initialDelaySec: 120
+    updatePolicy:
+      minimalAction: REPLACE
+      type: PROACTIVE
+    labels:
+      cycloidio: "true"
+      project: {{ properties["projectTag"] }}
+      customer: {{ properties["customerTag"] }}
+      role: {{ properties["roleTag"] }}
+      env: {{ properties["environmentTag"] }}
+      app: {{ name_prefix }}
+
+- name: {{ name_prefix }}-as
+  type: compute.v1.regionAutoscaler
+  properties:
+    region: {{ properties["region"] }}
+    target: $(ref.{{ name_prefix }}-igm.selfLink)
+    autoscalingPolicy:
+      minNumReplicas: {{ properties["numberOfWorkers"] }}
+      maxNumReplicas: {{ properties["numberOfWorkers"] }}
+      #cpuUtilization:
+      #  utilizationTarget: 0.8
+      #coolDownPeriodSec: 90
+    labels:
+      cycloidio: "true"
+      project: {{ properties["projectTag"] }}
+      customer: {{ properties["customerTag"] }}
+      role: {{ properties["roleTag"] }}
+      env: {{ properties["environmentTag"] }}
+      app: {{ name_prefix }}
+    
+
+# /!\ This require to enable runtimeconfig beta api on your project
+- name: {{ name_prefix }}-runtimeconfig
+  type: runtimeconfig.v1beta1.config
+  properties:
+    config: {{ name_prefix }}-runtimeconfig
+
+- name: {{ name_prefix }}-waiter
+  type: runtimeconfig.v1beta1.waiter
+  metadata:
+    # By adding this dependency on the instance, Deployment Manager won't create
+    # the waiter until after the VM has been created. While not strictly necessary,
+    # the benefit of blocking the waiter on instance creation is that the waiter's
+    # timeout countdown won't start until after the instance is running, leading to
+    # a more deterministic deployment.
+    dependsOn:
+    - {{ name_prefix }}-as
+
+  properties:
+    parent: $(ref.{{ name_prefix }}-runtimeconfig.name)
+    waiter: {{ name_prefix }}-waiter
+    timeout: 600s
+    # The area for success variables. This waiter considers 1 or more variables
+    # written somewhere under /success to indicate success.
+    success:
+      cardinality:
+        path: /success
+        number: 1
+    failure:
+      cardinality:
+        path: /failure
+        number: 1
+
+outputs:
+- name: configName
+  value: {{ name_prefix }}-runtimeconfig
+
+
+# Note : if start/stop of worker are requested by customers, a way would be to follow https://cloud.google.com/scheduler/docs/start-and-stop-compute-engine-instances-on-a-schedule

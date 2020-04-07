@@ -1,0 +1,59 @@
+---
+
+#
+# Front
+#
+- hosts: tag_role_front:&tag_project_{{ project }}:&tag_cycloid_io_true:&tag_env_{{ env }}
+  become: yes
+  serial: 50%
+
+  vars_files:
+    - "environments/default_front.yml"
+    - ["environments/{{ env }}-front.yml", "{{ env }}-front.yml", "environments/empty.yml"]
+  vars:
+    # See https://github.com/votum/ansible-role-magento2
+    magento_install_options: "{{ lookup('template', 'install_options.j2') }}"
+
+  pre_tasks:
+    - name: Create ansistrano required user
+      user:
+        name: "{{ ansistrano_user }}"
+        home: "/home/{{ ansistrano_user }}"
+  roles:
+#    - role: cycloid.customer-ssh
+#      home_directory: "/home/www/magento"
+#      user: magento
+#      tags: team-ssh
+
+    # - {role: cycloid.postfix, tags: postfix}
+    # require ses login/pass but install postfix
+    - {role: cycloid.fluentd, tags: fluentd}
+    - {role: cycloid.php, tags: php}
+    - {role: jdauphant.nginx, tags: nginx}
+
+    # # Mount share EFS
+    # - role: cycloid.systemd
+    #   systemd_type: mount
+    #   systemd_mount_device: "...-efs-magento-eu-we1-preprod.magento.{{ env }}:/"
+    #   systemd_mount_mountpoint: /home/magento/magento/shared
+    #   systemd_mount_type: nfs
+    #   tags: efs
+    #
+    # - role: cycloid.systemd
+    #   systemd_type: dropin
+    #   systemd_dropin_service_name: "nginx"
+    #   systemd_dropin_name: magento-share
+    #   systemd_dropin_priority: "01"
+    #   systemd_dropin_content:
+    #     - "[Unit]"
+    #     - 'After=home-www-...-shared.mount'
+    #     - 'Requires=home-www-...-shared.mount'
+    #   tags: efs
+
+
+    - role: cycloid.deployment
+      tags:
+        - deploy
+
+  tags:
+    - front

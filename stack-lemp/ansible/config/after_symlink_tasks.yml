@@ -1,0 +1,18 @@
+# If you have post symlink deploy command we suggest to update the healthcheck page here.
+# When the front boot/scale-up the healthpage need to answer only when the application is fully deployed
+
+# Create a healthcheck page to know when
+#- name: Create a temporary health-check page used by the ALB
+#  copy:
+#    content: |
+#        <?php echo "ok" ?>
+#    dest: "{{ ansistrano_release_path.stdout }}/healthcheck.php"
+
+# Post deploy example
+#- name: Clean cache local
+#  shell: php cleancache.php
+#  args:
+#    chdir: "{{ ansistrano_deploy_to }}/{{ ansistrano_current_dir }}"
+#  run_once: true
+#  become: yes
+#  become_user: "{{ ansistrano_user }}"
