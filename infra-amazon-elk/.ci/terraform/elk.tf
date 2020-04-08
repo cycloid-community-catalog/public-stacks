@@ -2,7 +2,8 @@ module "elk" {
 
   #####################################
   # Do not modify the following lines #
-  source   = "./module-elk"
+  source = "./module-elk"
+
   project  = var.project
   env      = var.env
   customer = var.customer
