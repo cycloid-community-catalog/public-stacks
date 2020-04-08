@@ -20,7 +20,7 @@ git_key: ((git_github.ssh_key))
 
 #. terraform_version (required): latest
 #+ terraform version to validate the stack.
-terraform_version: 0.12.10
+terraform_version: latest
 
 #. terraform_env_vars (required): dict
 #+ terraform configuration to validate the stack.
