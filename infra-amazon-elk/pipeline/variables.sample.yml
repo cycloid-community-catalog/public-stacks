@@ -34,9 +34,9 @@ config_git_repository: git@github.com:MyUser/config-lemp-app.git
 #+ Branch of the config git repository.
 config_git_branch: config
 
-#. config_git_private_key (required): ((git_config.ssh_key))
-#+ SSH key pair to fetch the config Git repository.
-config_git_private_key: ((git_config.ssh_key))
+#. config_git_private_key (required): ((ssh_config_ro.ssh_key))
+#+ SSH key pair to fetch the config git repository.
+config_git_private_key: ((ssh_config_ro.ssh_key))
 
 
 #
