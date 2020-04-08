@@ -10,9 +10,9 @@ git_repository: git@github.com:MyUser/ansible-code.git
 #+ Branch of the ansible source code Git repository.
 git_branch: master
 
-#. git_private_key (required): ((git_config.ssh_key))
+#. git_private_key (required): ((ssh_config.ssh_key))
 #+ SSH key pair to fetch ansible source code Git repository.
-git_private_key: ((git_config.ssh_key))
+git_private_key: ((ssh_config.ssh_key))
 
 #. git_ansible_path (required): ./
 #+ Path of ansible files in the git repository
@@ -31,7 +31,7 @@ ansible_version: 'v2.7'
 ansible_params:
   SSH_JUMP_URL: user1@Bastion1
   SSH_PRIVATE_KEYS:
-    - ((git_bastion.ssh_key))
+    - ((ssh_bastion.ssh_key))
   ANSIBLE_VAULT_PASSWORD: ((raw_ansible_password))
   # ANSIBLE_PLAYBOOK_PATH should be "ansible-playbook/" + (git_ansible_path)
   ANSIBLE_PLAYBOOK_PATH: ansible-playbook/

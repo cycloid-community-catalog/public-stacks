@@ -25,6 +25,6 @@ This stack allow you to do ansible or ansible-playbook command.
 |`env`|Name of the project's environment.|`-`|`($ environment $)`|`True`|
 |`git_ansible_path`|Path of ansible files in the git repositorycycloid-toolkit docker image tag to use (https://hub.docker.com/r/cycloid/cycloid-toolkit/tags).|`-`|`./`|`True`|
 |`git_branch`|Branch of the ansible source code Git repository.|`-`|`master`|`True`|
-|`git_private_key`|SSH key pair to fetch ansible source code Git repository.|`-`|`((git_config.ssh_key))`|`True`|
+|`git_private_key`|SSH key pair to fetch ansible source code Git repository.|`-`|`((ssh_config.ssh_key))`|`True`|
 |`git_repository`|URL to the Git repository containing ansible source code.|`-`|`git@github.com:MyUser/ansible-code.git`|`True`|
 |`project`|Name of the project.|`-`|`($ project $)`|`True`|

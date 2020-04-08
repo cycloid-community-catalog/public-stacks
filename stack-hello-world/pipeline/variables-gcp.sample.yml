@@ -4,9 +4,9 @@
 
 # GCP access to use to run terraform. Usually admin account to be able to create GCP services.
 
-#. gcp_credentials (required): ((gcp_credentials.json))
+#. gcp_credentials (required): ((gcp.json_key))
 #+ GCP json credentials for Terraform. See value format [here](https://docs.cycloid.io/advanced-guide/integrate-and-use-cycloid-credentials-manager.html#vault-in-the-pipeline).
-gcp_credentials: ((gcp_credentials.json))
+gcp_credentials: ((gcp.json_key))
 
 #. gcp_project (required): hello-world
 #+ GCP project to use for Terraform.
@@ -32,9 +32,9 @@ config_git_repository: git@github.com:MyUser/config-git.git
 #+ Branch of the config Git repository.
 config_git_branch: master
 
-#. config_git_private_key (required): ((git_config.ssh_key))
+#. config_git_private_key (required): ((ssh_config.ssh_key))
 #+ SSH key pair to fetch the config Git repository.
-config_git_private_key: ((git_config.ssh_key))
+config_git_private_key: ((ssh_config.ssh_key))
 
 
 #

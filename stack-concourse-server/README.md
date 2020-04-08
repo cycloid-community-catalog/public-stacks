@@ -52,7 +52,7 @@ In order to run this task, couple elements are required within the infrastructur
 |`concourse_server_creds`|Cycloid raw credential name containing Concourse keys. Expected fields `basic_auth_user`, `basic_auth_password`, `session_signing_key`, `tsa_host_key`, `vault_role_id` and `vault_secret_id`|`-`|`raw_concourse_server_creds`|`True`|
 |`config_ansible_path`|Path of Ansible files in the config git repository|`-`|`($ project $)/ansible`|`True`|
 |`config_git_branch`|Branch of the config git repository.|`-`|`master`|`True`|
-|`config_git_private_key`|SSH key pair to fetch the config git repository.|`-`|`((git_codecommit_readonly.ssh_key))`|`True`|
+|`config_git_private_key`|SSH key pair to fetch the config git repository.|`-`|`((ssh_codecommit_readonly.ssh_key))`|`True`|
 |`config_git_repository`|Git repository url containing the config of the stack.|`-`|`git@github.com:MyUser/config-concourse-server.git`|`True`|
 |`config_terraform_path`|Path of Terraform files in the config git repository|`-`|`($ project $)/terraform/($ environment $)`|`True`|
 |`customer`|Name of the Cycloid Organization, used as customer variable name.|`-`|`($ organization_canonical $)`|`True`|
@@ -60,7 +60,7 @@ In order to run this task, couple elements are required within the infrastructur
 |`env`|Name of the project's environment.|`-`|`($ environment $)`|`True`|
 |`packer_ansible_version`|Version of ansible used during Packer build to run Ansible playbook|`-`|`"2.4.3"`|`False`|
 |`project`|Name of the project.|`-`|`($ project $)`|`True`|
-|`rds_password`|Password used for your rds database.|`-`|`((raw_concourse_server_rds_password))`|`True`|
+|`rds_password`|Password used for your rds database.|`-`|`((custom_concourse_server_rds_password))`|`True`|
 |`stack_git_branch`|Branch to use on the public stack git repository|`-`|`master`|`True`|
 |`terraform_storage_bucket_name`|AWS S3 bucket name to store terraform remote state file.|`-`|`($ organization_canonical $)-terraform-remote-state`|`True`|
 |`terraform_storage_bucket_path`|AWS S3 bucket path to store terraform remote state file.|`-`|`($ project $)/($ environment $)`|`True`|

@@ -39,9 +39,9 @@ code_git_repository: git@github.com:...
 #+ Branch of the code git repository.
 code_git_branch: master
 
-#. code_git_private_key (required): ((git_code.ssh_key))
+#. code_git_private_key (required): ((ssh_code.ssh_key))
 #+ SSH key pair to fetch the code git repository.
-code_git_private_key: ((git_code.ssh_key))
+code_git_private_key: ((ssh_code.ssh_key))
 
 #. code_build_context (required): .
 #+ Path from the repository root to the files to build. The Dockerfile location is relative to this path.

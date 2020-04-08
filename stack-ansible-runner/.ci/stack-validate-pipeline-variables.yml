@@ -1,0 +1,72 @@
+#
+# Repos
+#
+
+#. git_repository (required): git@github.com:my/repo_to_validate.git
+#+ Git repository URL containing the stack to validate.
+git_repository: git@github.com:cycloid-community-catalog/stack-ansible-runner.git
+
+#. git_branch (required): master
+#+ Branch of the stack to validate Git repository.
+git_branch: master
+
+# git status
+git_repository_name: cycloid-community-catalog/stack-ansible-runner
+git_access_token: ((github_access_token.data))
+
+#. git_key (required): ((git.ssh_key))
+#+ SSH key pair to fetch stack source code Git repository.
+git_key: ((git_github.ssh_key))
+
+#. pipeline_env_vars (required): dict
+#+ pipeline configuration to validate the stack.
+pipeline_env_vars:
+  # login on cycloid.io to create pipeline
+  USERNAME: ((cycloid_bot_account.login))
+  PASSWORD: ((cycloid_bot_account.password))
+  # TEMPLATE to use in the stack
+  PIPELINE_TEMPLATE: pipeline.yml
+  # VARIABLES to use to create the PIPELINE_TEMPLATE
+  PIPELINE_VARIABLES: variables.sample.yml
+  # Where to create the pipeline
+  ORGANIZATION: cycloid-owl
+  # Which project to use for pipeline
+  PROJECT: ci-stack-ansible-runner
+  # Which environment to use for pipeline
+  ENVIRONMENT: master
+  # Tmp name to create the pipeline
+  PIPELINE_NAME: ci-stack-ansible-runner-master-validate
+
+#. config_pipeline_path (required): .ci/pipeline
+#+ Path of pipeline variables files in the config git repository
+config_pipeline_path: .ci/pipeline
+stack_pipeline_path: pipeline
+
+
+#
+# Default variables that shouldn't be changed except if needed
+#
+
+#. env (required): master
+#+ Name of the project's environment.
+env: master
+
+#. project (required): ci-stack-ansible-runner
+#+ Name of the project.
+project: ci-stack-ansible-runner
+
+#. customer (required): cycloid-owl
+#+ Name of the Cycloid Organization, used as customer variable name.
+customer: cycloid-owl
+
+#. git_stack-validate_repository (required): git@github.com:cycloidio/cycloid-stacks.git
+#+ Git repository URL of the stack-validate.
+git_stack-validate_repository: git@github.com:cycloidio/cycloid-stacks.git
+
+#. git_branch (required): stacks
+#+ Branch of the of the stack-validate.
+git_stack-validate_branch: stacks
+
+#. git_key (required): ((git.ssh_key))
+#+ SSH key pair to fetch the stack-validate.
+git_stack-validate_key: ((git_github.ssh_key))

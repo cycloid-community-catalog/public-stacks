@@ -46,7 +46,7 @@ Currently, Cycloid console doesn't support yet switching between different pipel
 |`code_build_context`|Path from the repository root to the files to build. The Dockerfile location is relative to this path.|`-`|`.`|`True`|
 |`code_dockerfile_location`|Dockerfile location related to code_build_context|`-`|`Dockerfile`|`True`|
 |`code_git_branch`|Branch of the code git repository.|`-`|`master`|`True`|
-|`code_git_private_key`|SSH key pair to fetch the code git repository.|`-`|`((git_code.ssh_key))`|`True`|
+|`code_git_private_key`|SSH key pair to fetch the code git repository.|`-`|`((ssh_code.ssh_key))`|`True`|
 |`code_git_repository`|Git repository url containing the code of the stack.|`-`|`git@github.com:...`|`True`|
 |`customer`|Name of the Cycloid Organization, used as customer variable name.|`-`|`($ organization_canonical $)`|`True`|
 |`env`|Name of the project's environment.|`-`|`($ environment $)`|`True`|

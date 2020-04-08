@@ -1,34 +1,53 @@
-# Configuration of the CI pipeline
+---
+# Configuration of the Cycloid stack
+version: '2'
 name: 'Cycloid hello world'
 canonical: 'stack-hello-world'
 status: 'public'
-description: 'Hello world stack which deploy small components depending of the cloud provider'
+description: |
+  Hello world stack which deploy small components depending of the cloud provider.
 keywords:
-  - 'aws'
-  - 'lambda'
   - 'demo'
-  - 'gcp'
-  - 'cloudfunction'
-technologies:
-  - technology: Aws Lambda
-    version: n/a
-  - technology: GCP Cloud Function
-    version: n/a
+  - 'lambda'
+  - 'provider:aws'
+  - 'cloudfunctions'
+  - 'provider:gcp'
 author: 'Cycloid'
-image: 'https://raw.githubusercontent.com/cycloid-community-catalog/stack-hello-world/master/icon.png'
-type: 'stack'
+image: |
+  https://raw.githubusercontent.com/cycloid-community-catalog/stack-hello-world/master/icon.png
+technologies:
+  - technology: AWS Lambda
+    version: n/a
+  - technology: GCP Cloud Functions
+    version: n/a
+
 config:
-  # Configuration of the CI pipeline
-  pipeline:
+  aws:
+    name: 'AWS'
+    description: 'AWS variant using lambdas.'
+    # Configuration of the CI pipeline
     pipeline:
-      path: 'pipeline/aws.yml'
-    variables:
-      path: 'pipeline/aws-variables.sample.yml'
-  # Configuration of terraform
-  terraform:
-    aws:
-      path: 'terraform-aws/main.tf.sample'
-      destination: '($ project $)/terraform/($ environment $)/main.tf'
-    gcp:
-      path: 'terraform-gcp/main.tf.sample'
-      destination: '($ project $)/terraform/($ environment $)/main.tf'
+      pipeline:
+        path: 'pipeline/pipeline-aws.yml'
+      variables:
+        path: 'pipeline/variables-aws.sample.yml'
+    # Configuration of terraform
+    terraform:
+      aws:
+        path: 'terraform-aws/main.tf.sample'
+        destination: '($ project $)/terraform/($ environment $)/main.tf'
+
+  gcp:
+    name: 'GCP'
+    description: 'GCP variant using CloudFunctions.'
+    # Configuration of the CI pipeline
+    pipeline:
+      pipeline:
+        path: 'pipeline/pipeline-gcp.yml'
+      variables:
+        path: 'pipeline/variables-gcp.sample.yml'
+    # Configuration of terraform
+    terraform:
+      gcp:
+        path: 'terraform-gcp/main.tf.sample'
+        destination: '($ project $)/terraform/($ environment $)/main.tf'

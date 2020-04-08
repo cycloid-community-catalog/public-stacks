@@ -32,9 +32,9 @@ config_git_repository: git@github.com:MyUser/config-git.git
 #+ Branch of the config Git repository.
 config_git_branch: master
 
-#. config_git_private_key (required): ((git_config.ssh_key))
+#. config_git_private_key (required): ((ssh_config.ssh_key))
 #+ SSH key pair to fetch the config Git repository.
-config_git_private_key: ((git_config.ssh_key))
+config_git_private_key: ((ssh_config.ssh_key))
 
 
 #

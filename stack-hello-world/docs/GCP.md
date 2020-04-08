@@ -7,7 +7,7 @@ This stack will create a small pipeline and infrastructure on your GCP Cloud pro
 # Architecture
 
 **GCP**
-  * **Cloud function** Google Cloud Function
+  * **Cloud Functions** Google Cloud Functions
 
 # Requirements
 
@@ -45,13 +45,13 @@ In order to run this task, some elements are required within the infrastructure:
 
 |Name|Description|Type|Default|Required|
 |---|---|:---:|:---:|:---:|
-|`gcp_credentials`|GCP json credentials for Terraform. See value format [here](https://docs.cycloid.io/advanced-guide/integrate-and-use-cycloid-credentials-manager.html#vault-in-the-pipeline).|`-`|`((gcp_credentials.json))`|`True`|
+|`gcp_credentials`|GCP json credentials for Terraform. See value format [here](https://docs.cycloid.io/advanced-guide/integrate-and-use-cycloid-credentials-manager.html#vault-in-the-pipeline).|`-`|`((gcp.json_key))`|`True`|
 |`gcp_project`|GCP project to use for Terraform.|`-`|`hello-world`|`True`|
 |`gcp_default_region`|GCP region to use for Terraform.|`-`|`europe-west1`|`True`|
 |`terraform_storage_bucket_name`|GCP GCS bucket name to store terraform remote state file.|`-`|`($ organization_canonical $)-terraform-remote-state`|`True`|
 |`config_git_repository`|Git repository URL containing the config of the stack.|`-`|`git@github.com:MyUser/config-git.git`|`True`|
 |`config_git_branch`|Branch of the config Git repository.|`-`|`master`|`True`|
-|`config_git_private_key`|SSH key pair to fetch the config Git repository.|`-`|`((git_config.ssh_key))`|`True`|
+|`config_git_private_key`|SSH key pair to fetch the config Git repository.|`-`|`((ssh_config.ssh_key))`|`True`|
 |`env`|Name of the project's environment.|`-`|`($ environment $)`|`True`|
 |`project`|Name of the project.|`-`|`($ project $)`|`True`|
 |`customer`|Name of the Cycloid Organization, used as customer variable name.|`-`|`($ organization_canonical $)`|`True`|

@@ -24,9 +24,9 @@ terraform_storage_bucket_name: ($ organization_canonical $)-terraform-remote-sta
 #+ AWS S3 bucket path to store terraform remote state file.
 terraform_storage_bucket_path: ($ project $)/($ environment $)
 
-#. rds_password (required): ((raw_concourse_server_rds_password))
+#. rds_password (required): ((custom_concourse_server_rds_password))
 #+ Password used for your RDS database.
-rds_password: ((raw_concourse_server_rds_password))
+rds_password: ((custom_concourse_server_rds_password))
 
 
 #
@@ -71,9 +71,9 @@ config_git_repository: ssh://APKAJ5QY5LYZNMX5
 #+ Branch of the config Git repository.
 config_git_branch: master
 
-#. config_git_private_key (required): ((git_codecommit_readonly.ssh_key))
+#. config_git_private_key (required): ((ssh_codecommit_readonly.ssh_key))
 #+ SSH key pair to fetch the config Git repository.
-config_git_private_key: ((git_codecommit_readonly.ssh_key))
+config_git_private_key: ((ssh_codecommit_readonly.ssh_key))
 
 #
 # Packer

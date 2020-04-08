@@ -29,9 +29,9 @@ terraform_storage_bucket_path: ($ project $)/($ environment $)
 # Ansible
 #
 
-#. ansible_vault_password (required): ((raw_ansible_vault_password))
+#. ansible_vault_password (required): ((custom_ansible_vault_password))
 #+ Password used by ansible vault to decrypt your vaulted files.
-ansible_vault_password: ((raw_ansible_vault_password))
+ansible_vault_password: ((custom_ansible_vault_password))
 
 #. bastion_keypair (required): ((ssh_bastion.ssh_key))
 #+ bastion SSH private key used by ansible to connect on aws ec2 instances and the bastion itself.
@@ -50,9 +50,9 @@ config_git_repository: ssh://myUserId@git-codecommit.eu-west-1.amazonaws.com/v1/
 #+ Branch of the config git repository.
 config_git_branch: config
 
-#. config_git_private_key (required): ((git_config_ro.ssh_key))
+#. config_git_private_key (required): ((ssh_config_ro.ssh_key))
 #+ SSH key pair to fetch the config git repository.
-config_git_private_key: ((git_config_ro.ssh_key))
+config_git_private_key: ((ssh_config_ro.ssh_key))
 
 
 #. stack_git_repository (required): https://github.com/cycloid-community-catalog/stack-infrastructure

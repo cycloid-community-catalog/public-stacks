@@ -19,8 +19,6 @@ provider "aws" {
 #  token   = "${var.vault_token}"
 #}
 
-variable "build_team_name" {}
-variable "build_pipeline_name" {}
 variable "project" {}
 variable "env" {}
 variable "customer" {}

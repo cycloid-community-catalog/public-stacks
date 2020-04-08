@@ -1,24 +1,26 @@
-# Configuration of the CI pipeline
+---
+# Configuration of the Cycloid stack
 name: 'Dummy stack'
 canonical: 'stack-dummy'
 status: 'public'
-description: 'This stack is a dummy stack which contain only a hello world pipeline'
+description: |
+  This stack is a dummy stack which contain only a hello world pipeline.
 keywords:
   - 'concourse'
   - 'dummy'
-  - 'cycloid'
+author: 'Cycloid'
+image: |
+  https://raw.githubusercontent.com/cycloid-community-catalog/stack-dummy/master/icon.png
 technologies:
   - technology: concourse
     version: n/a
   - technology: busybox
     version: n/a
-author: 'Cycloid'
-image: 'https://raw.githubusercontent.com/cycloid-community-catalog/stack-dummy/master/icon.png'
-type: 'stack'
+
 config:
   # Configuration of the CI pipeline
   pipeline:
     pipeline:
-      path: 'pipeline/dummy.yml'
+      path: 'pipeline/pipeline.yml'
     variables:
       path: 'pipeline/variables.sample.yml'

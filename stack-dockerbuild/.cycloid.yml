@@ -1,9 +1,11 @@
-# Configuration of the CI pipeline
+---
 version: '2'
+# Configuration of the Cycloid stack
 name: 'Stack Docker build'
 canonical: 'stack-dockerbuild'
 status: 'public'
-description: 'Build and test a docker image before pushing it to a registry.'
+description: |
+  Build and test a docker image before pushing it to a registry.
 keywords:
   - 'docker'
   - 'registry'
@@ -11,16 +13,13 @@ keywords:
   - 'container'
   - 'test'
   - 'validate'
-technologies:
-  - technology: docker
-    version: n/a
-
 author: 'Cycloid'
-image: ''
-type: 'stack'
+image: |
+  https://raw.githubusercontent.com/cycloid-community-catalog/stack-dockerbuild/master/icon.png
 technologies:
   - technology: Docker
     version: n/a
+
 config:
   default:
     name: 'Single job'

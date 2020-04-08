@@ -1,15 +1,20 @@
-# Configuration of the CI pipeline
+---
+# Configuration of the Cycloid stack
 name: 'Concourse Server'
 canonical: 'stack-concourse-server'
 status: 'public'
-description: 'Used to deploy a Concourse server (web+atc) on Amazon EC2 instance behind ALB/NLB load balancers, using PostgreSQL RDS database.'
+description: |
+  Used to deploy a Concourse server (web+atc) on Amazon EC2 instance behind ALB/NLB load balancers, using PostgreSQL RDS database.
 keywords:
   - 'concourse'
   - 'server'
   - 'ui'
   - 'atc'
   - 'postgresql'
-  - 'cycloid'
+  - 'provider:aws'
+author: 'Cycloid'
+image: |
+  https://raw.githubusercontent.com/cycloid-community-catalog/stack-concourse-server/master/icon.png
 technologies:
   - technology: Amazon Auto Scaling Group
     version: n/a
@@ -22,14 +27,11 @@ technologies:
   - technology: PostgreSQL
     version: 9.5.x
 
-author: 'Cycloid'
-image: 'https://raw.githubusercontent.com/cycloid-community-catalog/stack-concourse-server/master/icon.png'
-type: 'stack'
 config:
   # Configuration of the CI pipeline
   pipeline:
     pipeline:
-      path: 'pipeline/concourse-server.yml'
+      path: 'pipeline/pipeline.yml'
     variables:
       path: 'pipeline/variables.sample.yml'
 

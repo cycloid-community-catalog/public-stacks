@@ -1,9 +1,11 @@
-# Configuration of the CI pipeline
+---
+# Configuration of the Cycloid stack
 name: 'Cycloid Infrastructure'
 canonical: 'stack-infrastructure'
 status: 'public'
-description: 'This stack will create Amazon vpc, a bastion ec2 server and various components you might require to deploy other stacks in production. This stack is currently a bundle of common usecase of our customers.'
-image: 'https://raw.githubusercontent.com/cycloid-community-catalog/stack-infrastructure/master/icon.png'
+description: |
+  This stack will create Amazon vpc, a bastion ec2 server and various components you might require to deploy other stacks in production.
+  This stack is currently a bundle of common usecase of our customers.
 keywords:
   - 'infrastructure'
   - 'vpc'
@@ -11,8 +13,10 @@ keywords:
   - 'bastion'
   - 'ses'
   - 'deployment'
+  - 'provider:aws'
 author: 'Cycloid'
-type: 'stack'
+image: |
+  https://raw.githubusercontent.com/cycloid-community-catalog/stack-infrastructure/master/icon.png
 technologies:
   - technology: Amazon VPC
     version: n/a
@@ -29,16 +33,18 @@ config:
   # Configuration of the CI pipeline
   pipeline:
     pipeline:
-      path: 'pipeline/infrastructure.yml'
+      path: 'pipeline/pipeline.yml'
     variables:
       path: 'pipeline/variables.sample.yml'
-  # Configuration of terraform to setup the infrastructure
-  terraform:
-    infrastructure:
-      path: 'terraform/infrastructure.tf.sample'
-      destination: '($ project $)/terraform/($ environment $)/infrastructure.tf'
+
+  # Configuration of ansible for provisionning
   ansible:
     bastion:
       path: 'ansible/environments/bastion.yml.sample'
       destination: '($ project $)/ansible/environments/($ environment $)-bastion.yml'
 
+  # Configuration of terraform to setup the infrastructure
+  terraform:
+    infrastructure:
+      path: 'terraform/infrastructure.tf.sample'
+      destination: '($ project $)/terraform/($ environment $)/infrastructure.tf'

@@ -1,20 +1,22 @@
-# Configuration of the CI pipeline
+---
+# Configuration of the Cycloid stack
 name: 'ansible-runner'
 canonical: 'stack-ansible-runner'
 status: 'public'
-description: 'Allow you to run an ansible playbook*.'
+description: |
+  Allow you to run an Ansible playbook.
 keywords:
   - 'ansible-runner'
   - 'ansible-playbook'
   - 'ansible'
   - 'playbook'
+author: 'Cycloid'
+image: |
+  https://raw.githubusercontent.com/cycloid-community-catalog/stack-ansible-runner/master/icon.png
 technologies:
   - technology: ansible
     version: n/a
 
-author: 'Cycloid'
-image: 'https://raw.githubusercontent.com/cycloid-community-catalog/stack-ansible-runner/master/icon.png'
-type: 'stack'
 config:
   # Configuration of the CI pipeline
   pipeline:
