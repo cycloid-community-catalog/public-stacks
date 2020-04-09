@@ -1,20 +1,23 @@
-# Configuration of the CI pipeline
+---
+# Configuration of the Cycloid stack
 name: 'Google GKE'
 canonical: 'stack-gke'
 status: 'public'
-description: 'Used to deploy an Google Kubernetes Engine cluster with one or more node pools.'
+description: |
+  Used to deploy an Google Kubernetes Engine cluster with one or more node pools.
 keywords:
   - 'kubernetes'
   - 'gke'
-  - 'gcloud'
+  - 'provider:gcp'
 author: 'Cycloid'
-image: 'https://raw.githubusercontent.com/cycloid-community-catalog/stack-gke/master/icon.png'
-type: 'stack'
+image: |
+  https://raw.githubusercontent.com/cycloid-community-catalog/stack-gke/master/icon.png
 technologies:
   - technology: Google Kubernetes Engine
     version: latest
   - technology: Container-Optimized OS
     version: latest
+
 config:
   # Configuration of the CI pipeline
   pipeline:

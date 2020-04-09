@@ -44,7 +44,7 @@ In order to run this task, couple elements are required within the infrastructur
 Name|Description|Type|Default|Required|
 |---|---|:---:|:---:|:---:|
 |`config_git_branch`|Branch of the config Git repository.|`-`|`master`|`True`|
-|`config_git_private_key`|SSH key pair to fetch the config Git repository.|`-`|`((git_config.ssh_key))`|`True`|
+|`config_git_private_key`|SSH key pair to fetch the config Git repository.|`-`|`((ssh_config.ssh_key))`|`True`|
 |`config_git_repository`|Git repository URL containing the config of the stack.|`-`|`git@github.com:MyUser/config-eks.git`|`True`|
 |`config_terraform_path`|Path of Terraform files in the config git repository|`-`|`($ project $)/terraform/($ environment $)`|`True`|
 |`customer`|Name of the Cycloid Organization, used as customer variable name.|`-`|`($ organization_canonical $)`|`True`|
