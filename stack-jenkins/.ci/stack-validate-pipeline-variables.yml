@@ -8,7 +8,7 @@ git_repository: git@github.com:cycloid-community-catalog/stack-jenkins.git
 
 #. git_branch (required): master
 #+ Branch of the stack to validate Git repository.
-git_branch: stacks
+git_branch: master
 
 # git status
 git_repository_name: cycloid-community-catalog/stack-jenkins
@@ -46,11 +46,15 @@ pipeline_env_vars:
   USERNAME: ((cycloid_bot_account.login))
   PASSWORD: ((cycloid_bot_account.password))
   # TEMPLATE to use in the stack
-  PIPELINE_TEMPLATE: jenkins.yml
+  PIPELINE_TEMPLATE: pipeline.yml
   # VARIABLES to use to create the PIPELINE_TEMPLATE
   PIPELINE_VARIABLES: variables.sample.yml
   # Where to create the pipeline
   ORGANIZATION: cycloid-owl
+  # Which project to use for pipeline
+  PROJECT: ci-stack-jenkins
+  # Which environment to use for pipeline
+  ENVIRONMENT: master
   # Tmp name to create the pipeline
   PIPELINE_NAME: ci-stack-jenkins-master-validate
 
@@ -68,7 +72,6 @@ stack_terraform_path: terraform
 #+ Path of pipeline variables files in the config git repository
 config_pipeline_path: .ci/pipeline
 stack_pipeline_path: pipeline
-
 
 
 #

@@ -46,7 +46,7 @@ In order to run this task, couple elements are required within the infrastructur
 |`bastion_url`|bastion URL used by ansible to connect on AWS EC2 instances.|`-`|`user@bastion.server.com`|`True`|
 |`git_ansible_path`|Path of Ansible files in the config Git repository|`-`|`($ project $)/ansible`|`True`|
 |`git_branch`|Branch of the config Git repository.|`-`|`master`|`True`|
-|`git_private_key`|SSH key pair to fetch the config Git repository.|`-`|`((git_config.ssh_key))`|`True`|
+|`git_private_key`|SSH key pair to fetch the config Git repository.|`-`|`((ssh_config.ssh_key))`|`True`|
 |`git_repository`|Git repository URL containing the config of the stack.|`-`|`git@github.com:MyUser/config-jenkins.git`|`True`|
 |`git_terraform_path`|Path of Terraform files in the config Git repository|`-`|`($ project $)/terraform/($ environment $)`|`True`|
 |`customer`|Name of the Cycloid Organization, used as customer variable name.|`-`|`($ organization_canonical $)`|`True`|
