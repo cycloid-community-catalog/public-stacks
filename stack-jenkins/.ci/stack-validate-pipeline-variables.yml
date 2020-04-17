@@ -21,7 +21,7 @@ git_key: ((git_github.ssh_key))
 #. molecule_env_vars (required): dict
 #+ molecule configuration to validate the stack.
 molecule_env_vars:
-  ANSIBLE_PIP_VERSION: 2.9.1
+  ANSIBLE_PIP_VERSION: 2.7.17
   SSH_AGENT_KEY: ((git_github.ssh_key))
   ANSIBLE_PATH: ansible
   AWS_ACCESS_KEY_ID: ((aws_aws.access_key))
