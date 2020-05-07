@@ -21,8 +21,10 @@ resources:
 
 - name: tfstate
   type: terraform
+  icon: terraform
   source:
     env_name: ((env))
+    private_key: ((terraform_modules_private_key))
     backend_type: s3
     backend_config:
       bucket: ((terraform_storage_bucket_name))
@@ -46,6 +48,7 @@ resources:
 # The Terraform config (will be merged with the stack)
 - name: git_terraform
   type: git
+  icon: git
   source:
     uri: ((git_repository))
     branch: ((git_branch))

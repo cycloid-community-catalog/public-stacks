@@ -21,6 +21,10 @@ aws_default_region: eu-west-1
 #+ AWS S3 bucket name to store terraform remote state file.
 terraform_storage_bucket_name: ($ organization_canonical $)-terraform-remote-state
 
+#. terraform_modules_private_key (optional): ""
+#+ SSH key to use to clone private terraform modules from Git.
+terraform_modules_private_key: ""
+
 #
 # Repos
 #

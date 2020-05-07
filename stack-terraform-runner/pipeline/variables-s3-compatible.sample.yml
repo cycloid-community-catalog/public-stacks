@@ -33,6 +33,10 @@ terraform_s3_skip_credentials_validation: true
 #+ Always use path-style S3 URLs (https://<HOST>/<BUCKET> instead of https://<BUCKET>.<HOST>).
 terraform_s3_force_path_style: true
 
+#. terraform_modules_private_key (optional): ""
+#+ SSH key to use to clone private terraform modules from Git.
+terraform_modules_private_key: ""
+
 #
 # Repos
 #

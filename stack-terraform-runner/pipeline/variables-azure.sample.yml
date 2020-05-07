@@ -51,6 +51,10 @@ terraform_storage_container_name: ($ organization_canonical $)
 #+ Azure Storage container path to store terraform remote state file.
 terraform_storage_container_path: ($ project $)/($ environment $)
 
+#. terraform_modules_private_key (optional): ""
+#+ SSH key to use to clone private terraform modules from Git.
+terraform_modules_private_key: ""
+
 #
 # Repos
 #
