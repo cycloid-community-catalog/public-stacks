@@ -31,6 +31,7 @@ config:
         path: 'pipeline/pipeline-aws.yml'
       variables:
         path: 'pipeline/variables-aws.sample.yml'
+        destination: '($ project $)/pipeline/variables-aws-($ environment $).yml'
     # Configuration of terraform
     terraform:
       aws:
@@ -46,6 +47,7 @@ config:
         path: 'pipeline/pipeline-gcp.yml'
       variables:
         path: 'pipeline/variables-gcp.sample.yml'
+        destination: '($ project $)/pipeline/variables-gcp-($ environment $).yml'
     # Configuration of terraform
     terraform:
       gcp:
