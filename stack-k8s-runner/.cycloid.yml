@@ -29,6 +29,7 @@ config:
         path: 'pipeline/pipeline.yml'
       variables:
         path: 'pipeline/variables.sample.yml'
+        destination: '($ project $)/pipeline/variables-($ environment $).yml'
   eks:
     name: 'Amazon EKS'
     description: 'For AWS Elastic Kubernetes Service clusters.'
@@ -37,6 +38,7 @@ config:
         path: 'pipeline/pipeline-eks.yml'
       variables:
         path: 'pipeline/variables-eks.sample.yml'
+        destination: '($ project $)/pipeline/variables-eks-($ environment $).yml'
   gke:
     name: 'Google GKE'
     description: 'For Google Kubernetes Engine clusters.'
@@ -45,3 +47,4 @@ config:
         path: 'pipeline/pipeline-gke.yml'
       variables:
         path: 'pipeline/variables-gke.sample.yml'
+        destination: '($ project $)/pipeline/variables-gke-($ environment $).yml'
