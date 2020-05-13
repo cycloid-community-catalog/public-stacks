@@ -21,22 +21,36 @@ variable "suffix" {
 }
 
 variable "backup_bucket_prefix" {
-  description = "Prefix for the S3 backup bucket (change it if a bucket with the same name already exists) - defaults to '${var.customer}-'"
+  description = "Prefix for the S3 backup bucket (change it if a bucket with the same name already exists) - defaults to '$${var.customer}-'"
   default     = ""
+}
+
+variable "extra_tags" {
+  default = {}
+}
+
+locals {
+  standard_tags = {
+    "cycloid.io" = "true"
+    env          = var.env
+    project      = var.project
+    customer     = var.customer
+  }
+  merged_tags = merge(local.standard_tags, var.extra_tags)
 }
 
 ##### S3 bucket
 
 variable "create_s3_bucket_remote_state" {
   description = "To know if a terraform_remote_state s3 bucket has to be created or not"
-  default     = 0
+  default     = false
 }
 
 ##### IAM and authorizations
 
 variable "create_infra_user" {
   description = "To know if an admin user infra has to be created or not"
-  default     = 0
+  default     = false
 }
 
 variable "extra_admin_users" {
@@ -72,14 +86,19 @@ variable "keypair_public" {
 # Oce we can "count" the modules, we may even use a list of maps, allowing to
 # define any number of VPCs.
 
-variable "aws_region" {
-  description = "Name of the region where the infrastructure is created"
-  default     = "us-east-1"
+data "aws_region" "current" {}
+
+data "aws_availability_zones" "available" {
+  state = "available"
 }
 
 variable "zones" {
-  description = "The availability zones you want to use"
+  description = "To use specific AWS Availability Zones."
   default     = []
+}
+
+locals {
+  aws_availability_zones = length(var.zones) > 0 ? var.zones : data.aws_availability_zones.available.names
 }
 
 # Allow metrics (prometheus) to collect data from bastion
@@ -99,3 +118,4 @@ variable "enable_s3_endpoint" {
   description = "Should be true if you want to provision an S3 endpoint to the VPC"
   default     = false
 }
+

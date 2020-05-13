@@ -1,6 +1,6 @@
 # Create a bucket for terraform remote state
 resource "aws_s3_bucket" "terraform_remote_state" {
-  count = "${var.create_s3_bucket_remote_state ? 1 : 0}"
+  count = var.create_s3_bucket_remote_state ? 1 : 0
 
   bucket = "${var.customer}-terraform-remote-state"
   acl    = "private"
@@ -9,11 +9,8 @@ resource "aws_s3_bucket" "terraform_remote_state" {
     enabled = true
   }
 
-  tags {
+  tags = merge(local.merged_tags, {
     Name       = "terraform-remote-state"
-    client     = "${var.customer}"
-    project    = "${var.project}"
-    env        = "${var.env}"
-    cycloid.io = "true"
-  }
+  })
 }
+

@@ -1,29 +1,29 @@
 locals {
-  admin-users = ["${compact(concat("${aws_iam_user.infra.*.name}", "${var.extra_admin_users}"))}"]
+  admin-users = compact(concat(aws_iam_user.infra.*.name, var.extra_admin_users))
 }
 
 resource "aws_iam_user" "infra" {
-  count = "${var.create_infra_user ? 1 : 0}"
+  count = var.create_infra_user ? 1 : 0
 
   name = "infra${var.suffix}"
   path = "/cycloid/"
 }
 
 resource "aws_iam_access_key" "infra" {
-  count = "${var.create_infra_user ? 1 : 0}"
-  user  = "${aws_iam_user.infra.name}"
+  count = var.create_infra_user ? 1 : 0
+  user  = aws_iam_user.infra[0].name
 }
 
 resource "aws_iam_role_policy_attachment" "infra_administrator_access_role" {
-  count = "${var.create_infra_user ? 1 : 0}"
+  count = var.create_infra_user ? 1 : 0
 
   role       = "admin"
   policy_arn = "arn:aws:iam::aws:policy/AdministratorAccess"
 }
 
 resource "aws_iam_user_policy_attachment" "infra_administrator_access_user" {
-  count      = "${length(local.admin-users)}"
-  user       = "${element(local.admin-users, count.index)}"
+  count      = length(local.admin-users)
+  user       = element(local.admin-users, count.index)
   policy_arn = "arn:aws:iam::aws:policy/AdministratorAccess"
 }
 
@@ -41,23 +41,23 @@ data "aws_iam_policy_document" "role_infra" {
 
 resource "aws_iam_role" "infra" {
   name               = "infra${var.suffix}"
-  assume_role_policy = "${data.aws_iam_policy_document.role_infra.json}"
+  assume_role_policy = data.aws_iam_policy_document.role_infra.json
 }
 
 resource "aws_iam_user_policy_attachment" "infra_readonly_user" {
-  count      = "${length(var.readonly_users)}"
-  user       = "${element(var.readonly_users, count.index)}"
+  count      = length(var.readonly_users)
+  user       = element(var.readonly_users, count.index)
   policy_arn = "arn:aws:iam::aws:policy/ReadOnlyAccess"
 }
 
 resource "aws_iam_group_policy_attachment" "infra_readonly_group" {
-  count      = "${length(var.readonly_groups)}"
-  group      = "${element(var.readonly_groups, count.index)}"
+  count      = length(var.readonly_groups)
+  group      = element(var.readonly_groups, count.index)
   policy_arn = "arn:aws:iam::aws:policy/ReadOnlyAccess"
 }
 
 resource "aws_iam_role_policy_attachment" "infra_readonly_role" {
-  role       = "${aws_iam_role.infra.name}"
+  role       = aws_iam_role.infra.name
   policy_arn = "arn:aws:iam::aws:policy/ReadOnlyAccess"
 }
 
@@ -100,31 +100,32 @@ data "aws_iam_policy_document" "infa_ec2_snap" {
 resource "aws_iam_policy" "infra_logs" {
   name   = "infra-logs${var.suffix}"
   path   = "/cycloid/"
-  policy = "${data.aws_iam_policy_document.infra_logs.json}"
+  policy = data.aws_iam_policy_document.infra_logs.json
 }
 
 resource "aws_iam_policy" "infa_ec2_snap" {
   name   = "infra-ec2-snap${var.suffix}"
   path   = "/cycloid/"
-  policy = "${data.aws_iam_policy_document.infa_ec2_snap.json}"
+  policy = data.aws_iam_policy_document.infa_ec2_snap.json
 }
 
 resource "aws_iam_role_policy_attachment" "infra_logs" {
-  role       = "${aws_iam_role.infra.name}"
-  policy_arn = "${aws_iam_policy.infra_logs.arn}"
+  role       = aws_iam_role.infra.name
+  policy_arn = aws_iam_policy.infra_logs.arn
 }
 
 resource "aws_iam_role_policy_attachment" "infa_ec2_snap" {
-  role       = "${aws_iam_role.infra.name}"
-  policy_arn = "${aws_iam_policy.infa_ec2_snap.arn}"
+  role       = aws_iam_role.infra.name
+  policy_arn = aws_iam_policy.infa_ec2_snap.arn
 }
 
 resource "aws_iam_instance_profile" "infra" {
   name = "infra${var.suffix}"
-  role = "${aws_iam_role.infra.name}"
+  role = aws_iam_role.infra.name
 }
 
 // Expose iam policy for pushing logs
 output "iam_policy_infra-logs" {
-  value = "${aws_iam_policy.infra_logs.arn}"
+  value = aws_iam_policy.infra_logs.arn
 }
+

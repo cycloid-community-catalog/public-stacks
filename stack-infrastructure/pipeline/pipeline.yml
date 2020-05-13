@@ -63,12 +63,15 @@ resources:
 - name: tfstate
   type: terraform
   source:
-    storage:
+    env_name: ((project))-((env))
+    backend_type: s3
+    backend_config:
       bucket: ((terraform_storage_bucket_name))
-      bucket_path: ((terraform_storage_bucket_path))
-      region_name: ((aws_default_region))
-      access_key_id: ((aws_access_key))
-      secret_access_key: ((aws_secret_key))
+      key: ((project))-((env)).tfstate
+      workspace_key_prefix: ((project))
+      region: ((aws_default_region))
+      access_key: ((aws_access_key))
+      secret_key: ((aws_secret_key))
     vars:
       access_key: ((aws_access_key))
       secret_key: ((aws_secret_key))
@@ -147,7 +150,6 @@ jobs:
 
         - put: tfstate
           params:
-            env_name: ((project))-((env))
             plan_only: true
             terraform_source: merged-stack/
 
@@ -186,7 +188,6 @@ jobs:
 
         - put: tfstate
           params:
-            env_name: ((project))-((env))
             plan_run: true
             terraform_source: merged-stack/
 
@@ -270,7 +271,6 @@ jobs:
 
         - put: tfstate
           params:
-            env_name: ((project))-((env))
             action: destroy
             terraform_source: merged-stack/
           get_params:

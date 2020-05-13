@@ -27,3 +27,4 @@ data "aws_ami" "debian_stretch" {
   most_recent = true
   owners      = ["379101102735"] # Debian
 }
+

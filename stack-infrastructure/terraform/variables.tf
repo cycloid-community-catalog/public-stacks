@@ -1,3 +1,9 @@
-variable "env" {}
-variable "project" {}
-variable "customer" {}
+variable "env" {
+}
+
+variable "project" {
+}
+
+variable "customer" {
+}
+

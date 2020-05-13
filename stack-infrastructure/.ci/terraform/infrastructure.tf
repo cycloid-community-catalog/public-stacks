@@ -103,15 +103,11 @@ module "infrastructure" {
 
   #. backup_bucket_prefix: ""
   #+ Prefix for the S3 backup bucket (change it if a bucket with the same name already exists) - defaults to '${var.customer}-'
-  backup_bucket_prefix = "${var.customer}-${var.env}-"
+  backup_bucket_prefix = "${var.customer}-${var.env}"
 
   #. extra_admin_users (optional, list): []
   #+ List of users to give the administrator access role to
   #extra_admin_users = ["admin"]
-
-  #. extra_tags (optional): {}
-  #+ Dict of extra tags to add on aws resources.
-  #extra_tags = { "foo" = "bar" }
 
   #. readonly_users (optional, list): []
   #+ List of users to give a read-only access to

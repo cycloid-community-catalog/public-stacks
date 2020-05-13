@@ -38,47 +38,38 @@ variable "prod_redshift_subnets" {
 
 module "prod_vpc" {
   source  = "terraform-aws-modules/vpc/aws"
-  version = "~> v1.0"
+  version = "~> v2.17"
 
   name = "${var.customer}-prod${var.suffix}"
-  azs  = "${var.zones}"
-  cidr = "${var.prod_cidr}"
+  azs  = local.aws_availability_zones
+  cidr = var.prod_cidr
 
-  private_subnets     = "${var.prod_private_subnets}"
+  private_subnets     = var.prod_private_subnets
   enable_nat_gateway  = true
   single_nat_gateway  = true
-  public_subnets      = "${var.prod_public_subnets}"
-  elasticache_subnets = "${var.prod_elasticache_subnets}"
-  database_subnets    = "${var.prod_rds_subnets}"
-  redshift_subnets    = "${var.prod_redshift_subnets}"
+  public_subnets      = var.prod_public_subnets
+  elasticache_subnets = var.prod_elasticache_subnets
+  database_subnets    = var.prod_rds_subnets
+  redshift_subnets    = var.prod_redshift_subnets
 
   enable_dns_hostnames     = true
   enable_dhcp_options      = true
   dhcp_options_domain_name = "${var.customer}.prod"
 
-  enable_s3_endpoint       = "${var.enable_s3_endpoint}"
-  enable_dynamodb_endpoint = "${var.enable_dynamodb_endpoint}"
+  enable_s3_endpoint       = var.enable_s3_endpoint
+  enable_dynamodb_endpoint = var.enable_dynamodb_endpoint
 
-  tags = {
-    client     = "${var.customer}"
-    project    = "${var.project}"
-    env        = "${var.env}"
-    cycloid.io = "true"
-  }
+  tags = local.merged_tags
 }
 
 resource "aws_vpc_peering_connection" "infra_prod" {
-  peer_vpc_id = "${module.infra_vpc.vpc_id}"
-  vpc_id      = "${module.prod_vpc.vpc_id}"
+  peer_vpc_id = module.infra_vpc.vpc_id
+  vpc_id      = module.prod_vpc.vpc_id
   auto_accept = true
 
-  tags {
+  tags = merge(local.merged_tags, {
     Name       = "VPC Peering between infra and prod"
-    client     = "${var.customer}"
-    project    = "${var.project}"
-    env        = "${var.env}"
-    cycloid.io = "true"
-  }
+  })
 }
 
 variable "create_vpc" {
@@ -98,59 +89,64 @@ variable "one_nat_gateway_per_az" {
 
 # Fix for value of count cannot be computed, generating the count as the same way as amazon vpc module do : https://github.com/terraform-aws-modules/terraform-aws-vpc/blob/master/main.tf#L5
 locals {
-  prod_max_subnet_length = "${max(length(var.prod_private_subnets), length(var.prod_elasticache_subnets), length(var.prod_rds_subnets), length(var.prod_redshift_subnets))}"
-  prod_nat_gateway_count = "${var.single_nat_gateway ? 1 : (var.one_nat_gateway_per_az ? length(var.zones) : local.prod_max_subnet_length)}"
+  prod_max_subnet_length = max(
+    length(var.prod_private_subnets),
+    length(var.prod_elasticache_subnets),
+    length(var.prod_rds_subnets),
+    length(var.prod_redshift_subnets),
+  )
+  prod_nat_gateway_count = var.single_nat_gateway ? 1 : var.one_nat_gateway_per_az ? length(local.aws_availability_zones) : local.prod_max_subnet_length
 }
 
 resource "aws_route" "infra_prod_public" {
-  count = "${var.create_vpc && length(var.infra_public_subnets) > 0 ? 1 : 0}"
+  count = var.create_vpc && length(var.infra_public_subnets) > 0 ? 1 : 0
 
   #  count = "${length(module.infra_vpc.public_route_table_ids)}"
 
-  route_table_id            = "${element(module.infra_vpc.public_route_table_ids, count.index)}"
-  destination_cidr_block    = "${var.prod_cidr}"
-  vpc_peering_connection_id = "${aws_vpc_peering_connection.infra_prod.id}"
+  route_table_id            = element(module.infra_vpc.public_route_table_ids, count.index)
+  destination_cidr_block    = var.prod_cidr
+  vpc_peering_connection_id = aws_vpc_peering_connection.infra_prod.id
 }
 
 resource "aws_route" "infra_prod_private" {
   #count = "${length(module.infra_vpc.private_route_table_ids)}"
-  count = "${var.create_vpc && local.infra_max_subnet_length > 0 ? local.infra_nat_gateway_count : 0}"
+  count = var.create_vpc && local.infra_max_subnet_length > 0 ? local.infra_nat_gateway_count : 0
 
-  route_table_id            = "${element(module.infra_vpc.private_route_table_ids, count.index)}"
-  destination_cidr_block    = "${var.prod_cidr}"
-  vpc_peering_connection_id = "${aws_vpc_peering_connection.infra_prod.id}"
+  route_table_id            = element(module.infra_vpc.private_route_table_ids, count.index)
+  destination_cidr_block    = var.prod_cidr
+  vpc_peering_connection_id = aws_vpc_peering_connection.infra_prod.id
 }
 
 resource "aws_route" "prod_infra_public" {
   #count = "${length(module.infra_vpc.public_route_table_ids)}"
-  count = "${var.create_vpc && length(var.prod_public_subnets) > 0 ? 1 : 0}"
+  count = var.create_vpc && length(var.prod_public_subnets) > 0 ? 1 : 0
 
-  route_table_id            = "${element(module.prod_vpc.public_route_table_ids, count.index)}"
-  destination_cidr_block    = "${var.infra_cidr}"
-  vpc_peering_connection_id = "${aws_vpc_peering_connection.infra_prod.id}"
+  route_table_id            = element(module.prod_vpc.public_route_table_ids, count.index)
+  destination_cidr_block    = var.infra_cidr
+  vpc_peering_connection_id = aws_vpc_peering_connection.infra_prod.id
 }
 
 resource "aws_route" "prod_infra_private" {
   #count = "${length(module.infra_vpc.private_route_table_ids)}"
-  count = "${var.create_vpc && local.prod_max_subnet_length > 0 ? local.prod_nat_gateway_count : 0}"
+  count = var.create_vpc && local.prod_max_subnet_length > 0 ? local.prod_nat_gateway_count : 0
 
-  route_table_id            = "${element(module.prod_vpc.private_route_table_ids, count.index)}"
-  destination_cidr_block    = "${var.infra_cidr}"
-  vpc_peering_connection_id = "${aws_vpc_peering_connection.infra_prod.id}"
+  route_table_id            = element(module.prod_vpc.private_route_table_ids, count.index)
+  destination_cidr_block    = var.infra_cidr
+  vpc_peering_connection_id = aws_vpc_peering_connection.infra_prod.id
 }
 
 resource "aws_security_group" "allow_bastion_prod" {
-  count = "${var.bastion_count > 0 ? 1 : 0 }"
+  count = var.bastion_count > 0 ? 1 : 0
 
   name        = "allow-bastion-prod${var.suffix}"
   description = "Allow SSH traffic from the bastion to the prod env"
-  vpc_id      = "${module.prod_vpc.vpc_id}"
+  vpc_id      = module.prod_vpc.vpc_id
 
-  ingress = {
+  ingress {
     from_port       = 22
     to_port         = 22
     protocol        = "tcp"
-    security_groups = ["${aws_security_group.bastion.id}"]
+    security_groups = [aws_security_group.bastion[0].id]
     self            = false
   }
 
@@ -161,13 +157,9 @@ resource "aws_security_group" "allow_bastion_prod" {
     cidr_blocks = ["0.0.0.0/0"]
   }
 
-  tags {
+  tags = merge(local.merged_tags, {
     Name       = "allow-bastion-prod${var.suffix}"
-    client     = "${var.customer}"
-    project    = "${var.project}"
-    env        = "${var.env}"
-    cycloid.io = "true"
-  }
+  })
 }
 
 # Create route53 zones
@@ -176,26 +168,20 @@ resource "aws_route53_zone" "prod_private" {
   name = "${var.customer}.prod"
 
   vpc {
-    vpc_id = "${module.prod_vpc.vpc_id}"
+    vpc_id = module.prod_vpc.vpc_id
   }
 
-  tags {
-    client     = "${var.customer}"
-    project    = "${var.project}"
-    env        = "${var.env}"
-    client     = "${var.customer}"
-    cycloid.io = "true"
-  }
+  tags = local.merged_tags
 
   lifecycle {
-    ignore_changes = ["vpc"]
+    ignore_changes = [vpc]
   }
 }
 
 resource "aws_route53_zone_association" "prod_private_infra" {
-  zone_id = "${aws_route53_zone.prod_private.zone_id}"
-  vpc_id  = "${module.infra_vpc.vpc_id}"
-  count   = "${var.infra_associate_vpc_to_all_private_zones ? 1 : 0}"
+  zone_id = aws_route53_zone.prod_private.zone_id
+  vpc_id  = module.infra_vpc.vpc_id
+  count   = var.infra_associate_vpc_to_all_private_zones ? 1 : 0
 }
 
 #
@@ -265,50 +251,51 @@ resource "aws_db_parameter_group" "prod_rds-optimized-mysql57" {
 
 // Expose the mysql rds parameters
 output "prod_rds_parameters-mysql57" {
-  value = "${aws_db_parameter_group.prod_rds-optimized-mysql57.id}"
+  value = aws_db_parameter_group.prod_rds-optimized-mysql57.id
 }
 
 // Expose the private zone id
 output "prod_private_zone_id" {
-  value = "${aws_route53_zone.prod_private.zone_id}"
+  value = aws_route53_zone.prod_private.zone_id
 }
 
 output "prod_bastion_sg_allow" {
-  value = "${element(aws_security_group.allow_bastion_prod.*.id, 0)}"
+  value = element(aws_security_group.allow_bastion_prod.*.id, 0)
 }
 
 output "prod_vpc_id" {
-  value = "${module.prod_vpc.vpc_id}"
+  value = module.prod_vpc.vpc_id
 }
 
 output "prod_private_subnets" {
-  value = ["${module.prod_vpc.private_subnets}"]
+  value = [module.prod_vpc.private_subnets]
 }
 
 output "prod_public_subnets" {
-  value = ["${module.prod_vpc.public_subnets}"]
+  value = [module.prod_vpc.public_subnets]
 }
 
 output "prod_elasticache_subnets" {
-  value = ["${module.prod_vpc.elasticache_subnets}"]
+  value = [module.prod_vpc.elasticache_subnets]
 }
 
 output "prod_elasticache_subnet_group" {
-  value = "${module.prod_vpc.elasticache_subnet_group}"
+  value = module.prod_vpc.elasticache_subnet_group
 }
 
 output "prod_rds_subnets" {
-  value = ["${module.prod_vpc.database_subnets}"]
+  value = [module.prod_vpc.database_subnets]
 }
 
 output "prod_rds_subnet_group" {
-  value = "${module.prod_vpc.database_subnet_group}"
+  value = module.prod_vpc.database_subnet_group
 }
 
 output "prod_redshift_subnets" {
-  value = ["${module.prod_vpc.redshift_subnets}"]
+  value = [module.prod_vpc.redshift_subnets]
 }
 
 output "prod_redshift_subnet_group" {
-  value = "${module.prod_vpc.redshift_subnet_group}"
+  value = module.prod_vpc.redshift_subnet_group
 }
+

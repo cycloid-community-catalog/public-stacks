@@ -1,15 +1,15 @@
 resource "aws_security_group" "bastion" {
-  count = "${var.bastion_count > 0 ? 1 : 0 }"
+  count = var.bastion_count > 0 ? 1 : 0
 
   name        = "bastion${var.suffix}"
   description = "Allow SSH traffic from the internet"
-  vpc_id      = "${module.infra_vpc.vpc_id}"
+  vpc_id      = module.infra_vpc.vpc_id
 
   ingress {
     from_port   = 22
     to_port     = 22
     protocol    = "tcp"
-    cidr_blocks = ["${var.bastion_allowed_networks}"]
+    cidr_blocks = [var.bastion_allowed_networks]
   }
 
   egress {
@@ -19,71 +19,56 @@ resource "aws_security_group" "bastion" {
     cidr_blocks = ["0.0.0.0/0"]
   }
 
-  tags {
+  tags = merge(local.merged_tags, {
     Name       = "bastion${var.suffix}"
-    client     = "${var.customer}"
-    project    = "${var.project}"
-    env        = "${var.env}"
-    cycloid.io = "true"
-  }
+  })
 }
 
 resource "aws_eip" "bastion" {
-  count = "${var.bastion_count}"
+  count = var.bastion_count
 
-  instance = "${aws_instance.bastion.id}"
+  instance = aws_instance.bastion[0].id
   vpc      = true
 
-  tags {
+  tags = merge(local.merged_tags, {
     Name       = "${var.customer}-bastion${count.index}${var.suffix}"
-    client     = "${var.customer}"
-    project    = "${var.project}"
-    env        = "${var.env}"
-    cycloid.io = "true"
-  }
+  })
 }
 
 resource "aws_instance" "bastion" {
-  count = "${var.bastion_count}"
+  count = var.bastion_count
 
-  ami           = "${data.aws_ami.debian_stretch.id}"
-  instance_type = "${var.bastion_instance_type}"
-  key_name      = "${var.keypair_name != "" ? "${var.keypair_name}" : "${var.customer}-${var.project}${var.suffix}"}"
+  ami           = data.aws_ami.debian_stretch.id
+  instance_type = var.bastion_instance_type
+  key_name      = var.keypair_name != "" ? var.keypair_name : "${var.customer}-${var.project}${var.suffix}"
 
-  vpc_security_group_ids = ["${compact(list(
-    "${var.metrics_allowed_sg}",
-    "${aws_security_group.bastion.id}",
-  ))}"]
+  vpc_security_group_ids = compact([var.metrics_allowed_sg, aws_security_group.bastion[0].id])
 
-  iam_instance_profile    = "${aws_iam_instance_profile.infra.name}"
-  subnet_id               = "${element(module.infra_vpc.public_subnets, count.index)}"
+  iam_instance_profile    = aws_iam_instance_profile.infra.name
+  subnet_id               = element(module.infra_vpc.public_subnets, count.index)
   disable_api_termination = false
 
-  tags {
+  tags = merge(local.merged_tags, {
     Name       = "${var.customer}-bastion${count.index}${var.suffix}"
-    client     = "${var.customer}"
-    env        = "${var.env}"
-    project    = "${var.project}"
     role       = "bastion"
-    cycloid.io = "true"
-  }
+  })
 
   lifecycle {
-    ignore_changes = ["ami"]
+    ignore_changes = [ami]
   }
 }
 
 resource "aws_cloudwatch_metric_alarm" "recover-bastion" {
-  count = "${var.bastion_count}"
+  count = var.bastion_count
 
-  alarm_actions     = ["arn:aws:automate:${var.aws_region}:ec2:recover"]
+  alarm_actions     = ["arn:aws:automate:${data.aws_region.current.name}:ec2:recover"]
   alarm_description = "Recover the instance"
 
   alarm_name          = "recover-bastion${var.suffix}"
   comparison_operator = "GreaterThanThreshold"
 
   dimensions = {
-    InstanceId = "${element(aws_instance.bastion.*.id, count.index)}"
+    InstanceId = element(aws_instance.bastion.*.id, count.index)
   }
 
   evaluation_periods        = "2"
@@ -94,3 +79,4 @@ resource "aws_cloudwatch_metric_alarm" "recover-bastion" {
   statistic                 = "Average"
   threshold                 = "0"
 }
+
