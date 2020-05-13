@@ -28,6 +28,7 @@ config:
         path: 'pipeline/pipeline.yml'
       variables:
         path: 'pipeline/variables.sample.yml'
+        destination: '($ project $)/pipeline/variables-($ environment $).yml'
   s3-compatible:
     name: 'S3 API-compatible'
     description: 'Using an S3 API-compatible terraform backend like minio.io'
@@ -36,6 +37,7 @@ config:
         path: 'pipeline/pipeline-s3-compatible.yml'
       variables:
         path: 'pipeline/variables-s3-compatible.sample.yml'
+        destination: '($ project $)/pipeline/variables-s3-compatible-($ environment $).yml'
   gcp:
     name: 'GCP'
     description: 'Using Google GCS terraform backend.'
@@ -44,6 +46,7 @@ config:
         path: 'pipeline/pipeline-gcp.yml'
       variables:
         path: 'pipeline/variables-gcp.sample.yml'
+        destination: '($ project $)/pipeline/variables-gcp-($ environment $).yml'
   azure:
     name: 'Azure'
     description: 'Using AzureRM terraform backend.'
@@ -52,4 +55,5 @@ config:
         path: 'pipeline/pipeline-azure.yml'
       variables:
         path: 'pipeline/variables-azure.sample.yml'
+        destination: '($ project $)/pipeline/variables-azure-($ environment $).yml'
 
