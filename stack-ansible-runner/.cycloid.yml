@@ -24,3 +24,4 @@ config:
       path: 'pipeline/pipeline.yml'
     variables:
       path: 'pipeline/variables.sample.yml'
+      destination: '($ project $)/pipeline/variables-($ environment $).yml'
