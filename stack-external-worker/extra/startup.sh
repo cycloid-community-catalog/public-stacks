@@ -198,7 +198,7 @@ use_endpoint_heuristics = True' > /etc/boto.cfg
     export HOME=/root
     # Remove spaces because some CloudProvider don't support empty parametter so their default value contain one space as empty
     export VERSION=${VERSION// /}
-    export VERSION=${VERSION:-$(curl -sL "${SCHEDULER_API_ADDRESS}/api/v1/info" | jq -r '.version')}
+    export VERSION=${VERSION:-$(curl -skL "${SCHEDULER_API_ADDRESS}/api/v1/info" | jq -r '.version')}
 
     cat >> "${ENV}-worker.yml" <<EOF
 concourse_version: "${VERSION}"

@@ -1,0 +1,211 @@
+# YAML anchors
+shared:
+  # Task : connect on vault API with approle and generate a token from it.
+  # Also provide some extra vars like external_worker_image for terraform
+  - &extract-vars
+    task: extract-vars
+    config:
+      platform: linux
+      image_resource:
+        type: docker-image
+        source:
+          repository: cycloid/cycloid-toolkit
+          tag: latest
+      run:
+        path: /usr/bin/vault-approle-login
+      outputs:
+      - name: extracted-vars
+        path: extracted-vars
+    params:
+      VAULT_ROLEID: ((vault.role_id))
+      VAULT_SECRETID: ((vault.secret_id))
+      VARS_TF_PATH: extracted-vars/terraform.tfvars
+
+  # Task : sync and merge with rsync 2 rep. Used to merge stack and config
+  - &merge-stack-and-config
+    platform: linux
+    image_resource:
+      type: docker-image
+      source:
+        repository: cycloid/cycloid-toolkit
+        tag: latest
+    run:
+      path: /usr/bin/merge-stack-and-config
+    outputs:
+    - name: merged-stack
+      path: "merged-stack"
+
+
+groups:
+
+- name: overview
+  jobs:
+  - terraform-plan
+  - terraform-apply
+
+- name: destroy
+  jobs:
+  - terraform-destroy
+
+resource_types:
+
+- name: terraform
+  type: docker-image
+  source:
+    repository: ljfranklin/terraform-resource
+    tag: '0.11.14'
+
+resources:
+
+# Terraform by itself
+- name: terraform-((project))
+  type: terraform
+  source:
+    storage:
+      bucket: ((terraform_storage_bucket_name))
+      bucket_path: ((terraform_storage_bucket_path))
+      region_name: ((aws_default_region))
+      access_key_id: ((aws_access_key))
+      secret_access_key: ((aws_secret_key))
+    vars:
+      access_key: ((aws_access_key))
+      secret_key: ((aws_secret_key))
+      aws_region: ((aws_default_region))
+      env: ((env))
+      customer: ((customer))
+      project: ((project))
+    env:
+      AWS_ACCESS_KEY_ID: ((aws_access_key))
+      AWS_DEFAULT_REGION: ((aws_default_region))
+      AWS_SECRET_ACCESS_KEY: ((aws_secret_key))
+
+# The Terraform stack (will be merged with the config)
+- name: stack-terraform
+  type: git
+  source:
+    uri: ((sc_repository))
+    branch: ((sc_branch))
+    private_key: ((sc_git_key))
+    paths:
+      - ((sc_path))/terraform/*
+
+# The Terraform config (will be merged with the stack)
+- name: config-terraform
+  type: git
+  source:
+    uri: ((config_git_repository))
+    branch: ((config_git_branch))
+    private_key: ((config_git_key))
+    paths:
+      - ((config_terraform_path))/*
+
+jobs:
+
+# Merge and trigger a plan whenever there is a commit in Terraform stack or config
+- name: terraform-plan
+  max_in_flight: 1
+  build_logs_to_retain: 10
+  plan:
+    - do:
+      - get: stack-terraform
+        trigger: true
+      - get: config-terraform
+        trigger: true
+
+      - task: merge-stack-and-config
+        config:
+          <<: *merge-stack-and-config
+          inputs:
+          - name: config-terraform
+            path: "config"
+          - name: stack-terraform
+            path: "stack"
+        params:
+          CONFIG_PATH: ((config_terraform_path))
+          STACK_PATH: ((sc_path))/terraform
+
+      - *extract-vars
+
+      - put: terraform-((project))
+        params:
+          env_name: ((project))-((env))
+          plan_only: true
+          terraform_source: merged-stack/
+          var_files:
+              - extracted-vars/terraform.tfvars
+
+# Merge and trigger an apply manually (no autostart of this job)
+- name: terraform-apply
+  max_in_flight: 1
+  build_logs_to_retain: 10
+  plan:
+    - do:
+      - get: stack-terraform
+        trigger: false
+        passed:
+          - terraform-plan
+      - get: config-terraform
+        trigger: false
+        passed:
+          - terraform-plan
+      - get: terraform-((project))
+        trigger: false
+        passed:
+          - terraform-plan
+
+      - task: merge-stack-and-config
+        config:
+          <<: *merge-stack-and-config
+          inputs:
+          - name: config-terraform
+            path: "config"
+          - name: stack-terraform
+            path: "stack"
+        params:
+          CONFIG_PATH: ((config_terraform_path))
+          STACK_PATH: ((sc_path))/terraform
+
+      - *extract-vars
+
+      - put: terraform-((project))
+        params:
+          env_name: ((project))-((env))
+          run_plan: true
+          terraform_source: merged-stack/
+          var_files:
+              - extracted-vars/terraform.tfvars
+
+
+# Merge and trigger a destroy of the stack (no autostart of this job)
+- name: terraform-destroy
+  max_in_flight: 1
+  build_logs_to_retain: 10
+  plan:
+    - do:
+      - get: stack-terraform
+        trigger: false
+      - get: config-terraform
+        trigger: false
+      - task: merge-stack-and-config
+        config:
+          <<: *merge-stack-and-config
+          inputs:
+          - name: config-terraform
+            path: "config"
+          - name: stack-terraform
+            path: "stack"
+        params:
+          CONFIG_PATH: ((config_terraform_path))
+          STACK_PATH: ((sc_path))/terraform
+
+      - *extract-vars
+
+      - put: terraform-((project))
+        params:
+          action: destroy
+          env_name: ((project))-((env))
+          terraform_source: merged-stack/
+          var_files:
+              - extracted-vars/terraform.tfvars
+        get_params:
+          action: destroy

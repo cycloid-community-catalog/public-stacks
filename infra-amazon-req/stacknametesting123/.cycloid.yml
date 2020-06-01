@@ -1,0 +1,28 @@
+version: "2"
+name: Stacknametesting123
+canonical: stacknametesting123
+author: James Fontaine Herrera
+status: private
+description: James' test
+image: ""
+keywords:
+- test123
+- provider:aws
+- provider:vault
+technologies:
+- technology: stackcraft
+  version: "1"
+config:
+  default:
+    description: ""
+    name: default
+    pipeline:
+      pipeline:
+        path: default/pipeline/terraform-pipeline.yaml
+      variables:
+        destination: ($ project $)/pipeline/variables-($ environment $).yml
+        path: default/pipeline/variables.sample.yaml
+    terraform:
+      stacknametesting123:
+        destination: ($ project $)/default/terraform/($ environment $)/stacknametesting123.tf
+        path: default/terraform/stacknametesting123.tf.sample
