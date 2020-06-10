@@ -1,0 +1,9 @@
+module "tf-jamestestagain123" {
+  source = "module-jamestestagain123"
+
+  # env - type: string
+  # env = "[PLACEHOLDER]"
+
+  # project - type: string
+  # project = "[PLACEHOLDER]"
+}
