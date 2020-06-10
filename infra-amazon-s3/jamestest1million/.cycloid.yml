@@ -1,0 +1,28 @@
+version: "2"
+name: jamestest1million
+canonical: jamestest1million
+author: James Fontaine Herrera
+status: private
+description: jamestest1million
+image: ""
+keywords:
+- 1234sdfwg
+- provider:openstack
+- provider:vault
+technologies:
+- technology: stackcraft
+  version: "1"
+config:
+  default:
+    description: ""
+    name: default
+    pipeline:
+      pipeline:
+        path: default/pipeline/terraform-pipeline.yaml
+      variables:
+        destination: ($ project $)/pipeline/variables-($ environment $).yml
+        path: default/pipeline/variables.sample.yaml
+    terraform:
+      jamestest1million:
+        destination: ($ project $)/default/terraform/($ environment $)/jamestest1million.tf
+        path: default/terraform/jamestest1million.tf.sample
