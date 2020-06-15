@@ -16,6 +16,10 @@
   "token" = "ad34234"
 }
 
+"resource" "openstack_networking_secgroup_v2" "wtduck" {
+  "name" = "wtduck"
+}
+
 "variable" "env" {
   "default" = "[PLACEHOLDER]"
 
