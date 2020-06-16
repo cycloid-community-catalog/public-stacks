@@ -36,17 +36,8 @@ resources:
       endpoint: ((terraform_s3_endpoint))
       skip_credentials_validation: ((terraform_s3_skip_credentials_validation))
       force_path_style: ((terraform_s3_force_path_style))
-    vars:
-      access_key: ((aws_access_key))
-      secret_key: ((aws_secret_key))
-      env: ((env))
-      project: ((project))
-      customer: ((customer))
-      aws_region: ((aws_default_region))
-    env:
-      AWS_ACCESS_KEY_ID: ((aws_access_key))
-      AWS_DEFAULT_REGION: ((aws_default_region))
-      AWS_SECRET_ACCESS_KEY: ((aws_secret_key))
+    vars: ((terraform_vars))
+    env: ((terraform_envs))
 
 # The Terraform config (will be merged with the stack)
 - name: git_terraform

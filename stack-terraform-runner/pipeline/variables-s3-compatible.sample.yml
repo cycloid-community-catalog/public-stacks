@@ -37,6 +37,12 @@ terraform_s3_force_path_style: true
 #+ SSH key to use to clone private terraform modules from Git.
 terraform_modules_private_key: ""
 
+terraform_vars:
+  env: ($ environment $)
+  project: ($ project $)
+  customer: ($ organization_canonical $)
+terraform_envs:
+
 #
 # Repos
 #
