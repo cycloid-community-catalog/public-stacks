@@ -3,7 +3,11 @@ output "keypair_name" {
 }
 
 output "bastion_ip" {
-  value = [aws_eip.bastion.*.public_ip]
+  value = aws_eip.bastion.*.public_ip
+}
+
+output "bastion_sg" {
+  value = aws_security_group.bastion[0].id
 }
 
 output "iam_ses_smtp_user_key" {

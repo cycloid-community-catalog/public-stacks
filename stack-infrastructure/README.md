@@ -104,6 +104,7 @@ In order to run this task, couple elements are required within the infrastructur
 | Name | Description |
 |------|-------------|
 | bastion_ip | The EIP attached to the bastion EC2 server |
+| bastion_sg | The bastion security group ID. |
 | deployment_bucket_name | S3 bucket name for the deployment bucket |
 | iam_policy_infra-backup | IAM read and write policy to the S3 backup bucket |
 | iam_policy_infra-logs | IAM write policy to AWS Cloudwatch logs |

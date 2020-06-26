@@ -5,7 +5,12 @@ output "keypair_name" {
 
 output "bastion_ip" {
   description = "The EIP attached to the bastion EC2 server"
-  value       = [module.infrastructure.bastion_ip]
+  value       = module.infrastructure.bastion_ip
+}
+
+output "bastion_sg" {
+  description = "The bastion security group ID."
+  value       = module.infrastructure.bastion_sg
 }
 
 output "infra_vpc_id" {
