@@ -10,17 +10,17 @@ output "prod_vpc_id" {
 
 output "prod_private_subnets" {
   description = "The private subnets for the prod VPC"
-  value       = [module.infrastructure.prod_private_subnets]
+  value       = module.infrastructure.prod_private_subnets
 }
 
 output "prod_public_subnets" {
   description = "The public subnets for the prod VPC"
-  value       = [module.infrastructure.prod_public_subnets]
+  value       = module.infrastructure.prod_public_subnets
 }
 
 output "prod_elasticache_subnets" {
   description = "The elasticache subnets for the prod VPC"
-  value       = [module.infrastructure.prod_elasticache_subnets]
+  value       = module.infrastructure.prod_elasticache_subnets
 }
 
 output "prod_elasticache_subnet_group" {
@@ -30,7 +30,7 @@ output "prod_elasticache_subnet_group" {
 
 output "prod_rds_subnets" {
   description = "The RDS subnets for the prod VPC"
-  value       = [module.infrastructure.prod_rds_subnets]
+  value       = module.infrastructure.prod_rds_subnets
 }
 
 output "prod_rds_subnet_group" {
@@ -40,7 +40,7 @@ output "prod_rds_subnet_group" {
 
 output "prod_redshift_subnets" {
   description = "The redshift subnets for the prod VPC"
-  value       = [module.infrastructure.prod_redshift_subnets]
+  value       = module.infrastructure.prod_redshift_subnets
 }
 
 output "prod_redshift_subnet_group" {

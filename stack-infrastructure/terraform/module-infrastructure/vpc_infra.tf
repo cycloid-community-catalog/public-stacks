@@ -191,10 +191,10 @@ output "infra_vpc_id" {
 }
 
 output "infra_private_subnets" {
-  value = [module.infra_vpc.private_subnets]
+  value = module.infra_vpc.private_subnets
 }
 
 output "infra_public_subnets" {
-  value = [module.infra_vpc.public_subnets]
+  value = module.infra_vpc.public_subnets
 }
 

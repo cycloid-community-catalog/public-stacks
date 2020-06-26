@@ -250,15 +250,15 @@ output "staging_vpc_id" {
 }
 
 output "staging_private_subnets" {
-  value = [module.staging_vpc.private_subnets]
+  value = module.staging_vpc.private_subnets
 }
 
 output "staging_public_subnets" {
-  value = [module.staging_vpc.public_subnets]
+  value = module.staging_vpc.public_subnets
 }
 
 output "staging_elasticache_subnets" {
-  value = [module.staging_vpc.elasticache_subnets]
+  value = module.staging_vpc.elasticache_subnets
 }
 
 output "staging_elasticache_subnet_group" {
@@ -266,7 +266,7 @@ output "staging_elasticache_subnet_group" {
 }
 
 output "staging_rds_subnets" {
-  value = [module.staging_vpc.database_subnets]
+  value = module.staging_vpc.database_subnets
 }
 
 output "staging_rds_subnet_group" {
@@ -274,7 +274,7 @@ output "staging_rds_subnet_group" {
 }
 
 output "staging_redshift_subnets" {
-  value = [module.staging_vpc.redshift_subnets]
+  value = module.staging_vpc.redshift_subnets
 }
 
 output "staging_redshift_subnet_group" {

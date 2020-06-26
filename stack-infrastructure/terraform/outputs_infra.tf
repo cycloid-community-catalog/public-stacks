@@ -15,12 +15,12 @@ output "infra_vpc_id" {
 
 output "infra_private_subnets" {
   description = "The private subnets for the infra VPC"
-  value       = [module.infrastructure.infra_private_subnets]
+  value       = module.infrastructure.infra_private_subnets
 }
 
 output "infra_public_subnets" {
   description = "The public subnets for the infra VPC"
-  value       = [module.infrastructure.infra_public_subnets]
+  value       = module.infrastructure.infra_public_subnets
 }
 
 output "infra_bastion_sg_allow" {

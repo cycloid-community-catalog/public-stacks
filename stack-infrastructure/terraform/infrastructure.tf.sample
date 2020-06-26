@@ -125,13 +125,13 @@ module "infrastructure" {
   #+ First create infra, second create prometheus, third uncomment variable
   # metrics_allowed_sg = "${data.terraform_remote_state.prometheus.infra_metrics_sg_allow}"
 
-  #. create_s3_bucket_remote_state (optional, int): 0
+  #. create_s3_bucket_remote_state (optional, bool): false
   #+ terraform_remote_state s3 bucket has to be created or not
-  #create_s3_bucket_remote_state = 0
+  #create_s3_bucket_remote_state = false
 
-  #. create_infra_user (optional, int): 0
+  #. create_infra_user (optional, bool): false
   #+ admin user infra has to be created or not
-  #create_infra_user = 0
+  #create_infra_user = false
 
 }
 

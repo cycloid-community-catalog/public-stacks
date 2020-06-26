@@ -268,15 +268,15 @@ output "prod_vpc_id" {
 }
 
 output "prod_private_subnets" {
-  value = [module.prod_vpc.private_subnets]
+  value = module.prod_vpc.private_subnets
 }
 
 output "prod_public_subnets" {
-  value = [module.prod_vpc.public_subnets]
+  value = module.prod_vpc.public_subnets
 }
 
 output "prod_elasticache_subnets" {
-  value = [module.prod_vpc.elasticache_subnets]
+  value = module.prod_vpc.elasticache_subnets
 }
 
 output "prod_elasticache_subnet_group" {
@@ -284,7 +284,7 @@ output "prod_elasticache_subnet_group" {
 }
 
 output "prod_rds_subnets" {
-  value = [module.prod_vpc.database_subnets]
+  value = module.prod_vpc.database_subnets
 }
 
 output "prod_rds_subnet_group" {
@@ -292,7 +292,7 @@ output "prod_rds_subnet_group" {
 }
 
 output "prod_redshift_subnets" {
-  value = [module.prod_vpc.redshift_subnets]
+  value = module.prod_vpc.redshift_subnets
 }
 
 output "prod_redshift_subnet_group" {
