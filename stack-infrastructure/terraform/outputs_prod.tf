@@ -8,6 +8,21 @@ output "prod_vpc_id" {
   value       = module.infrastructure.prod_vpc_id
 }
 
+output "prod_vpc_cidr" {
+  description = "The CIDR for the prod VPC"
+  value       = module.infrastructure.prod_vpc_cidr
+}
+
+output "prod_public_route_table_ids" {
+  description = "The public route table IDs for the prod VPC"
+  value       = module.infrastructure.prod_public_route_table_ids
+}
+
+output "prod_private_route_table_ids" {
+  description = "The private route table IDs for the prod VPC"
+  value       = module.infrastructure.prod_private_route_table_ids
+}
+
 output "prod_private_subnets" {
   description = "The private subnets for the prod VPC"
   value       = module.infrastructure.prod_private_subnets

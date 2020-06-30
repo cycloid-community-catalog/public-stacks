@@ -190,6 +190,18 @@ output "infra_vpc_id" {
   value = module.infra_vpc.vpc_id
 }
 
+output "infra_vpc_cidr" {
+  value = var.infra_cidr
+}
+
+output "infra_public_route_table_ids" {
+  value = module.infra_vpc.public_route_table_ids
+}
+
+output "infra_private_route_table_ids" {
+  value = module.infra_vpc.private_route_table_ids
+}
+
 output "infra_private_subnets" {
   value = module.infra_vpc.private_subnets
 }

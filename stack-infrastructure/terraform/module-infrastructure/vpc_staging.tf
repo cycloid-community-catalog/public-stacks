@@ -249,6 +249,18 @@ output "staging_vpc_id" {
   value = module.staging_vpc.vpc_id
 }
 
+output "staging_vpc_cidr" {
+  value = var.staging_cidr
+}
+
+output "staging_public_route_table_ids" {
+  value = module.staging_vpc.public_route_table_ids
+}
+
+output "staging_private_route_table_ids" {
+  value = module.staging_vpc.private_route_table_ids
+}
+
 output "staging_private_subnets" {
   value = module.staging_vpc.private_subnets
 }

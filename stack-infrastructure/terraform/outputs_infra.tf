@@ -18,6 +18,21 @@ output "infra_vpc_id" {
   value       = module.infrastructure.infra_vpc_id
 }
 
+output "infra_vpc_cidr" {
+  description = "The CIDR for the infra VPC"
+  value       = module.infrastructure.infra_vpc_cidr
+}
+
+output "infra_public_route_table_ids" {
+  description = "The public route table IDs for the infra VPC"
+  value       = module.infrastructure.infra_public_route_table_ids
+}
+
+output "infra_private_route_table_ids" {
+  description = "The private route table IDs for the infra VPC"
+  value       = module.infrastructure.infra_private_route_table_ids
+}
+
 output "infra_private_subnets" {
   description = "The private subnets for the infra VPC"
   value       = module.infrastructure.infra_private_subnets

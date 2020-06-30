@@ -267,6 +267,18 @@ output "prod_vpc_id" {
   value = module.prod_vpc.vpc_id
 }
 
+output "prod_vpc_cidr" {
+  value = var.prod_cidr
+}
+
+output "prod_public_route_table_ids" {
+  value = module.prod_vpc.public_route_table_ids
+}
+
+output "prod_private_route_table_ids" {
+  value = module.prod_vpc.private_route_table_ids
+}
+
 output "prod_private_subnets" {
   value = module.prod_vpc.private_subnets
 }
