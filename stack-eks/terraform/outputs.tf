@@ -40,11 +40,6 @@ output "private_zone_name" {
   value       = module.vpc.private_zone_name
 }
 
-output "bastion_sg_allow" {
-  description = "EKS Cluster dedicated VPC bastion Security Group to allow SSH access to EC2 instances."
-  value       = module.vpc.bastion_sg_allow
-}
-
 # EKS Cluster
 output "cluster_name" {
   description = "EKS Cluster name."

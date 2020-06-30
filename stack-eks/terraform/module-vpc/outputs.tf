@@ -37,8 +37,3 @@ output "private_zone_name" {
   description = "EKS Cluster dedicated VPC private zone name."
   value       = aws_route53_zone.vpc_private.name
 }
-
-output "bastion_sg_allow" {
-  description = "EKS Cluster dedicated VPC bastion Security Group to allow SSH access to EC2 instances."
-  value       = length(var.bastion_sg_id) > 0 ? aws_security_group.allow_bastion[0].id : null
-}

@@ -60,9 +60,6 @@ module "vpc" {
   #+ Should be true if you want to provision an S3 endpoint to the VPC
   #enable_s3_endpoint = false
 
-  #. bastion_sg_id (optional):
-  #+ Security Group ID of the bastion to allow SSH access. Make sure the bastion VPC is peered.
-
   ###
   # Required (should probably not be touched)
   ###
@@ -104,8 +101,8 @@ module "eks" {
   public_subnets_ids = module.vpc.public_subnets
 
   #. metrics_sg_allow (optional): ""
-  #+ Additionnal security group ID to assign to servers. Goal is to allow monitoring server to query metrics. Make sure the prometheus VPC is peered.
-  #metrics_sg_allow = "<prometheus-sg>"
+  #+ Additionnal security group ID to assign to servers. Goal is to allow monitoring server to query metrics. Make sure the prometheus VPC is peered. @see example below in this file.
+  #metrics_sg_allow = aws_security_group.eks_allow_metrics_scraping.id
 
   ###
   # Control plane
@@ -167,13 +164,13 @@ module "eks-node" {
   #+ Amazon subnets IDs on which create each components.
   private_subnets_ids = module.vpc.private_subnets
 
-  #. bastion_sg_allow (optional):
-  #+ Amazon source security group ID which will be allowed to connect on nodes port 22 (SSH). Only if module.vpc.bastion_sg_id variable is set.
-  #bastion_sg_allow = module.vpc.bastion_sg_allow
+  #. bastion_sg_allow (optional): ""
+  #+ Additionnal security group ID to assign to servers. Goal is to allow bastion server to connect on nodes port 22 (SSH). Make sure the bastion VPC is peered. @see example below in this file.
+  #bastion_sg_allow = aws_security_group.eks_allow_bastion.id
 
   #. metrics_sg_allow (optional): ""
-  #+ Additionnal security group ID to assign to servers. Goal is to allow monitoring server to query metrics. Make sure the prometheus VPC is peered.
-  #metrics_sg_allow = "<prometheus-sg>"
+  #+ Additionnal security group ID to assign to servers. Goal is to allow monitoring server to query metrics. Make sure the prometheus VPC is peered. @see example below in this file.
+  #metrics_sg_allow = aws_security_group.eks_allow_metrics_scraping.id
 
   ###
   # Nodes
@@ -226,3 +223,136 @@ module "eks-node" {
   control_plane_endpoint         = module.eks.control_plane_endpoint
   control_plane_ca               = module.eks.control_plane_ca
 }
+
+#
+# VPC Peering example
+#
+
+# resource "aws_vpc_peering_connection" "external_eks" {
+#   peer_vpc_id = "<EXTERNAL-VPC-ID>"
+#   vpc_id      = module.vpc.vpc_id
+#   auto_accept = true
+
+#   tags = {
+#     Name         = "VPC Peering between `<EXTERNAL-VPC-NAME>` external VPC and the dedicated `${var.project}-${var.env}-eks` VPC"
+#     "cycloid.io" = "true"
+#     env          = var.env
+#     project      = var.project
+#     client       = var.customer
+#   }
+# }
+
+# resource "aws_route" "external_eks_public" {
+#   for_each = toset("<EXTERNAL-VPC-PUBLIC-ROUTE-TABLE-IDS>")
+
+#   route_table_id            = each.value
+#   destination_cidr_block    = module.vpc.vpc_cidr
+#   vpc_peering_connection_id = aws_vpc_peering_connection.infra_eks.id
+# }
+
+# resource "aws_route" "external_eks_private" {
+#   for_each = toset("<EXTERNAL-VPC-PRIVATE-ROUTE-TABLE-IDS>")
+
+#   route_table_id            = each.value
+#   destination_cidr_block    = module.vpc.vpc_cidr
+#   vpc_peering_connection_id = aws_vpc_peering_connection.infra_eks.id
+# }
+
+# resource "aws_route" "eks_external_public" {
+#   for_each = toset(module.vpc.public_route_table_ids)
+
+#   route_table_id            = each.value
+#   destination_cidr_block    = "<EXTERNAL-VPC-VPC-CIDR>"
+#   vpc_peering_connection_id = aws_vpc_peering_connection.infra_eks.id
+# }
+
+# resource "aws_route" "eks_external_private" {
+#   for_each = toset(module.vpc.private_route_table_ids)
+
+#   route_table_id            = each.value
+#   destination_cidr_block    = "<EXTERNAL-VPC-VPC-CIDR>"
+#   vpc_peering_connection_id = aws_vpc_peering_connection.infra_eks.id
+# }
+
+# resource "aws_route53_zone_association" "vpc_private_external" {
+#   zone_id = module.vpc.private_zone_id
+#   vpc_id  = "<EXTERNAL-VPC-ID>"
+# }
+
+#
+# Bastion Security Group example
+#
+
+# resource "aws_security_group" "eks_allow_bastion" {
+#   name        = "${var.project}-${var.env}-eks-allow-bastion"
+#   description = "Allow SSH traffic from the bastion to the EKS env"
+#   vpc_id      = module.vpc.vpc_id
+
+#   ingress {
+#     from_port       = 22
+#     to_port         = 22
+#     protocol        = "tcp"
+#     security_groups = ["<external-prometheus-security-group-id>"]
+#     self            = false
+#   }
+
+#   egress {
+#     from_port   = 0
+#     to_port     = 0
+#     protocol    = "-1"
+#     cidr_blocks = ["0.0.0.0/0"]
+#   }
+
+#   tags = {
+#     Name         = "${var.project}-${var.env}-eks-allow-bastion"
+#     "cycloid.io" = "true"
+#     customer     = "${var.customer}"
+#     project      = "${var.project}"
+#     env          = "${var.env}"
+#   }
+
+#   depends_on = [aws_vpc_peering_connection.external_eks]
+# }
+
+# output "eks_bastion_sg_allow" {
+#   value = aws_security_group.eks_allow_bastion.id
+# }
+
+#
+# Monitoring Security Group example
+#
+
+# resource "aws_security_group" "eks_allow_metrics_scraping" {
+#   name        = "${var.project}-${var.env}-eks-allow-metrics-scraping"
+#   description = "Allow prometheus server to scrape the EKS env metrics"
+#   vpc_id      = module.vpc.vpc_id
+
+#   ingress {
+#     from_port       = 9100
+#     to_port         = 9100
+#     protocol        = "tcp"
+#     security_groups = ["<external-prometheus-security-group-id>"]
+#     self            = false
+#   }
+
+#   egress {
+#     from_port   = 0
+#     to_port     = 0
+#     protocol    = "-1"
+#     cidr_blocks = ["0.0.0.0/0"]
+#   }
+
+#   tags = {
+#     Name         = "${var.project}-${var.env}-eks-allow-metrics-scraping"
+#     "cycloid.io" = "true"
+#     customer     = "${var.customer}"
+#     project      = "${var.project}"
+#     env          = "${var.env}"
+#   }
+
+#   depends_on = [aws_vpc_peering_connection.external_eks]
+# }
+
+# output "eks_metrics_sg_allow" {
+#   value = aws_security_group.eks_allow_metrics_scraping.id
+# }

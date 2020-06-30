@@ -66,8 +66,7 @@ In order to run this task, couple elements are required within the infrastructur
 |Name|Description|Type|Default|Required|
 |---|---|:---:|:---:|:---:|
 |`aws_zones`|To use specific AWS Availability Zones.|`-`|`{}`|`False`|
-|`bastion_sg_allow`|Amazon source security group ID which will be allowed to connect on nodes port 22 (SSH). Only if module.vpc.bastion_sg_id variable is set.|`-`|``|`False`|
-|`bastion_sg_id`|Security Group ID of the bastion to allow SSH access. Make sure the bastion VPC is peered.|`-`|``|`False`|
+|`bastion_sg_allow`|Additionnal security group ID to assign to servers. Goal is to allow bastion server to connect on nodes port 22 (SSH). Make sure the bastion VPC is peered.|`-`|``|`False`|
 |`cluster_enabled_log_types`|EKS cluster enabled log types.|`-`|`["api", "audit", "authenticator", "controllerManager", "scheduler"]`|`False`|
 |`cluster_version`|EKS cluster version.|`-`|`1.14`|`False`|
 |`control_plane_allowed_ips`|Allow Inbound IP CIDRs to access the Kubernetes API.|`-`|`[]`|`False`|
@@ -106,7 +105,6 @@ In order to run this task, couple elements are required within the infrastructur
 | `private_route_table_ids` | EKS Cluster dedicated VPC private route table IDs.
 | `private_zone_id` | EKS Cluster dedicated VPC private zone ID. |
 | `private_zone_name` | EKS Cluster dedicated VPC private zone name. |
-| `bastion_sg_allow` | EKS Cluster dedicated VPC bastion Security Group to allow SSH access to EC2 instances. |
 | `cluster_name` | EKS Cluster name. |
 | `cluster_version` | EKS Cluster version. |
 | `cluster_platform_version` | EKS Cluster plateform version. |

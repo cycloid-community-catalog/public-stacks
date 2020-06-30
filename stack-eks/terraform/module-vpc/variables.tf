@@ -73,11 +73,6 @@ variable "one_nat_gateway_per_az" {
   default     = false
 }
 
-variable "bastion_sg_id" {
-  description = "Security Group ID of the bastion to allow SSH access. Make sure the bastion VPC is peered with `external_vpc_to_peer` variable."
-  default     = ""
-}
-
 #
 # VPC endpoints
 #

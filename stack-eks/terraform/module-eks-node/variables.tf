@@ -63,12 +63,12 @@ variable "private_subnets_ids" {
 }
 
 variable "bastion_sg_allow" {
-  description = "Bastion Security Group ID to allow SSH access on EKS nodes."
+  description = "Additionnal security group ID to assign to servers. Goal is to allow bastion server to connect on nodes port 22 (SSH). Make sure the bastion VPC is peered."
   default     = ""
 }
 
 variable "metrics_sg_allow" {
-  description = "Metrics Security Group ID to allow prometheus scraping on EKS nodes."
+  description = "Additionnal security group ID to assign to servers. Goal is to allow monitoring server to query metrics. Make sure the prometheus VPC is peered."
   default     = ""
 }
 
