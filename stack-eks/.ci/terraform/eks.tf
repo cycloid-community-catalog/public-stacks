@@ -108,9 +108,9 @@ module "eks" {
   # Control plane
   ###
 
-  #. cluster_version (optional): 1.14
+  #. cluster_version (optional): 1.16
   #+ EKS cluster version.
-  cluster_version = "1.14"
+  cluster_version = "1.16"
 
   #. cluster_enabled_log_types (optional): ["api", "audit", "authenticator", "controllerManager", "scheduler"]
   #+ EKS cluster enabled log types.

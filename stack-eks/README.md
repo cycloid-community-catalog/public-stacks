@@ -56,7 +56,7 @@ In order to run this task, couple elements are required within the infrastructur
 |`project`|Name of the project.|`-`|`($ project $)`|`True`|
 |`stack_git_branch`|Branch to use on the public stack Git repository|`-`|`master`|`True`|
 |`terraform_storage_bucket_name`|AWS S3 bucket name to store terraform remote state file.|`-`|`($ organization_canonical $)-terraform-remote-state`|`True`|
-|`terraform_version`|terraform version used to execute your code.|`-`|`'0.12.6'`|`True`|
+|`terraform_version`|terraform version used to execute your code.|`-`|`'0.12.28'`|`True`|
 
 
 ## Terraform
@@ -68,7 +68,7 @@ In order to run this task, couple elements are required within the infrastructur
 |`aws_zones`|To use specific AWS Availability Zones.|`-`|`{}`|`False`|
 |`bastion_sg_allow`|Additionnal security group ID to assign to servers. Goal is to allow bastion server to connect on nodes port 22 (SSH). Make sure the bastion VPC is peered.|`-`|``|`False`|
 |`cluster_enabled_log_types`|EKS cluster enabled log types.|`-`|`["api", "audit", "authenticator", "controllerManager", "scheduler"]`|`False`|
-|`cluster_version`|EKS cluster version.|`-`|`1.14`|`False`|
+|`cluster_version`|EKS cluster version.|`-`|`1.16`|`False`|
 |`control_plane_allowed_ips`|Allow Inbound IP CIDRs to access the Kubernetes API.|`-`|`[]`|`False`|
 |`enable_dynamodb_endpoint`|Should be true if you want to provision a DynamoDB endpoint to the VPC.|`bool`|`false`|`False`|
 |`enable_s3_endpoint`|Should be true if you want to provision an S3 endpoint to the VPC.|`bool`|`false`|`False`|
