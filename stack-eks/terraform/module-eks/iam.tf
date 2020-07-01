@@ -2,6 +2,8 @@
 # Control plane
 #
 
+# Role
+
 resource "aws_iam_role" "eks-cluster" {
   name = "${var.project}-${var.env}-eks-cluster"
 
@@ -21,6 +23,8 @@ resource "aws_iam_role" "eks-cluster" {
 POLICY
 }
 
+# EKS policies
+
 resource "aws_iam_role_policy_attachment" "eks-cluster-AmazonEKSClusterPolicy" {
   policy_arn = "arn:aws:iam::aws:policy/AmazonEKSClusterPolicy"
   role       = aws_iam_role.eks-cluster.name
@@ -34,6 +38,8 @@ resource "aws_iam_role_policy_attachment" "eks-cluster-AmazonEKSServicePolicy" {
 #
 # Node
 #
+
+# Role
 
 resource "aws_iam_role" "eks-node" {
   name = "${var.project}-${var.env}-eks-node"
@@ -54,6 +60,8 @@ resource "aws_iam_role" "eks-node" {
 POLICY
 }
 
+# EKS policies
+
 resource "aws_iam_role_policy_attachment" "eks-node-AmazonEKSWorkerNodePolicy" {
   policy_arn = "arn:aws:iam::aws:policy/AmazonEKSWorkerNodePolicy"
   role       = aws_iam_role.eks-node.name
@@ -68,6 +76,8 @@ resource "aws_iam_role_policy_attachment" "eks-node-AmazonEC2ContainerRegistryRe
   policy_arn = "arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly"
   role       = aws_iam_role.eks-node.name
 }
+
+# Cluster autoscaler
 
 data "aws_iam_policy_document" "eks-node-cluster-autoscaler" {
   statement {
@@ -97,6 +107,36 @@ resource "aws_iam_role_policy_attachment" "eks-node-cluster-autoscaler" {
   policy_arn = aws_iam_policy.eks-node-cluster-autoscaler.arn
   role       = aws_iam_role.eks-node.name
 }
+
+# CloudFormation signal
+
+data "aws_iam_policy_document" "cloudformation-signal" {
+  statement {
+    actions = [
+      "cloudformation:SignalResource",
+    ]
+
+    effect = "Allow"
+
+    resources = [
+      "arn:aws:cloudformation:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:stack/${var.project}-*-eks-node-*/*",
+    ]
+  }
+}
+
+resource "aws_iam_policy" "cloudformation-signal" {
+  name        = "${var.project}-${var.env}-cloudformation-signal"
+  path        = "/"
+  description = "Allow to send stack signal from EKS nodes"
+  policy      = data.aws_iam_policy_document.cloudformation-signal.json
+}
+
+resource "aws_iam_role_policy_attachment" "cloudformation-signal" {
+  policy_arn = aws_iam_policy.cloudformation-signal.arn
+  role       = aws_iam_role.eks-node.name
+}
+
+# Instance profile
 
 resource "aws_iam_instance_profile" "eks-node" {
   name = "${var.project}-${var.env}-eks-node"
