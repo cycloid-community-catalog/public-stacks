@@ -28,6 +28,9 @@ trap 'rc=$?; set +e; finish' EXIT
 
 LOG_FILE="/var/log/user-data.log"
 
+export AWS_REGION=$(curl -s http://169.254.169.254/latest/dynamic/instance-identity/document | jq -r .region)
+export AWS_UNIQUE_ID=$(curl http://169.254.169.254/latest/meta-data/instance-id)
+
 /etc/eks/bootstrap.sh \
     --apiserver-endpoint '${apiserver_endpoint}' \
     --b64-cluster-ca '${b64_cluster_ca}' \
