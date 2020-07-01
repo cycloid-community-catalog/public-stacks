@@ -52,17 +52,17 @@ clusters:
 - cluster:
     server: ${aws_eks_cluster.eks-cluster.endpoint}
     certificate-authority-data: ${aws_eks_cluster.eks-cluster.certificate_authority.0.data}
-  name: eks-${var.cluster_name}
+  name: ${var.customer}-eks-${var.cluster_name}
 contexts:
 - context:
-    cluster: eks-${var.cluster_name}
-    user: aws-${var.cluster_name}
-  name: ${var.cluster_name}
-current-context: ${var.cluster_name}
+    cluster: ${var.customer}-eks-${var.cluster_name}
+    user: ${var.customer}-aws-${var.cluster_name}
+  name: ${var.customer}-${var.cluster_name}
+current-context: ${var.customer}-${var.cluster_name}
 kind: Config
 preferences: {}
 users:
-- name: aws-${var.cluster_name}
+- name: ${var.customer}-aws-${var.cluster_name}
   user:
     exec:
       apiVersion: client.authentication.k8s.io/v1alpha1
