@@ -43,10 +43,10 @@ resource "aws_eks_cluster" "eks-cluster" {
   enabled_cluster_log_types = var.cluster_enabled_log_types
 
   vpc_config {
-    security_group_ids = [
+    security_group_ids = compact([
       aws_security_group.eks-cluster.id,
       var.metrics_sg_allow
-    ]
+    ])
     subnet_ids = var.public_subnets_ids
   }
 

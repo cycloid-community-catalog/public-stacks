@@ -225,11 +225,31 @@ module "eks-node" {
 }
 
 #
+# External terraform states
+#
+
+# data "terraform_remote_state" "infrastructure" {
+#   backend = "s3"
+#   config  = {
+#     bucket = "($ organization_canonical $)-terraform-remote-state"
+#     key    = "infrastructure/infra/infrastructure-infra.tfstate"
+#     region = "eu-west-1"
+#   }
+# }
+
+#
 # VPC Peering example
 #
 
+# locals {
+#   external_vpc_id                      = "<EXTERNAL-VPC-ID>" # data.terraform_remote_state.infrastructure.outputs.infra_vpc_id
+#   external_vpc_public_route_table_ids  = "<EXTERNAL-VPC-PUBLIC-ROUTE-TABLE-IDS>" # data.terraform_remote_state.infrastructure.outputs.infra_public_route_table_ids
+#   external_vpc_private_route_table_ids = "<EXTERNAL-VPC-PRIVATE-ROUTE-TABLE-IDS>" # data.terraform_remote_state.infrastructure.outputs.infra_private_route_table_ids
+#   external_vpc_cidr                    = "<EXTERNAL-VPC-VPC-CIDR>" # data.terraform_remote_state.infrastructure.outputs.infra_vpc_cidr
+# }
+
 # resource "aws_vpc_peering_connection" "external_eks" {
-#   peer_vpc_id = "<EXTERNAL-VPC-ID>"
+#   peer_vpc_id = local.external_vpc_id
 #   vpc_id      = module.vpc.vpc_id
 #   auto_accept = true
 
@@ -243,40 +263,44 @@ module "eks-node" {
 # }
 
 # resource "aws_route" "external_eks_public" {
-#   for_each = toset("<EXTERNAL-VPC-PUBLIC-ROUTE-TABLE-IDS>")
+#   for_each = toset(local.external_vpc_public_route_table_ids)
 
 #   route_table_id            = each.value
 #   destination_cidr_block    = module.vpc.vpc_cidr
-#   vpc_peering_connection_id = aws_vpc_peering_connection.infra_eks.id
+#   vpc_peering_connection_id = aws_vpc_peering_connection.external_eks.id
 # }
 
 # resource "aws_route" "external_eks_private" {
-#   for_each = toset("<EXTERNAL-VPC-PRIVATE-ROUTE-TABLE-IDS>")
+#   for_each = toset(local.external_vpc_private_route_table_ids)
 
 #   route_table_id            = each.value
 #   destination_cidr_block    = module.vpc.vpc_cidr
-#   vpc_peering_connection_id = aws_vpc_peering_connection.infra_eks.id
+#   vpc_peering_connection_id = aws_vpc_peering_connection.external_eks.id
 # }
 
 # resource "aws_route" "eks_external_public" {
-#   for_each = toset(module.vpc.public_route_table_ids)
+#   # for_each cannot be used because of:
+#   # `The "for_each" value depends on resource attributes that cannot be determined until apply, so Terraform cannot predict how many instances will be created.`
+#   count = length(module.vpc.public_route_table_ids)
 
-#   route_table_id            = each.value
-#   destination_cidr_block    = "<EXTERNAL-VPC-VPC-CIDR>"
-#   vpc_peering_connection_id = aws_vpc_peering_connection.infra_eks.id
+#   route_table_id            = module.vpc.public_route_table_ids[count.index]
+#   destination_cidr_block    = local.external_vpc_cidr
+#   vpc_peering_connection_id = aws_vpc_peering_connection.external_eks.id
 # }
 
 # resource "aws_route" "eks_external_private" {
-#   for_each = toset(module.vpc.private_route_table_ids)
+#   # for_each cannot be used because of:
+#   # `The "for_each" value depends on resource attributes that cannot be determined until apply, so Terraform cannot predict how many instances will be created.`
+#   count = length(module.vpc.private_route_table_ids)
 
-#   route_table_id            = each.value
-#   destination_cidr_block    = "<EXTERNAL-VPC-VPC-CIDR>"
-#   vpc_peering_connection_id = aws_vpc_peering_connection.infra_eks.id
+#   route_table_id            = module.vpc.private_route_table_ids[count.index]
+#   destination_cidr_block    = local.external_vpc_cidr
+#   vpc_peering_connection_id = aws_vpc_peering_connection.external_eks.id
 # }
 
 # resource "aws_route53_zone_association" "vpc_private_external" {
 #   zone_id = module.vpc.private_zone_id
-#   vpc_id  = "<EXTERNAL-VPC-ID>"
+#   vpc_id  = local.external_vpc_id
 # }
 
 #
@@ -292,7 +316,7 @@ module "eks-node" {
 #     from_port       = 22
 #     to_port         = 22
 #     protocol        = "tcp"
-#     security_groups = ["<external-prometheus-security-group-id>"]
+#     security_groups = ["<external-bastion-security-group-id>"]
 #     self            = false
 #   }
 
