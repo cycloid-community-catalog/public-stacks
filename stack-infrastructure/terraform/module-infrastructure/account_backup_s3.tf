@@ -43,3 +43,29 @@ output "iam_policy_backup" {
   value = aws_iam_policy.s3_backup.arn
 }
 
+resource "aws_iam_user" "backup" {
+  count = var.create_backup_user ? 1 : 0
+
+  name = "backup${var.suffix}"
+  path = "/cycloid/"
+}
+
+resource "aws_iam_access_key" "backup" {
+  count = var.create_backup_user ? 1 : 0
+  user  = aws_iam_user.backup[0].name
+}
+
+resource "aws_iam_user_policy_attachment" "backup_s3_access" {
+  count      = var.create_backup_user ? 1 : 0
+  user       = aws_iam_user.backup[0].name
+  policy_arn = aws_iam_policy.s3_backup.arn
+}
+
+output "iam_backup_user_key" {
+  value = aws_iam_access_key.ses_smtp_user.id
+}
+
+output "iam_backup_user_secret" {
+  value = aws_iam_access_key.ses_smtp_user.ses_smtp_password
+}
+

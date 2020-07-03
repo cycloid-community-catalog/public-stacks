@@ -125,10 +125,13 @@ module "infrastructure" {
   #+ terraform_remote_state s3 bucket has to be created or not
   #create_s3_bucket_remote_state = 0
 
-  #. create_infra_user (optional, int): 0
-  #+ admin user infra has to be created or not
-  #create_infra_user = 0
+  #. create_infra_user (optional, bool): false
+  #+ If an admin user infra has to be created or not
+  create_infra_user = true
 
+  #. create_backup_user (optional, bool): false
+  #+ If a backup user has to be created or not
+  create_backup_user = true
 }
 
 

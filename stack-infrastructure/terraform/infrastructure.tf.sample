@@ -130,9 +130,12 @@ module "infrastructure" {
   #create_s3_bucket_remote_state = false
 
   #. create_infra_user (optional, bool): false
-  #+ admin user infra has to be created or not
+  #+ If an admin user infra has to be created or not
   #create_infra_user = false
 
+  #. create_backup_user (optional, bool): false
+  #+ If a backup user has to be created or not
+  #create_backup_user = false
 }
 
 

@@ -68,3 +68,13 @@ output "iam_ses_smtp_user_secret" {
   value       = module.infrastructure.iam_ses_smtp_user_secret
 }
 
+output "iam_backup_user_key" {
+  description = "The dedicated backup user"
+  value       = module.infrastructure.iam_backup_user_key
+}
+
+output "iam_backup_user_secret" {
+  description = "The dedicated backup user secret"
+  value       = module.infrastructure.iam_backup_user_secret
+}
+

@@ -72,7 +72,8 @@ In order to run this task, couple elements are required within the infrastructur
 |`backup_bucket_prefix`|Prefix for the S3 backup bucket (change it if a bucket with the same name already exists) - defaults to '${var.customer}-'|`-`|`""`|`False`|
 |`bastion_allowed_networks`|Networks allowed to connect to the bastion using SSH|`-`|`0.0.0.0/0`|`False`|
 |`bastion_instance_type`|Instance type for the bastion|`-`|`t3.micro`|`False`|
-|`create_infra_user`|admin user infra has to be created or not|`int`|`0`|`False`|
+|`create_backup_user`|If a backup user has to be created or not|`int`|`0`|`False`|
+|`create_infra_user`|If an admin user infra has to be created or not|`int`|`0`|`False`|
 |`create_s3_bucket_remote_state`|terraform_remote_state s3 bucket has to be created or not|`int`|`0`|`False`|
 |`enable_dynamodb_endpoint`|Should be true if you want to provision a DynamoDB endpoint to the VPC|`bool`|`false`|`False`|
 |`enable_s3_endpoint`|Should be true if you want to provision an S3 endpoint to the VPC|`bool`|`false`|`False`|
@@ -106,6 +107,8 @@ In order to run this task, couple elements are required within the infrastructur
 | bastion_ip | The EIP attached to the bastion EC2 server |
 | bastion_sg | The bastion security group ID. |
 | deployment_bucket_name | S3 bucket name for the deployment bucket |
+| iam_backup_user_key | The dedicated backup user |
+| iam_backup_user_secret | The dedicated backup user secret |
 | iam_policy_infra-backup | IAM read and write policy to the S3 backup bucket |
 | iam_policy_infra-logs | IAM write policy to AWS Cloudwatch logs |
 | iam_policy_s3-deployment | IAM read and write policy to the S3 deployment bucket |

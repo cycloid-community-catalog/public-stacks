@@ -49,7 +49,7 @@ variable "create_s3_bucket_remote_state" {
 ##### IAM and authorizations
 
 variable "create_infra_user" {
-  description = "To know if an admin user infra has to be created or not"
+  description = "If an admin user infra has to be created or not"
   default     = false
 }
 
@@ -66,6 +66,11 @@ variable "readonly_users" {
 variable "readonly_groups" {
   description = "List of groups to give a read-only access to"
   default     = []
+}
+
+variable "create_backup_user" {
+  description = "If a backup user has to be created or not"
+  default     = false
 }
 
 ##### Keypair
