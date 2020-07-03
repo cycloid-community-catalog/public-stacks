@@ -62,10 +62,10 @@ resource "aws_iam_user_policy_attachment" "backup_s3_access" {
 }
 
 output "iam_backup_user_key" {
-  value = aws_iam_access_key.backup.id
+  value = aws_iam_access_key.backup[0].id
 }
 
 output "iam_backup_user_secret" {
-  value = aws_iam_access_key.backup.ses_smtp_password
+  value = aws_iam_access_key.backup[0].secret
 }
 
