@@ -5,7 +5,7 @@ locals {
 data "aws_iam_policy_document" "s3_backup" {
   statement {
     effect  = "Allow"
-    actions = ["*"]
+    actions = ["s3:*"]
 
     resources = [
       "arn:aws:s3:::${local.backup_bucket_prefix}backup/*",
@@ -62,10 +62,10 @@ resource "aws_iam_user_policy_attachment" "backup_s3_access" {
 }
 
 output "iam_backup_user_key" {
-  value = aws_iam_access_key.ses_smtp_user.id
+  value = aws_iam_access_key.backup.id
 }
 
 output "iam_backup_user_secret" {
-  value = aws_iam_access_key.ses_smtp_user.ses_smtp_password
+  value = aws_iam_access_key.backup.ses_smtp_password
 }
 
