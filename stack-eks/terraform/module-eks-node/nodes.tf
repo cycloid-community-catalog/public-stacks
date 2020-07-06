@@ -60,6 +60,19 @@ locals {
   )
 }
 
+data "aws_subnet_ids" "selected" {
+  vpc_id = var.vpc_id
+
+  filter {
+    name   = "subnet-id"
+    values = var.private_subnets_ids
+  }
+  filter {
+    name   = "availability-zone"
+    values = local.aws_availability_zones
+  }
+}
+
 # More information: https://docs.aws.amazon.com/eks/latest/userguide/launch-workers.html
 data "template_file" "user-data-eks-node" {
   template = file("${path.module}/templates/userdata.sh.tpl")
@@ -88,7 +101,7 @@ resource "aws_cloudformation_stack" "eks-node" {
       "Type": "AWS::AutoScaling::AutoScalingGroup",
       "Properties": {
         "AvailabilityZones": ${jsonencode(local.aws_availability_zones)},
-        "VPCZoneIdentifier": ${jsonencode(var.private_subnets_ids)},
+        "VPCZoneIdentifier": ${jsonencode(data.aws_subnet_ids.selected.ids)},
         "LaunchTemplate": {
             "LaunchTemplateId": "${local.node_launch_template_id}",
             "Version" : "${local.node_launch_template_latest_version}"
