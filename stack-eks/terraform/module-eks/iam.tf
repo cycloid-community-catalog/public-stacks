@@ -136,6 +136,46 @@ resource "aws_iam_role_policy_attachment" "cloudformation-signal" {
   role       = aws_iam_role.eks-node.name
 }
 
+# Amazon EBS CSI driver
+
+data "aws_iam_policy_document" "ebs-csi-driver" {
+  statement {
+    actions = [
+      "ec2:AttachVolume",
+      "ec2:CreateSnapshot",
+      "ec2:CreateTags",
+      "ec2:CreateVolume",
+      "ec2:DeleteSnapshot",
+      "ec2:DeleteTags",
+      "ec2:DeleteVolume",
+      "ec2:DescribeInstances",
+      "ec2:DescribeSnapshots",
+      "ec2:DescribeTags",
+      "ec2:DescribeVolumes",
+      "ec2:DetachVolume",
+      "ec2:ModifyVolume"
+    ]
+
+    effect = "Allow"
+
+    resources = [
+      "*",
+    ]
+  }
+}
+
+resource "aws_iam_policy" "ebs-csi-driver" {
+  name        = "${var.project}-${var.env}-ebs-csi-driver"
+  path        = "/"
+  description = "Allows Amazon EKS clusters to manage the lifecycle of Amazon EBS volumes for persistent volumes"
+  policy      = data.aws_iam_policy_document.ebs-csi-driver.json
+}
+
+resource "aws_iam_role_policy_attachment" "ebs-csi-driver" {
+  policy_arn = aws_iam_policy.ebs-csi-driver.arn
+  role       = aws_iam_role.eks-node.name
+}
+
 # Instance profile
 
 resource "aws_iam_instance_profile" "eks-node" {
