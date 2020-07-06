@@ -84,10 +84,6 @@ variable "cluster_version" {
   description = "EKS Cluster version for EKS nodes AMI"
 }
 
-variable "control_plane_sg_id" {
-  description = "EKS Cluster Security Group ID."
-}
-
 variable "control_plane_endpoint" {
   description = "EKS Cluster endpoint."
 }
@@ -102,6 +98,10 @@ variable "control_plane_ca" {
 
 variable "node_iam_instance_profile_name" {
   description = "EKS nodes IAM instance profile name."
+}
+
+variable "node_sg_id" {
+  description = "EKS nodes Security Group ID."
 }
 
 variable "node_group_name" {

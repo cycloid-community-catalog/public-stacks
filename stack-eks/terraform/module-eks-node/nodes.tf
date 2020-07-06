@@ -4,7 +4,7 @@
 
 resource "aws_security_group" "eks-node" {
   name        = "${var.project}-${var.env}-eks-node-${var.node_group_name}"
-  description = "Security group for all nodes in the cluster"
+  description = "Security group for node group ${var.node_group_name} in the cluster"
   vpc_id      = var.vpc_id
 
   egress {
@@ -20,36 +20,6 @@ resource "aws_security_group" "eks-node" {
     "kubernetes.io/cluster/${var.cluster_name}" = "owned"
     "kubernetes.io/nodegroup/name"             = "${var.node_group_name}"
   })
-}
-
-resource "aws_security_group_rule" "eks-node-ingress-self" {
-  description              = "Allow nodes to communicate with each other"
-  from_port                = 0
-  protocol                 = "-1"
-  security_group_id        = aws_security_group.eks-node.id
-  source_security_group_id = aws_security_group.eks-node.id
-  to_port                  = 65535
-  type                     = "ingress"
-}
-
-resource "aws_security_group_rule" "eks-node-ingress-cluster" {
-  description              = "Allow nodes Kubelets and pods to receive communication from the cluster control plane"
-  from_port                = 1025
-  protocol                 = "tcp"
-  security_group_id        = aws_security_group.eks-node.id
-  source_security_group_id = var.control_plane_sg_id
-  to_port                  = 65535
-  type                     = "ingress"
-}
-
-resource "aws_security_group_rule" "eks-cluster-ingress-node-https" {
-  description              = "Allow pods to communicate with the cluster API Server"
-  from_port                = 443
-  protocol                 = "tcp"
-  security_group_id        = var.control_plane_sg_id
-  source_security_group_id = aws_security_group.eks-node.id
-  to_port                  = 443
-  type                     = "ingress"
 }
 
 #

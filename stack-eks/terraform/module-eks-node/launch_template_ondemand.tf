@@ -16,6 +16,7 @@ resource "aws_launch_template" "eks-node-ondemand" {
     security_groups = compact(
       [
         aws_security_group.eks-node.id,
+        var.node_sg_id,
         var.bastion_sg_allow,
         var.metrics_sg_allow,
       ],

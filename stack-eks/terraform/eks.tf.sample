@@ -219,7 +219,7 @@ module "eks-node" {
   cluster_name                   = module.eks.cluster_name
   cluster_version                = module.eks.cluster_version
   node_iam_instance_profile_name = module.eks.node_iam_instance_profile_name
-  control_plane_sg_id            = module.eks.control_plane_sg_id
+  node_sg_id                     = module.eks.node_sg_id
   control_plane_endpoint         = module.eks.control_plane_endpoint
   control_plane_ca               = module.eks.control_plane_ca
 }

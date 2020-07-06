@@ -86,6 +86,11 @@ output "node_iam_instance_profile_name" {
   value       = module.eks.node_iam_instance_profile_name
 }
 
+output "node_sg_id" {
+  description = "EKS nodes Security Group ID."
+  value       = module.eks.node_sg_id
+}
+
 output "kubeconfig" {
   description = "Kubernetes config to connect to the EKS cluster."
   value       = module.eks.kubeconfig

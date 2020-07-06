@@ -43,6 +43,11 @@ output "node_iam_instance_profile_name" {
   value       = aws_iam_instance_profile.eks-node.name
 }
 
+output "node_sg_id" {
+  description = "EKS nodes Security Group ID."
+  value       = aws_security_group.eks-node.id
+}
+
 locals {
   kubeconfig = <<KUBECONFIG
 
