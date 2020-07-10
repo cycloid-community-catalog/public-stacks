@@ -16,10 +16,13 @@ shared:
       - |
         /usr/bin/merge-stack-and-config
         echo rc-$(cat config/.git/short_ref) > merged-stack/TAGS-RC
-        echo ${EXTRA_TAGS} $(cat config/.git/short_ref) > merged-stack/TAGS
-        if [ -n "BUILD_ARGS" ]; then
-          python -c "import json, os, yaml; print('\n'.join([ '%s=%s' % (k,v) for k, v in json.loads(os.environ['BUILD_ARGS'].replace('\\n','\\\\\\\n')).items()]))" >> merged-stack/build_args_file
-          cat merged-stack/build_args_file
+        if [[ "$TAG_COMMIT_ID" == "true" ]]; then
+          echo ${EXTRA_TAGS} $(cat config/.git/short_ref) > merged-stack/.ci/TAGS
+        else
+          echo ${EXTRA_TAGS} > merged-stack/.ci/TAGS
+        fi
+        if [ -n "$BUILD_ARGS" ] && [[ "$BUILD_ARGS" != "null" ]]; then
+          python -c "import json, os, yaml; print('\n'.join([ '%s=%s' % (k,v) for k, v in json.loads(os.environ['BUILD_ARGS'].replace('\\n','\\\\\\\n')).items()]))" >> merged-stack/.ci/build_args_file
         fi
     outputs:
       - name: merged-stack
@@ -28,7 +31,7 @@ shared:
 resource_types:
 
 - name: registry-image
-  type: registry-image
+  type: docker-image
   privileged: true
   source:
     repository: concourse/registry-image-resource
@@ -41,22 +44,21 @@ resources:
   source:
     #version: every
     repository: ((registry_image_name))
+    tag: ((registry_tag))
     username: ((registry_username))
     password: ((registry_password))
-    tag: ci-rc
-
+    aws_access_key_id: ((aws_access_key))
+    aws_secret_access_key: ((aws_secret_key))
+    aws_region: ((aws_region))
 
 - name: git_stack
   type: git
   check_every: 2m
   source:
-    #uri: https://github.com/cycloid-community-catalog/stack-magento
+    uri: https://github.com/cycloid-community-catalog/stack-dockerbuild
     branch: ((stack_git_branch))
-# TODO : replace it by the public stack
-    uri: git@github.com:cycloidio/cycloid-stacks.git
-    private_key: ((code_git_private_key))
     paths:
-      - stack-dockerbuild/docker/*
+      - docker/*
 
 - name: git_code
   type: git
@@ -90,15 +92,16 @@ jobs:
         path: "stack"
     params:
       CONFIG_PATH: ((code_build_context))
-      STACK_PATH: stack-dockerbuild/docker
+      STACK_PATH: docker
       EXTRA_TAGS: ((registry_extra_tags))
       BUILD_ARGS: ((code_build_args))
+      TAG_COMMIT_ID: ((registry_tag_commit_id))
 
   - task: tests
-    file: merged-stack/tests.yml
+    file: merged-stack/.ci/tests.yml
     privileged: true
 
-- name: build-rc
+- name: build
   build_logs_to_retain: 3
   plan:
 
@@ -122,24 +125,25 @@ jobs:
         path: "stack"
     params:
       CONFIG_PATH: ((code_build_context))
-      STACK_PATH: stack-dockerbuild/docker
+      STACK_PATH: docker
       EXTRA_TAGS: ((registry_extra_tags))
       BUILD_ARGS: ((code_build_args))
+      TAG_COMMIT_ID: ((registry_tag_commit_id))
 
   - task: build
-    file: merged-stack/build.yml
+    file: merged-stack/.ci/build.yml
     privileged: true
     params:
       REPOSITORY: ((registry_image_name))
+      TAG: ((registry_tag))
       CONTEXT: merged-stack
       DOCKERFILE: merged-stack/((code_dockerfile_location))
-      BUILD_ARGS_FILE: merged-stack/build_args_file
+      BUILD_ARGS_FILE: merged-stack/.ci/build_args_file
 
   - put: image
     params:
       additional_tags: merged-stack/TAGS-RC
       image: image/image.tar
-
 
 - name: post-tests
   build_logs_to_retain: 3
@@ -149,14 +153,14 @@ jobs:
     - get: git_stack
       trigger: false
       passed:
-      - build-rc
+      - build
     - get: git_code
       trigger: false
       passed:
-      - build-rc
+      - build
     - get: image
       passed:
-      - build-rc
+      - build
       trigger: true
       params:
         format: oci
@@ -171,14 +175,16 @@ jobs:
         path: "stack"
     params:
       CONFIG_PATH: ((code_build_context))
-      STACK_PATH: stack-dockerbuild/docker
+      STACK_PATH: docker
       EXTRA_TAGS: ((registry_extra_tags))
       BUILD_ARGS: ((code_build_args))
+      TAG_COMMIT_ID: ((registry_tag_commit_id))
 
   - task: post-tests
-    file: merged-stack/post-tests.yml
+    file: merged-stack/.ci/post-tests.yml
     privileged: true
     params:
+      TAG: ((registry_tag))
       REPOSITORY: ((registry_image_name))
 
 - name: push
@@ -211,11 +217,12 @@ jobs:
         path: "stack"
     params:
       CONFIG_PATH: ((code_build_context))
-      STACK_PATH: stack-dockerbuild/docker
+      STACK_PATH: docker
       EXTRA_TAGS: ((registry_extra_tags))
       BUILD_ARGS: ((code_build_args))
+      TAG_COMMIT_ID: ((registry_tag_commit_id))
 
   - put: image
     params:
-      additional_tags: merged-stack/TAGS
+      additional_tags: merged-stack/.ci/TAGS
       image: image/image.tar
