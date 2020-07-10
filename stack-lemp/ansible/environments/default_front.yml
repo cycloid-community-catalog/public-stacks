@@ -175,7 +175,9 @@ default_cycloid_files_watched:
  - name: nginx-error
    path: "/var/log/nginx/error.log"
  - name: nginx-application
-   path: "/var/log/nginx/application-*.log"
+   path: "/var/log/nginx/application-access.log"
+ - name: nginx-application-error
+   path: "/var/log/nginx/application-error.log"
 
 cycloid_files_watched: "{{ default_cycloid_files_watched + extra_cycloid_files_watched }}"
 
