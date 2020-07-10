@@ -154,6 +154,7 @@ data "aws_iam_policy_document" "s3_bucket_deploy" {
       "s3:AbortMultipartUpload",
       "s3:GetObjectVersion",
       "s3:PutObjectVersionAcl",
+      "s3:ListObjectVersions",
     ]
 
     effect = "Allow"
@@ -175,6 +176,7 @@ data "aws_iam_policy_document" "s3_bucket_deploy" {
       "s3:AbortMultipartUpload",
       "s3:GetObjectVersion",
       "s3:PutObjectVersionAcl",
+      "s3:ListObjectVersions",
     ]
 
     effect = "Allow"

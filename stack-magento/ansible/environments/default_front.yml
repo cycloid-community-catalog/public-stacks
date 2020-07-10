@@ -1,7 +1,7 @@
 magento_backend_frontname: admin
 magento_admin_firstname: admin
 magento_admin_lastname: admin
-magento_admin_email: root@localhost.local
+magento_admin_email: root@example-cycloid.com
 magento_admin_user: admin
 magento_admin_password: "{{ lookup('env','MAGENTO_ADMIN_PASSWORD') | default('4Bigs3cr3t', true) }}"
 
@@ -115,11 +115,12 @@ nginx_remove_sites:
 nginx_sites:
     00-metrics:
         - listen 80
-        - server_name 127.0.0.1
+        - server_name 127.0.0.1 127.0.0.2
         - location /nginx_status {
             stub_status on;
             access_log   off;
             allow 127.0.0.1;
+            allow 127.0.0.2;
             deny all;
           }
         - set $pool "{{ ansistrano_user }}"
@@ -129,6 +130,7 @@ nginx_sites:
         - location ~ "/fpm-(status|ping)" {
             access_log   off;
             allow 127.0.0.1;
+            allow 127.0.0.2;
             deny all;
             fastcgi_pass $pool;
             include fastcgi_params;
