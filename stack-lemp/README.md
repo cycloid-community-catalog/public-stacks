@@ -81,7 +81,7 @@ In order to run this task, couple elements are required within the infrastructur
 |`rds_password`|Password used for your rds. Set "empty" if you dont use databases|`-`|`((custom_rds_password))`|`True`|
 |`stack_git_branch`|Branch to use on the public stack Git repository|`-`|`master`|`True`|
 |`terraform_storage_bucket_name`|AWS S3 bucket name to store terraform remote state file.|`-`|`($ organization_canonical $)-terraform-remote-state`|`True`|
-
+|`terraform_version`|terraform version used to execute your code.|`-`|`'0.12.28'`|`True`|
 
 ## Terraform
 
