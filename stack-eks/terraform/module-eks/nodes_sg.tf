@@ -47,6 +47,16 @@ resource "aws_security_group_rule" "eks-node-ingress-cluster-2" {
   type                     = "ingress"
 }
 
+resource "aws_security_group_rule" "eks-node-ingress-aws-lb" {
+  description       = "Allow nodes to receive communication on service nodePorts from AWS Load Balancers"
+  from_port         = 30000
+  protocol          = "tcp"
+  security_group_id = aws_security_group.eks-node.id
+  cidr_blocks       = ["0.0.0.0/0", "::/0"]
+  to_port           = 32767
+  type              = "ingress"
+}
+
 resource "aws_security_group_rule" "eks-cluster-ingress-node-https" {
   description              = "Allow pods to communicate with the cluster API Server"
   from_port                = 443

@@ -1,0 +1,21 @@
+---
+# To fix the issue with AWS LoadBalancers healthcheck failure
+# due to the fact that the dhcp hostname doesn't match the node hostname
+# https://github.com/kubernetes/kubernetes/issues/61486
+# kubectl -n kube-system patch daemonset kube-proxy --patch "$(cat aws_lb_kube-proxy.yml.patch)"
+spec:
+  template:
+    spec:
+      containers:
+        - name: kube-proxy
+          command:
+            - kube-proxy
+            - --hostname-override=$(NODE_NAME)
+            - --v=2
+            - --config=/var/lib/kube-proxy-config/config
+          env:
+            - name: NODE_NAME
+              valueFrom:
+                fieldRef:
+                  apiVersion: v1
+                  fieldPath: spec.nodeName

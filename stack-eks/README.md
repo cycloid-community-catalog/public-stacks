@@ -115,3 +115,15 @@ In order to run this task, couple elements are required within the infrastructur
 | `node_iam_role_arn` | EKS nodes IAM role ARN. |
 | `node_iam_instance_profile_name` | EKS nodes IAM instance profile name. |
 | `kubeconfig` | Kubernetes config to connect to the EKS cluster. |
+
+# Known Issues
+
+## Service `type: LoadBalancers` target groups healthcheck failure
+
+There is a known issue about K8S Services of `type: LoadBalancers` having healthcheck failures. @see https://github.com/kubernetes/kubernetes/issues/61486
+
+The temporary solution is to patch the `kube-proxy` daemonset:
+
+```sh
+kubectl -n kube-system patch daemonset kube-proxy --patch "$(cat extra/aws_lb_kube-proxy.yml.patch)"
+```
