@@ -77,6 +77,34 @@ resource "aws_iam_role_policy_attachment" "eks-node-AmazonEC2ContainerRegistryRe
   role       = aws_iam_role.eks-node.name
 }
 
+# ECR
+
+data "aws_iam_policy_document" "eks-node-ecr-pull" {
+  statement {
+    actions = [
+      "ecr:BatchCheckLayerAvailability",
+      "ecr:BatchGetImage",
+      "ecr:GetDownloadUrlForLayer",
+      "ecr:GetAuthorizationToken"
+    ]
+
+    effect    = "Allow"
+    resources = ["*"]
+  }
+}
+
+resource "aws_iam_policy" "eks-node-ecr-pull" {
+  name        = "${var.project}-${var.env}-eks-node-ecr-pull"
+  path        = "/"
+  description = "EKS nodes ECR pull access"
+  policy      = data.aws_iam_policy_document.eks-node-ecr-pull.json
+}
+
+resource "aws_iam_role_policy_attachment" "eks-node-ecr-pull" {
+  policy_arn = aws_iam_policy.eks-node-ecr-pull.arn
+  role       = aws_iam_role.eks-node.name
+}
+
 # Cluster autoscaler
 
 data "aws_iam_policy_document" "eks-node-cluster-autoscaler" {
