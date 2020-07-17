@@ -325,3 +325,45 @@ variable "create_ses_access" {
 variable "ses_resource_arn" {
   default = "*"
 }
+
+# Cloudfront
+
+variable "create_cloudfront_medias" {
+  default = false
+}
+
+variable "cloudfront_ssl_certificate" {
+  default = "arn:aws:acm:us-east-1:xxxxxxxx:certificate/xxxxxxx"
+}
+
+variable "cloudfront_aliases" {
+  type    = list(string)
+  default = []
+}
+
+variable "cloudfront_price_class" {
+  default = "PriceClass_200"
+}
+
+variable "cloudfront_minimum_protocol_version" {
+  default = "TLSv1"
+}
+
+variable "cloudfront_min_ttl" {
+  default = 0
+}
+variable "cloudfront_default_ttl" {
+  default = 300
+}
+
+variable "cloudfront_max_ttl" {
+  default = 1200
+}
+
+variable "cloudfront_compress" {
+  default = true
+}
+
+variable "cloudfront_cached_methods" {
+  default = ["GET", "HEAD"]
+}

@@ -145,6 +145,22 @@ module "lemp" {
   #+ Override the default json policy applied to the bucket.
 
   ###
+  # Cloudfront medias
+  ###
+
+  #. create_cloudfront_medias (optional, bool): false
+  #+ Create a Cloudfront on top of medias S3 bucket.
+  create_cloudfront_medias = false
+
+  #. cloudfront_aliases (optional, list): []
+  #+ Extra cname for the cloudfront distribution.
+  cloudfront_aliases = []
+
+  #. cloudfront_ssl_certificate (optional, string): "arn:aws:acm:us-east-1:xxxxxxxx:certificate/xxxxxxx"
+  #+ ACM certificate arn to use for cloudfront domain. Need to be in us-east-1 region.
+  cloudfront_ssl_certificate = "arn:aws:acm:us-east-1:xxxxxxxx:certificate/xxxxxxx"
+
+  ###
   # Ses access
   ###
 
@@ -153,5 +169,4 @@ module "lemp" {
 
   #. ses_resource_arn (optional, string): "*"
   #+ Define a arn to limitate SES access.
-
 }

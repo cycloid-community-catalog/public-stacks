@@ -92,6 +92,9 @@ In order to run this task, couple elements are required within the infrastructur
 |`application_ssl_cert`|ARN of an Amazon cert (ACM) to use for the loadbalancer.|`-`|``|`False`|
 |`bastion_sg_allow`|Amazon source security group ID which will be allowed to connect on Fronts port 22 (SSH).|`-`|``|`False`|
 |`cache_subnet_group`|Name of the Amazon ElastiCache subnet group to use. If not specified, create a dedicated group with private_subnets_ids.|`-`|``|`False`|
+|`cloudfront_aliases`|Extra cname for the cloudfront distribution.|`list`|`[]`|`False`|
+|`cloudfront_ssl_certificate`|ACM certificate arn to use for cloudfront domain. Need to be in us-east-1 region.|`string`|`"arn:aws:acm:us-east-1:xxxxxxxx:certificate/xxxxxxx"`|`False`|
+|`create_cloudfront_medias`|Create a Cloudfront on top of medias S3 bucket.|`bool`|`false`|`False`|
 |`create_elasticache`||`bool`|`true`|`False`|
 |`create_rds`|Define if we want to create or not an RDS database.|`bool`|`false`|`False`|
 |`create_s3_medias`|Create a S3 bucket dedicated to medias for the LEMP application.|`bool`|`false`|`False`|
@@ -133,16 +136,23 @@ In order to run this task, couple elements are required within the infrastructur
 
 | Name | Description |
 |------|-------------|
-| alb_front_dns_name | DNS name of the front alb. |
-| alb_front_zone_id | Zone ID of the front alb. |
-| elasticache_address | Address of the elasticache. |
-| iam_s3-medias_user_key | Access key of the dedicated IAM user to access to the media S3 bucket. |
-| iam_s3-medias_user_secret | Access secret key of the dedicated IAM user to access to the media S3 bucket. |
+| alb_front_dns_name | DNS name of the front ALB. |
+| alb_front_zone_id | Zone ID of the front ALB. |
+| elasticache_address | Address of the ElastiCache. |
+| elasticache_cluster_id | Cluster Id of the ElastiCache. |
 | rds_address | Address of the RDS database. |
-| rds_database | Database name of the RDS database. |
 | rds_port | Port of the RDS database. |
 | rds_username | Username of the RDS database. |
+| rds_database | Database name of the RDS database. |
+| iam_s3-medias_user_key | Access key of the dedicated IAM user to access to the media S3 bucket. |
+| iam_s3-medias_user_secret | Access secret key of the dedicated IAM user to access to the media S3 bucket. |
+| iam_s3-medias_user_name | Iam user name of the dedicated IAM user to access to the media S3 bucket. |
 | s3_medias | S3 bucket name dedicated to medias. |
+| iam_ses_user_key | Iam user key for SES. |
+| iam_ses_user_secret | Iam user secret for SES. |
+| iam_ses_smtp_user_key | Smtp user key for ses. |
+| iam_ses_smtp_user_secret | Smtp user secret for ses. |
+| cloudfront_medias_domain_name | Cloudfront domain on top of S3 medias bucket. |
 
 
 ## Ansible
@@ -153,7 +163,9 @@ In order to run this task, couple elements are required within the infrastructur
 |---|---|:---:|:---:|:---:|
 |`cycloid_files_watched`|Provide log files you want to export to Cycloid logs.|`-`|`<Default log files watched>`|`False`|
 |`nginx_sites`|Contain Nginx vhosts to create on front servers. A default application and metrics vhosts are already provided.|`dict`|`<metric and application vhost>`|`False`|
+|`nginx_vhost_extra_directive`|If you need extra directive to add in the default application vhost. Example basic auth, https redirect ...|`dict`|``|`False`|
 |`php_version_to_install`|PHP fpm version to install.|`-`|`7.2`|`False`|
+|`telegraf_install`|Install telegraf|`bool`|`true`|`False`|
 
 # Molecule tests
 

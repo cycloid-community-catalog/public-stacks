@@ -77,3 +77,8 @@ output "iam_ses_smtp_user_secret" {
   value       = module.lemp.iam_ses_smtp_user_secret
   description = "Smtp user secret for ses."
 }
+
+output "cloudfront_medias_domain_name" {
+  value       = module.lemp.cloudfront_medias_domain_name
+  description = "Cloudfront domain on top of S3 medias bucket."
+}
