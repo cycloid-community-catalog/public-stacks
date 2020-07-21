@@ -59,6 +59,8 @@ Currently, Cycloid console doesn't support yet switching between different pipel
 |`registry_password`|Password for regular image repository, otherwise leave it as a empty string.|`string`|`secret`|`False`|
 |`registry_tag`|tag to put on the builded image (eg latest).|`string`|`($ environment $)`|`True`|
 |`registry_tag_commit_id`|Add additionnal tag using short commit id|`bool`|`false`|`False`|
+|`registry_tag_custom_script`|Add additional tags using a `.ci/tag_custom_script.sh` shell script.|`bool`|`false`|`False`|
+|`registry_tag_describe_ref`|Add additional tag using git describe ref: `<latest annoted git tag>-<the number of commit since the tag>-g<short_ref>` (eg. `v1.6.2-1-g13dfd7b`).|`bool`|`false`|`False`|
 |`registry_username`|Username for regular image repository, otherwise leave it as a empty string.|`string`|`myuser`|`False`|
 |`stack_git_branch`|Branch to use on the public stack git repository|`-`|`master`|`True`|
 

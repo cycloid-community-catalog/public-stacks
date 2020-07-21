@@ -38,6 +38,14 @@ registry_extra_tags: ''
 #+ Add additionnal tag using short commit id
 registry_tag_commit_id: false
 
+#. registry_tag_described_ref (optional, bool): false
+#+ Add additional tag using git describe ref: `<latest annoted git tag>-<the number of commit since the tag>-g<short_ref>` (eg. `v1.6.2-1-g13dfd7b`).
+registry_tag_describe_ref: false
+
+#. registry_tag_custom_script (optional, bool): false
+#+ Add additional tags using a `.ci/tag_custom_script.sh` shell script.
+registry_tag_custom_script: false
+
 
 #
 # Repos

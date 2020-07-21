@@ -10,16 +10,19 @@ shared:
     #run:
     #  path: /usr/bin/merge-stack-and-config
     run:
-      path: /bin/sh
+      path: /bin/bash
       args:
       - -c
       - |
         /usr/bin/merge-stack-and-config
-        if [[ "$TAG_COMMIT_ID" == "true" ]]; then
-          echo ${EXTRA_TAGS} $(cat config/.git/short_ref) > merged-stack/.ci/TAGS
-        else
-          echo ${EXTRA_TAGS} > merged-stack/.ci/TAGS
-        fi
+
+        declare -a tags
+        [[ "$TAG_CUSTOM_SCRIPT" == "true" ]] && tags+=( $(bash merged-stack/.ci/tag_custom_script.sh) )
+        [[ "$TAG_DESCRIBE_REF" == "true" ]] && tags+=( "$(cat config/.git/describe_ref)" )
+        [[ "$TAG_COMMIT_ID" == "true" ]] && tags+=( "$(cat config/.git/short_ref)" )
+        [[ -n "$EXTRA_TAGS" ]] && tags+=( ${EXTRA_TAGS} )
+        printf "%s " "${tags[@]}" | xargs > merged-stack/.ci/TAGS
+
         if [ -n "$BUILD_ARGS" ] && [[ "$BUILD_ARGS" != "null" ]]; then
           python -c "import json, os, yaml; print('\n'.join([ '%s=%s' % (k,v) for k, v in json.loads(os.environ['BUILD_ARGS'].replace('\\n','\\\\\\\n')).items()]))" >> merged-stack/.ci/build_args_file
         fi
@@ -28,6 +31,12 @@ shared:
         path: "merged-stack"
 
 resource_types:
+
+- name: git
+  type: docker-image
+  source:
+    repository: concourse/git-resource
+    tag: latest
 
 - name: registry-image
   type: docker-image
@@ -79,6 +88,8 @@ jobs:
     - get: git_stack
       trigger: true
     - get: git_code
+      params:
+        describe_ref_options: --always --tags
       trigger: true
 
   - task: merge-stack-and-config
@@ -92,9 +103,11 @@ jobs:
     params:
       CONFIG_PATH: ((code_build_context))
       STACK_PATH: docker
-      EXTRA_TAGS: ((registry_extra_tags))
       BUILD_ARGS: ((code_build_args))
+      EXTRA_TAGS: ((registry_extra_tags))
       TAG_COMMIT_ID: ((registry_tag_commit_id))
+      TAG_DESCRIBE_REF: ((registry_tag_describe_ref))
+      TAG_CUSTOM_SCRIPT: ((registry_tag_custom_script))
 
   - task: tests
     file: merged-stack/.ci/tests.yml
