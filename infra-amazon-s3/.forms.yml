@@ -89,5 +89,5 @@ default:
         key: extra_tags
         widget: text_area
         type: map
-        default: {}
+        #default: {}
 
