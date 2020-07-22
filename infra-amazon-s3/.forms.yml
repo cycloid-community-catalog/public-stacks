@@ -1,0 +1,93 @@
+---
+default:
+  pipeline:
+    Terraform:
+      - name: "AWS access key"
+        description: "Amazon AWS access key for Terraform."
+        key: aws_access_key
+        widget: cy_cred
+        type: string
+        default: "((aws.access_key))"
+      - name: "AWS secret key"
+        description: "Amazon AWS secret key for Terraform."
+        key: aws_secret_key
+        widget: cy_cred
+        type: string
+        default: "((aws.secret_key))"
+      - name: "Amazon AWS region"
+        description: "Amazon AWS region to use for Terraform."
+        key: aws_default_region
+        widget: auto_complete
+        type: string
+        values: ["eu-north-1","ap-south-1","eu-west-3","eu-west-2","eu-west-1","ap-northeast-2","ap-northeast-1","sa-east-1","ca-central-1","ap-southeast-1","ap-southeast-2","eu-central-1","us-east-1","us-east-2","us-west-1","us-west-2"]
+        default: eu-west-1
+      - name: "Terraform storage bucket"
+        description: "AWS S3 bucket name to store terraform remote state file."
+        key: terraform_storage_bucket_name
+        widget: simple_text
+        type: string
+        default: ($ organization_canonical $)-terraform-remote-state
+
+    Repos:
+      - name: "Config repository"
+        key: config_git_repository
+        type: string
+        widget: cy_crs
+        description: "Git repository URL containing the config of the stack."
+        default: "git@github.com:MyUser/config.git"
+        required: true
+      - name: "Config git key"
+        description: "SSH key pair to fetch the config Git repository."
+        key: config_git_private_key
+        type: string
+        widget: cy_cred
+        default: "((ssh_config.ssh_key))"
+        required: true
+      - name: "Config branch"
+        description: "Branch of the config Git repository."
+        key: config_git_branch
+        widget: cy_branch
+        type: string
+        description: "The branch used by the config repository"
+        source: config_git_repository
+        default: "config"
+        required: true
+
+    Cycloid:
+      - name: "Stack branch"
+        description: "Branch to use on the public stack Git repository."
+        key: stack_git_branch
+        widget: simple_text
+        type: string
+        default: master
+
+  terraform:
+    config:
+      - name: "Bucket name"
+        description: "Name of the S3 bucket to create. Only lowercase alphanumeric characters and hyphens allowed."
+        key: bucket_name
+        widget: simple_text
+        type: string
+        required: true
+      - name: "Versionning enabled"
+        description: "Enable S3 bucket versionning."
+        key: versioning_enabled
+        widget: dropdown
+        type: boolean
+        default: false
+        values:
+            - true
+            - false
+      - name: "Bucket ACL"
+        description: "S3 canned ACL."
+        key: bucket_acl
+        widget: simple_text
+        type: string
+        default: "private"
+      - name: "Extra AWS tags"
+        description: "Dict of extra tags to add on aws resources."
+        key: extra_tags
+        widget: text_area
+        type: map
+        default: {}
+
