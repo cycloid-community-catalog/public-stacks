@@ -69,25 +69,25 @@ default:
         widget: simple_text
         type: string
         required: true
-#      - name: "Versionning enabled"
-#        description: "Enable S3 bucket versionning."
-#        key: versioning_enabled
-#        widget: dropdown
-#        type: boolean
-#        default: false
-#        values:
-#            - true
-#            - false
-#      - name: "Bucket ACL"
-#        description: "S3 canned ACL."
-#        key: bucket_acl
-#        widget: simple_text
-#        type: string
-#        default: "private"
-#      - name: "Extra AWS tags"
-#        description: "Dict of extra tags to add on aws resources."
-#        key: extra_tags
-#        widget: text_area
-#        type: map
-#        default: {}
+      - name: "Versionning enabled"
+        description: "Enable S3 bucket versionning."
+        key: versioning_enabled
+        widget: dropdown
+        type: boolean
+        default: false
+        values:
+            - true
+            - false
+      - name: "Bucket ACL"
+        description: "S3 canned ACL."
+        key: bucket_acl
+        widget: simple_text
+        type: string
+        default: "private"
+      - name: "Extra AWS tags"
+        description: "Dict of extra tags to add on aws resources."
+        key: extra_tags
+        widget: text_area
+        type: map
+        default: {}
 
