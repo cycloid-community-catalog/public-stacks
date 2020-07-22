@@ -1,0 +1,10 @@
+---
+default:
+  pipeline:
+    config:
+      - name: "Message"
+        description: "Message to display in the job"
+        key: message
+        widget: simple_text
+        type: string
+        default: "hello world and especially to ($ organization_canonical $)"
