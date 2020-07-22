@@ -48,3 +48,12 @@ config:
       variables:
         path: 'pipeline/variables-github-pr.sample.yml'
         destination: '($ project $)/pipeline/variables-github-pr-($ environment $).yml'
+  deploy-k8s:
+    name: 'Build + Deploy to K8s'
+    description: 'Used to build, tests, push docker images from branches and deploy it on a Kubernetes cluster using Kustomize.'
+    pipeline:
+      pipeline:
+        path: 'pipeline/pipeline-deploy-k8s.yml'
+      variables:
+        path: 'pipeline/variables-deploy-k8s.sample.yml'
+        destination: '($ project $)/pipeline/variables-($ environment $).yml'

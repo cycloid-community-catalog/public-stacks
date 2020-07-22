@@ -1,0 +1,303 @@
+shared:
+  # Task : sync and merge with rsync 2 rep. Used to merge stack and config
+  - &merge-stack-and-config
+    platform: linux
+    image_resource:
+      type: docker-image
+      source:
+        repository: cycloid/cycloid-toolkit
+        tag: latest
+    #run:
+    #  path: /usr/bin/merge-stack-and-config
+    run:
+      path: /bin/bash
+      args:
+      - -c
+      - |
+        /usr/bin/merge-stack-and-config
+
+        declare -a tags
+        [[ "$TAG_CUSTOM_SCRIPT" == "true" ]] && tags+=( $(bash merged-stack/.ci/tag_custom_script.sh) )
+        [[ "$TAG_DESCRIBE_REF" == "true" ]] && tags+=( "$(cat config/.git/describe_ref)" )
+        [[ "$TAG_COMMIT_ID" == "true" ]] && tags+=( "$(cat config/.git/short_ref)" )
+        [[ -n "$EXTRA_TAGS" ]] && tags+=( ${EXTRA_TAGS} )
+        printf "%s " "${tags[@]}" | xargs > merged-stack/.ci/TAGS
+
+        if [ -n "$BUILD_ARGS" ] && [[ "$BUILD_ARGS" != "null" ]]; then
+          python -c "import json, os, yaml; print('\n'.join([ '%s=%s' % (k,v) for k, v in json.loads(os.environ['BUILD_ARGS'].replace('\\n','\\\\\\\n')).items()]))" >> merged-stack/.ci/build_args_file
+        fi
+    outputs:
+      - name: merged-stack
+        path: "merged-stack"
+
+resource_types:
+
+- name: build-metadata
+  type: docker-image
+  source:
+    repository: mastertinner/build-metadata-resource
+    tag: latest
+
+- name: git
+  type: docker-image
+  source:
+    repository: concourse/git-resource
+    tag: latest
+
+- name: registry-image
+  type: docker-image
+  privileged: true
+  source:
+    repository: concourse/registry-image-resource
+    tag: latest
+
+- name: kubernetes
+  type: docker-image
+  source:
+    repository: cycloid/kubernetes-resource
+    tag: ((k8s_version))
+
+resources:
+
+- name: build-metadata
+  type: build-metadata
+  icon: settings
+
+- name: image
+  type: registry-image
+  icon: docker
+  source:
+    #version: every
+    repository: ((registry_image_name))
+    tag: ((registry_tag))
+    username: ((registry_username))
+    password: ((registry_password))
+    aws_access_key_id: ((aws_access_key))
+    aws_secret_access_key: ((aws_secret_key))
+    aws_region: ((aws_region))
+
+- name: git_stack
+  type: git
+  icon: git
+  check_every: 2m
+  source:
+    uri: https://github.com/cycloid-community-catalog/stack-dockerbuild
+    branch: ((stack_git_branch))
+    paths:
+      - docker/*
+
+- name: git_code
+  type: git
+  icon: git
+  check_every: 2m
+  source:
+    uri: ((code_git_repository))
+    branch: ((code_git_branch))
+    private_key: ((code_git_private_key))
+    paths:
+      - ((code_build_context))/*
+
+- name: git_stack-k8s
+  type: git
+  icon: git
+  check_every: 2m
+  source:
+    uri: https://github.com/cycloid-community-catalog/stack-dockerbuild
+    branch: ((stack_git_branch))
+    paths:
+      - k8s/*
+
+- name: git_config-k8s
+  type: git
+  icon: git
+  source:
+    uri: ((config_git_repository))
+    branch: ((config_git_branch))
+    private_key: ((config_git_private_key))
+    paths:
+      - ((k8s_path))/((k8s_base_path))/*
+      - ((k8s_path))/((k8s_env_path))/*
+
+- name: k8s
+  type: kubernetes
+  icon: kubernetes
+  source:
+    kubeconfig: ((k8s_kubeconfig))
+    namespace: ((k8s_namespace))
+    aws_access_key_id: ((aws_access_key))
+    aws_secret_access_key: ((aws_secret_key))
+
+jobs:
+
+- name: build
+  serial: True
+  max_in_flight: 1
+  build_logs_to_retain: 3
+  plan:
+
+  - aggregate:
+    - get: git_stack
+      trigger: true
+    - get: git_code
+      params:
+        describe_ref_options: --always --tags
+      trigger: true
+
+  - task: merge-stack-and-config
+    config:
+      <<: *merge-stack-and-config
+      inputs:
+      - name: git_code
+        path: "config"
+      - name: git_stack
+        path: "stack"
+    params:
+      CONFIG_PATH: ((code_build_context))
+      STACK_PATH: docker
+      BUILD_ARGS: ((code_build_args))
+      EXTRA_TAGS: ((registry_extra_tags))
+      TAG_COMMIT_ID: ((registry_tag_commit_id))
+      TAG_DESCRIBE_REF: ((registry_tag_describe_ref))
+      TAG_CUSTOM_SCRIPT: ((registry_tag_custom_script))
+
+  - task: tests
+    file: merged-stack/.ci/tests.yml
+    privileged: true
+
+  - task: build
+    file: merged-stack/.ci/build.yml
+    privileged: true
+    params:
+      REPOSITORY: ((registry_image_name))
+      TAG: ((registry_tag))
+      CONTEXT: merged-stack
+      DOCKERFILE: merged-stack/((code_dockerfile_location))
+      BUILD_ARGS_FILE: merged-stack/.ci/build_args_file
+
+  - task: post-tests
+    file: merged-stack/.ci/post-tests.yml
+    privileged: true
+    params:
+      TAG: ((registry_tag))
+      REPOSITORY: ((registry_image_name))
+
+  - put: image
+    params:
+      additional_tags: merged-stack/.ci/TAGS
+      image: image/image.tar
+
+- name: deploy
+  serial: True
+  max_in_flight: 1
+  build_logs_to_retain: 3
+  plan:
+  - aggregate:
+    - get: git_stack-k8s
+      trigger: false
+    - get: git_config-k8s
+      trigger: true
+
+    # metadatas
+    - get: git_stack
+      trigger: false
+      passed:
+        - build
+    - get: git_code
+      params:
+        describe_ref_options: --always --tags
+      trigger: false
+      passed:
+        - build
+    - get: image
+      trigger: ((k8s_continuous_deployment))
+      passed:
+        - build
+    - get: build-metadata
+
+  - task: merge-stack-and-config
+    config:
+      <<: *merge-stack-and-config
+      inputs:
+      - name: git_code
+        path: "config"
+      - name: git_stack
+        path: "stack"
+      - name: image
+      - name: build-metadata
+    params:
+      CONFIG_PATH: ((code_build_context))
+      STACK_PATH: docker
+      BUILD_ARGS: ((code_build_args))
+      EXTRA_TAGS: ((registry_extra_tags))
+      TAG_COMMIT_ID: ((registry_tag_commit_id))
+      TAG_DESCRIBE_REF: ((registry_tag_describe_ref))
+      TAG_CUSTOM_SCRIPT: ((registry_tag_custom_script))
+    
+  - task: prepare-kustomization
+    config:
+      platform: linux
+      image_resource:
+        type: docker-image
+        source:
+          repository: cycloid/cycloid-toolkit
+          tag: latest
+      run:
+        path: /bin/bash
+        args:
+        - -c
+        - |
+          /usr/bin/merge-stack-and-config
+  
+          # When pushing to ECR, the IMAGE_NAME envvar doesn't contain the full repository name
+          if [[ -n "$AWS_ACCESS_KEY_ID" ]]; then
+            IMAGE_NAME="$(aws sts get-caller-identity | jq -r .Account).dkr.ecr.$AWS_REGION.amazonaws.com/$IMAGE_NAME"
+          fi
+          
+          cat <<EOF >> kustomization/kustomization.yaml
+          
+          bases:
+          - $K8S_ENV_PATH
+
+          commonAnnotations:
+            cycloid.io/revision: "$(cat code/.git/ref)"
+            cycloid.io/build-tags: "$(cat image/tag) $(cat merged-stack/.ci/TAGS)"
+            cycloid.io/build-origin: "console.cycloid.io/organizations/$CUSTOMER/projects/$PROJECT/pipelines/$(cat build-metadata/build-pipeline-name)/jobs/$(cat build-metadata/build-job-name)/builds/$(cat build-metadata/build-id)"
+            cycloid.io/build-date: "$(date --utc -Iseconds)"
+            kubernetes.io/change-cause: "Cycloid $(cat build-metadata/build-pipeline-name) pipeline deploy"
+  
+          images:
+          - name: $IMAGE_NAME
+            digest: $(cat image/digest)
+          EOF
+          echo -e "\n############ Kustomization Preview : kustomization/kustomization.yaml"
+          cat kustomization/kustomization.yaml
+      inputs:
+      - name: git_config-k8s
+        path: "config"
+      - name: git_stack-k8s
+        path: "stack"
+      - name: merged-stack
+      - name: git_code
+        path: "code"
+      - name: image
+      - name: build-metadata
+      outputs:
+      - name: kustomization
+        path: "kustomization"
+    params:
+      MERGE_OUTPUT_PATH: kustomization
+      CONFIG_PATH: ((k8s_path))
+      STACK_PATH: k8s
+      IMAGE_NAME: ((registry_image_name))
+      AWS_ACCESS_KEY_ID: ((aws_access_key))
+      AWS_SECRET_ACCESS_KEY: ((aws_secret_key))
+      AWS_REGION: ((aws_region))
+      K8S_ENV_PATH: ((k8s_env_path))
+      CUSTOMER: ((customer))
+      PROJECT: ((project))
+
+  - put: k8s
+    params:
+      kubectl: |
+        apply --kustomize kustomization/
+      wait_until_ready_selector: ((k8s_wait_ready_selector))

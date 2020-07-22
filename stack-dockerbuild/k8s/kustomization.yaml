@@ -1,0 +1,4 @@
+# Used by the deploy-k8s pipeline variant only.
+#
+# This file be completed by the pipeline with useful annotations regarding the build
+# and the information about the image to use for the deployment

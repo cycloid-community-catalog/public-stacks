@@ -49,6 +49,7 @@ resources:
 
 - name: image
   type: registry-image
+  icon: docker
   source:
     #version: every
     repository: ((registry_image_name))
@@ -61,6 +62,7 @@ resources:
 
 - name: git_stack
   type: git
+  icon: git
   check_every: 2m
   source:
     uri: https://github.com/cycloid-community-catalog/stack-dockerbuild
@@ -70,6 +72,7 @@ resources:
 
 - name: git_code
   type: git
+  icon: git
   check_every: 2m
   source:
     uri: ((code_git_repository))
