@@ -62,7 +62,7 @@ default:
         default: master
 
   terraform:
-    config:
+    testconfig:
       - name: "Bucket name"
         description: "Name of the S3 bucket to create. Only lowercase alphanumeric characters and hyphens allowed."
         key: bucket_name
