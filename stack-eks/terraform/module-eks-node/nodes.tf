@@ -15,10 +15,9 @@ resource "aws_security_group" "eks-node" {
   }
 
   tags = merge(local.merged_tags, {
-    Name                                        = "${var.project}-${var.env}-eks-node-${var.node_group_name}"
-    role                                        = "eks-node"
-    "kubernetes.io/cluster/${var.cluster_name}" = "owned"
-    "kubernetes.io/nodegroup/name"             = "${var.node_group_name}"
+    Name                           = "${var.project}-${var.env}-eks-node-${var.node_group_name}"
+    role                           = "eks-node"
+    "kubernetes.io/nodegroup/name" = "${var.node_group_name}"
   })
 }
 
