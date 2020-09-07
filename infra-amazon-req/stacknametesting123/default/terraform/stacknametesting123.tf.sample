@@ -1,9 +1,0 @@
-module "tf-stacknametesting123" {
-  source = "module-stacknametesting123"
-
-  # env - type: string
-  # env = "[PLACEHOLDER]"
-
-  # project - type: string
-  # project = "[PLACEHOLDER]"
-}

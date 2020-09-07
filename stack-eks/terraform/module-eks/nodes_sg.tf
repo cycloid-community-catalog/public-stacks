@@ -52,7 +52,8 @@ resource "aws_security_group_rule" "eks-node-ingress-aws-lb" {
   from_port         = 30000
   protocol          = "tcp"
   security_group_id = aws_security_group.eks-node.id
-  cidr_blocks       = ["0.0.0.0/0", "::/0"]
+  cidr_blocks       = ["0.0.0.0/0"]
+  ipv6_cidr_blocks  = ["::/0"]
   to_port           = 32767
   type              = "ingress"
 }
