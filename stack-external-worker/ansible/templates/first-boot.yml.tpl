@@ -5,7 +5,7 @@
   become: yes
   vars:
     ami_hostname: "{{ ansible_hostname }}"
-    ami_ip_address: "{{ ansible_eth0.ipv4.address }}"
+    ami_ip_address: "{{ ansible_default_ipv4.address|default(ansible_all_ipv4_addresses[0]) }}"
     var_lib_device: "{{var_lib_device}}"
     use_local_device: "{{use_local_device}}"
     fs_volume_type: "{{fs_volume_type}}"
@@ -13,6 +13,7 @@
 {{fs_volume_options | to_nice_yaml | indent(8,first=true) }}
 
 {% raw %}
+    ip_address: "{{ ansible_default_ipv4.address|default(ansible_all_ipv4_addresses[0]) }}"
     ami_role: "{{ role }}"
     ami_project: "{{ project }}"
     ami_env: "{{ env }}"
@@ -65,7 +66,7 @@
      when: use_local_device|bool == true and dev_files.files
 
    - name: "Set facts with hostname"
-     set_fact: ansible_hostname="{{ ami_project|lower }}-{{ ami_role|lower }}-{{ ami_env|lower }}-{{ instance_id | default(ansible_default_ipv4.address | replace('.', '-'), true) }}"
+     set_fact: ansible_hostname="{{ ami_project|lower }}-{{ ami_role|lower }}-{{ ami_env|lower }}-{{ instance_id | default(ip_address | replace('.', '-'), true) }}"
 
    # Due to ansible set hostname issue https://github.com/ansible/ansible/issues/25543
    - name: install dbus
@@ -83,8 +84,8 @@
 
    - name: "Setup instance AWS Hosts file"
      lineinfile: dest=/etc/hosts
-                 regexp='^{{ ansible_eth0.ipv4.address }}.*'
-                 line="{{ ansible_eth0.ipv4.address }} {{ ansible_hostname | truncate(64, False, '') }}"
+                 regexp='^{{ ip_address }}.*'
+                 line="{{ ip_address }} {{ ansible_hostname | truncate(64, False, '') }}"
                  state=present
 
    - name: "Find files containing packer's hostname"
@@ -106,7 +107,7 @@
      replace:
        dest: "{{ item }}"
        regexp: "{{ ami_ip_address }}"
-       replace: "{{ ansible_eth0.ipv4.address }}"
+       replace: "{{ ip_address }}"
      with_items: "{{ relics_ip_address.stdout_lines }}"
 
    - name: "volume - Check if persistent device need to be initialized"

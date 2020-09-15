@@ -13,29 +13,53 @@ fi
 _() {
     set -euo pipefail
 
+    # Run the setup in debug mode.
     DEBUG=${DEBUG:-0}
-    STACK_BRANCH=${STACK_BRANCH:-"master"}
-    VAR_LIB_DEVICE=${VAR_LIB_DEVICE:-""}
+    # Concourse worker version to use. By default, the same version as the Concourse server will be used.
     VERSION=${VERSION:-""}
-    CLOUD_PROVIDER=${CLOUD_PROVIDER:-""}
-    WORKER_KEY=${WORKER_KEY:-""}
-    SCHEDULER_API_ADDRESS=${SCHEDULER_API_ADDRESS:-""}
-    SCHEDULER_HOST=${SCHEDULER_HOST:-""}
-    SCHEDULER_PORT=${SCHEDULER_PORT:-""}
-    TSA_PUBLIC_KEY=${TSA_PUBLIC_KEY:-""}
-    RUNTIMECONFIG_NAME=${RUNTIMECONFIG_NAME:-""}
-    TEAM_ID=${TEAM_ID:-""}
-    VAULT_URL=${VAULT_URL:-"https://vault.cycloid.io"}
-    VAULT_ROLE_ID=${VAULT_ROLE_ID:-""}
-    VAULT_SECRET_ID=${VAULT_SECRET_ID:-""}
+    # Branch of the external-worker stack to use for the install, should be master in most cases.
+    STACK_BRANCH=${STACK_BRANCH:-"master"}
 
-    # For backward compatibility with older deployments
+    # Project name, env and role used in the concourse worker naming.
     PROJECT=${PROJECT:-"cycloid-ci-workers"}
     ROLE="${ROLE:-"workers"}"
     ENV="${ENV:-"prod"}"
-    STACK_NAME="${STACK_NAME:-$PROJECT}"
-    # Make sure there is no trailling slash
+
+    # Dedicated device used by the concourse worker for storage.
+    # This device will be formatted to btrfs.
+    VAR_LIB_DEVICE=${VAR_LIB_DEVICE:-""}
+
+    # Informations needed to connect to Concourse. Defaults to the Cycloid SaaS.
+    SCHEDULER_API_ADDRESS=${SCHEDULER_API_ADDRESS:-"https://scheduler.cycloid.io"}
+    SCHEDULER_HOST=${SCHEDULER_HOST:-"scheduler.cycloid.io"}
+    SCHEDULER_PORT=${SCHEDULER_PORT:-"32223"}
+    TSA_PUBLIC_KEY=${TSA_PUBLIC_KEY:-"ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQC+To6R1hDAO00Xrt8q5Md38J9dh+aMIbV2GTqQkFcKwVAB6czbPPcitPWZ7y3Bw1dKMC8R7DGRAt01yWlkYo/voRp5prqKMc/uzkObhHNy42eJgZlStKU1IMw/fx0Rx+6Y3NClCCOecx415dkAH+PFudKosq4pFB9KjfOp3tMHqirMSF7dsbM3910gcPBL2NFHkOZ4cNfeSztXEg9wy4SExX3CHiUyLiShpwXa+C2f6IPdOJt+9ueXQIL0hcMmd12PRL5UU6/e5U5kldM4EWiJoohVbfoA1CRFF9QwJt6H3IiZPmd3sWqIVVy6Vssn5okjYLRwCwEd8+wd8tI6OnNb"}
+
+    # Cycloid team ID that can be found on the organization view page.
+    TEAM_ID=${TEAM_ID:-""}
+
+    # SSH public key used by the worker to be able to join the Concourse server.
+    # Go to your Cycloid Credentials, find the `cycloid-worker-keys` credential
+    # and copy the value of the private key here encoded in base64.
+    # This variable can be ignored if you plan to get it from Vault.
+    WORKER_KEY=${WORKER_KEY:-""}
+
+    # Vault
+    VAULT_URL=${VAULT_URL:-"https://vault.cycloid.io"}
+    VAULT_ROLE_ID=${VAULT_ROLE_ID:-""}
+    VAULT_SECRET_ID=${VAULT_SECRET_ID:-""}
+    # Make sure there is no trailling slash.
     VAULT_URL=${VAULT_URL%/}
+
+    # Specify a supported Cloud Provider to handle specifities related to it. Some settings will be automatically set if not overriden.
+    CLOUD_PROVIDER=${CLOUD_PROVIDER:-""}
+
+    # AWS
+    # For backward compatibility with older deployments.
+    STACK_NAME="${STACK_NAME:-$PROJECT}"
+
+    # GCP
+    RUNTIMECONFIG_NAME=${RUNTIMECONFIG_NAME:-""}
 
     cloud_signal_status() {
         local status="$1"
@@ -69,7 +93,7 @@ _() {
 
     usage() {
         echo "Usage: $SCRIPT_NAME [-d] [-b BRANCH_NAME] [<cloud_provider>]" >&2
-        echo "The <cloud_provider> argument is optional, it can be either `aws`, `azure` or `gcp`." >&2
+        echo "The <cloud_provider> argument is optional, it can be either `aws`, `azure`, `gcp`, `flexible-engine` or `scaleway`." >&2
         echo '' >&2
         echo '  -d           Debug mode.' >&2
         echo '  -b           Branch to use for the external-worker stack (default: master).' >&2
@@ -105,15 +129,7 @@ _() {
     }
 
     handle_envvars() {
-        [[ -z "${SCHEDULER_API_ADDRESS}" ]] && echo "error: SCHEDULER_API_ADDRESS envvar must be set." >&2 && exit 2
-        [[ -z "${SCHEDULER_HOST}" ]] && echo "error: SCHEDULER_HOST envvar must be set." >&2 && exit 2
-        [[ -z "${SCHEDULER_PORT}" ]] && echo "error: SCHEDULER_PORT envvar must be set." >&2 && exit 2
-        [[ -z "${TSA_PUBLIC_KEY}" ]] && echo "error: TSA_PUBLIC_KEY envvar must be set." >&2 && exit 2
         [[ -z "${TEAM_ID}" ]] && echo "error: TEAM_ID envvar must be set." >&2 && exit 2
-        [[ -z "${PROJECT}" ]] && echo "error: PROJECT envvar must be set." >&2 && exit 2
-        [[ -z "${ENV}" ]] && echo "error: ENV envvar must be set." >&2 && exit 2
-        [[ -z "${ROLE}" ]] && echo "error: ROLE envvar must be set." >&2 && exit 2
-
 
         # If WORKER_KEY is not provided, try others methods
         if [[ -z "${WORKER_KEY}" ]] && [[ -z "${VAULT_SECRET_ID}" || -z "${VAULT_SECRET_ID}" ]] ; then
@@ -135,6 +151,8 @@ _() {
                 VAR_LIB_DEVICE="/dev/disk/azure/scsi1/lun0"
             elif [[ "${CLOUD_PROVIDER}" == "flexible-engine" ]]; then
                 VAR_LIB_DEVICE="/dev/vdb"
+            elif [[ "${CLOUD_PROVIDER}" == "scaleway" ]]; then
+                VAR_LIB_DEVICE="/dev/sda"
             else
                 VAR_LIB_DEVICE="nodevice"
             fi
@@ -202,12 +220,12 @@ use_endpoint_heuristics = True' > /etc/boto.cfg
 
     cat >> "${ENV}-worker.yml" <<EOF
 concourse_version: "${VERSION}"
-concourse_tsa_port: "$SCHEDULER_PORT"
-concourse_tsa_host: "$SCHEDULER_HOST"
-concourse_tsa_public_key: "$TSA_PUBLIC_KEY"
-concourse_tsa_worker_key_base64: "$WORKER_KEY"
+concourse_tsa_port: "${SCHEDULER_PORT}"
+concourse_tsa_host: "${SCHEDULER_HOST}"
+concourse_tsa_public_key: "${TSA_PUBLIC_KEY}"
+concourse_tsa_worker_key_base64: "${WORKER_KEY}"
 concourse_tsa_worker_key: "{{ concourse_tsa_worker_key_base64 | b64decode}}"
-concourse_worker_team: "$TEAM_ID"
+concourse_worker_team: "${TEAM_ID}"
 nvme_mapping_run: true
 var_lib_device: ${VAR_LIB_DEVICE}
 EOF
