@@ -28,7 +28,7 @@ default:
         type: string
         default: ($ organization_canonical $)-terraform-remote-state
       - name: "Private module SSH key"
-        description: "SSH key to use to clone private terraform modules from Git."
+        description: "SSH key used to clone private terraform modules from Git."
         key: terraform_modules_private_key
         widget: cy_cred
         type: string
@@ -200,7 +200,6 @@ azure:
         - public
         - china
         - german
-        - stack
         - usgovernment
         default: public
       - name: "Azure location"
@@ -208,7 +207,7 @@ azure:
         widget: auto_complete
         type: string
         values: [eastasia,southeastasia,centralus,eastus,eastus2,westus,northcentralus,southcentralus,northeurope,westeurope,japanwest,japaneast,brazilsouth,australiaeast,australiasoutheast,southindia,centralindia,westindia,canadacentral,canadaeast,uksouth,ukwest,westcentralus,westus2,koreacentral,koreasouth,francecentral,francesouth,australiacentral,australiacentral2,uaecentral,uaenorth,southafricanorth,southafricawest,switzerlandnorth,switzerlandwest,germanynorth,germanywestcentral,norwaywest,norwayeast]
-        default: francecentral
+        default: westeurope
       - name: "Terraform resource group name"
         description: "Azure Resource Group of the Storage Account to use to store terraform remote state file."
         key: terraform_resource_group_name
