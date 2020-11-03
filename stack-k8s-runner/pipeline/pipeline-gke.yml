@@ -67,43 +67,17 @@ jobs:
             - name: gcloud
 
       - try:
-          task: weaveworks kubediff
-          config:
-            platform: linux
-            image_resource:
-              type: docker-image
-              source:
-                repository: weaveworks/kubediff
-                tag: latest
-            run:
-              path: sh
-              args:
-                - '-ec'
-                - |
-                  export PATH=$PWD/gcloud/google-cloud-sdk/bin:$PATH
-                  echo "$GOOGLE_CREDENTIALS" > .gcp_credentials.json
-                  gcloud auth activate-service-account --key-file=.gcp_credentials.json
-                  echo "$KUBECONFIG" > .kubeconfig
-                  kubediff --kubeconfig=.kubeconfig git_config-k8s/((k8s_path))
-            inputs:
-              - name: git_config-k8s
-              - name: gcloud
-          params:
-            KUBECONFIG: ((k8s_kubeconfig))
-            GOOGLE_CREDENTIALS: ((gcp_credentials_json))
-
-      - try:
           put: kubectl diff
           resource: k8s
           params:
             kubectl: |
-              diff -f git_config-k8s/((k8s_path)) --recursive
+              diff $(grep -rnw git_config-k8s/((k8s_path)) -e 'apiVersion:' --include='*.yaml' --include='*.yml' --files-with-matches | xargs -I % sh -c "echo -f %" )
 
       - put: kubectl apply dry-run
         resource: k8s
         params:
           kubectl: |
-            apply --server-dry-run -f git_config-k8s/((k8s_path)) --recursive
+            apply --dry-run=server $(grep -rnw git_config-k8s/((k8s_path)) -e 'apiVersion:' --include='*.yaml' --include='*.yml' --files-with-matches | xargs -I % sh -c "echo -f %" )
           wait_until_ready_selector: ((k8s_wait_ready_selector))
 
 - name: kubernetes-apply
@@ -121,7 +95,7 @@ jobs:
         resource: k8s
         params:
           kubectl: |
-            apply -f git_config-k8s/((k8s_path)) --recursive
+            apply $(grep -rnw git_config-k8s/((k8s_path)) -e 'apiVersion:' --include='*.yaml' --include='*.yml' --files-with-matches | xargs -I % sh -c "echo -f %" )
           wait_until_ready_selector: ((k8s_wait_ready_selector))
 
 - name: kubernetes-delete
@@ -137,5 +111,5 @@ jobs:
         resource: k8s
         params:
           kubectl: |
-            delete -f git_config-k8s/((k8s_path)) --recursive
+            delete $(grep -rnw git_config-k8s/((k8s_path)) -e 'apiVersion:' --include='*.yaml' --include='*.yml' --files-with-matches | xargs -I % sh -c "echo -f %" )
           wait_until_ready_selector: ((k8s_wait_ready_selector))

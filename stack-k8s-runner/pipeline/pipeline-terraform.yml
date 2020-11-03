@@ -4,10 +4,23 @@ groups:
   jobs:
   - kubernetes-plan
   - kubernetes-apply
+  - terraform-plan
+  - terraform-apply
+
+- name: kubernetes
+  jobs:
+  - kubernetes-plan
+  - kubernetes-apply
+
+- name: terraform
+  jobs:
+  - terraform-plan
+  - terraform-apply
 
 - name: destroy
   jobs:
   - kubernetes-delete
+  - terraform-destroy
 
 resource_types:
 
@@ -16,6 +29,12 @@ resource_types:
   source:
     repository: cycloid/kubernetes-resource
     tag: ((k8s_version))
+
+- name: terraform
+  type: docker-image
+  source:
+    repository: ljfranklin/terraform-resource
+    tag: ((terraform_version))
 
 resources:
 
@@ -27,7 +46,7 @@ resources:
     branch: ((config_git_branch))
     private_key: ((config_git_private_key))
     paths:
-      - ((k8s_path))/*
+      - ((k8s_path))
 
 - name: k8s
   type: kubernetes
@@ -35,8 +54,31 @@ resources:
   source:
     kubeconfig: ((k8s_kubeconfig))
 
+- name: tfstate
+  type: terraform
+  icon: terraform
+  source:
+    env_name: ((env))
+    backend_type: ((terraform_backend_type))
+    backend_config: ((terraform_backend_config))
+    vars: ((terraform_vars))
+    env: ((terraform_envvars))
+  
+- name: git_config-terraform
+  type: git
+  icon: git
+  source:
+    uri: ((config_git_repository))
+    branch: ((config_git_branch))
+    private_key: ((config_git_private_key))
+    paths:
+      - ((terraform_path))
+
 jobs:
 
+#
+# Kubernetes
+#
 - name: kubernetes-plan
   serial: true
   max_in_flight: 1
@@ -93,3 +135,55 @@ jobs:
           kubectl: |
             delete $(grep -rnw git_config-k8s/((k8s_path)) -e 'apiVersion:' --include='*.yaml' --include='*.yml' --files-with-matches | xargs -I % sh -c "echo -f %" )
           wait_until_ready_selector: ((k8s_wait_ready_selector))
+
+#
+# Terraform
+#
+- name: terraform-plan
+  serial: True
+  max_in_flight: 1
+  build_logs_to_retain: 10
+  plan:
+    - do:
+      - get: git_config-terraform
+        trigger: true
+
+      - put: tfstate
+        params:
+          plan_only: true
+          terraform_source: git_config-terraform/((terraform_path))/
+
+- name: terraform-apply
+  serial: True
+  max_in_flight: 1
+  build_logs_to_retain: 10
+  plan:
+    - aggregate:
+      - get: git_config-terraform
+        trigger: false
+        passed:
+          - terraform-plan
+      - get: tfstate
+        trigger: false
+        passed:
+          - terraform-plan
+
+    - put: tfstate
+      params:
+        plan_run: true
+        terraform_source: git_config-terraform/((terraform_path))/
+
+- name: terraform-destroy
+  max_in_flight: 1
+  build_logs_to_retain: 10
+  plan:
+    - do:
+        - get: git_config-terraform
+          trigger: false
+
+        - put: tfstate
+          params:
+            action: destroy
+            terraform_source: git_config-terraform/((terraform_path))/
+          get_params:
+            action: destroy

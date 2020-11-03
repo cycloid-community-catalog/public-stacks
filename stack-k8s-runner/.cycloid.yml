@@ -5,14 +5,16 @@ name: 'k8s-runner'
 canonical: 'stack-k8s-runner'
 status: 'public'
 description: |
-  Used to manage resources deployed on a Kubernetes cluster with plain YAML or JSON manifests.
+  Used to manage resources deployed on a Kubernetes cluster with plain YAML manifests and/or terraform resources.
 keywords:
   - 'kubernetes'
   - 'eks'
   - 'gke'
   - 'onprem'
+  - 'terraform'
   - 'provider:aws'
   - 'provider:gcp'
+  - 'provider:scw'
 author: 'Cycloid'
 image: |
   https://raw.githubusercontent.com/cycloid-community-catalog/stack-k8s-runner/master/icon.png
@@ -30,6 +32,15 @@ config:
       variables:
         path: 'pipeline/variables.sample.yml'
         destination: '($ project $)/pipeline/variables-($ environment $).yml'
+  default_terraform:
+    name: 'Classic Kubernetes + Terraform'
+    description: 'For on-premises style Kubernetes clusters + terraform code.'
+    pipeline:
+      pipeline:
+        path: 'pipeline/pipeline-terraform.yml'
+      variables:
+        path: 'pipeline/variables-terraform.sample.yml'
+        destination: '($ project $)/pipeline/variables-terraform-($ environment $).yml'
   eks:
     name: 'Amazon EKS'
     description: 'For AWS Elastic Kubernetes Service clusters.'
@@ -39,6 +50,15 @@ config:
       variables:
         path: 'pipeline/variables-eks.sample.yml'
         destination: '($ project $)/pipeline/variables-eks-($ environment $).yml'
+  eks_terraform:
+    name: 'Amazon EKS + Terraform'
+    description: 'For AWS Elastic Kubernetes Service clusters + terraform code.'
+    pipeline:
+      pipeline:
+        path: 'pipeline/pipeline-eks-terraform.yml'
+      variables:
+        path: 'pipeline/variables-eks-terraform.sample.yml'
+        destination: '($ project $)/pipeline/variables-eks-terraform-($ environment $).yml'
   gke:
     name: 'Google GKE'
     description: 'For Google Kubernetes Engine clusters.'
@@ -48,3 +68,12 @@ config:
       variables:
         path: 'pipeline/variables-gke.sample.yml'
         destination: '($ project $)/pipeline/variables-gke-($ environment $).yml'
+  gke_terraform:
+    name: 'Google GKE + Terraform'
+    description: 'For Google Kubernetes Engine clusters + terraform code.'
+    pipeline:
+      pipeline:
+        path: 'pipeline/pipeline-gke-terraform.yml'
+      variables:
+        path: 'pipeline/variables-gke-terraform.sample.yml'
+        destination: '($ project $)/pipeline/variables-gke-terraform-($ environment $).yml'
