@@ -1,4 +1,5 @@
 ---
+version: '2'
 # Configuration of the Cycloid stack
 name: 'Amazon Elasticsearch'
 canonical: 'infra-amazon-elk'
@@ -22,16 +23,19 @@ technologies:
     version: n/a
 
 config:
-  # Configuration of the CI pipeline
-  pipeline:
+  default:
+    name: 'Default'
+    description: 'Default pipeline usecase'
+    # Configuration of the CI pipeline
     pipeline:
-      path: 'pipeline/pipeline.yml'
-    variables:
-      path: 'pipeline/variables.sample.yml'
-      destination: '($ project $)/pipeline/variables-($ environment $).yml'
+      pipeline:
+        path: 'pipeline/pipeline.yml'
+      variables:
+        path: 'pipeline/variables.sample.yml'
+        destination: '($ project $)/pipeline/variables-($ environment $).yml'
 
-  # Configuration of terraform to setup the infrastructure
-  terraform:
-    elk:
-      path: 'terraform/elk.tf.sample'
-      destination: '($ project $)/terraform/($ environment $)/elk.tf'
+    # Configuration of terraform to setup the infrastructure
+    terraform:
+      elk:
+        path: 'terraform/elk.tf.sample'
+        destination: '($ project $)/terraform/($ environment $)/elk.tf'

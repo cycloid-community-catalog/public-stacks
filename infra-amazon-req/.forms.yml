@@ -1,0 +1,119 @@
+---
+default:
+  pipeline:
+    Terraform:
+      - name: "AWS access key"
+        description: "Amazon AWS access key for Terraform."
+        key: aws_access_key
+        widget: cy_cred
+        type: string
+        default: "((aws.access_key))"
+      - name: "AWS secret key"
+        description: "Amazon AWS secret key for Terraform."
+        key: aws_secret_key
+        widget: cy_cred
+        type: string
+        default: "((aws.secret_key))"
+      - name: "Amazon AWS region"
+        description: "Amazon AWS region to use for Terraform."
+        key: aws_default_region
+        widget: auto_complete
+        type: string
+        values: ["eu-north-1","ap-south-1","eu-west-3","eu-west-2","eu-west-1","ap-northeast-2","ap-northeast-1","sa-east-1","ca-central-1","ap-southeast-1","ap-southeast-2","eu-central-1","us-east-1","us-east-2","us-west-1","us-west-2"]
+        default: eu-west-1
+      - name: "Terraform storage bucket"
+        description: "AWS S3 bucket name to store terraform remote state file."
+        key: terraform_storage_bucket_name
+        widget: simple_text
+        type: string
+        default: ($ organization_canonical $)-terraform-remote-state
+    Repos:
+      - name: "Config repository"
+        key: config_git_repository
+        type: string
+        widget: cy_crs
+        description: "Git repository URL containing the config of the stack."
+        default: "git@github.com:MyUser/config.git"
+        required: true
+      - name: "Config git key"
+        description: "SSH key pair to fetch the config Git repository."
+        key: config_git_private_key
+        type: string
+        widget: cy_cred
+        default: "((ssh_config.ssh_key))"
+        required: true
+      - name: "Config branch"
+        description: "Branch of the config Git repository."
+        key: config_git_branch
+        widget: cy_branch
+        type: string
+        description: "The branch used by the config repository"
+        source: config_git_repository
+        default: "config"
+        required: true
+
+  terraform:
+    config:
+      - name: "Infra IAM ARN"
+        description: "If provided this user will be used instead of the created one."
+        key: infra_iam_arn
+        widget: simple_text
+        type: string
+        default: ""
+      - name: "Suffix"
+        description: "Extra potential suffix in case of already existing users"
+        key: suffix
+        widget: simple_text
+        type: string
+        default: ""
+    s3:
+      - name: "Create S3 bucket"
+        description: "To know if the the S3 bucket has to be created or not."
+        key: create_s3_bucket
+        widget: slider_range
+        type: integer
+        default: 1
+        values:
+            - 0
+            - 1
+      - name: "Bucket name"
+        description: "Specify the S3 bucket name"
+        key: bucket_name
+        widget: simple_text
+        type: string
+        default: "${var.customer}-terraform-remote-state"
+      - name: "Force destroy"
+        description: "for S3: by default it WILL delete the s3 bucket containing its remote state."
+        key: force_destroy
+        widget: switch
+        type: boolean
+        default: true
+    codecommit:
+      - name: "Create codecommit repository"
+        description: "To know if the the codecommit repo has to be created or not"
+        key: create_codecommit_repository
+        widget: slider_range
+        type: integer
+        default: 1
+        values:
+            - 0
+            - 1
+      - name: "Codecommit readonly public key"
+        description: "Only required when using codecommit - key allowing readonly access to the repository."
+        key: codecommit_readonly_key_public
+        widget: simple_text
+        type: string
+        default: ""
+      - name: "Codecommit public key"
+        description: "Only required when using codecommit - key allowing readonly access to the repository."
+        key: codecommit_key_public
+        widget: simple_text
+        type: string
+        default: ""
+      - name: "Repository name"
+        description: "Codecommit repository name to create."
+        key: codecommit_repository_name
+        widget: simple_text
+        type: string
+        default: "cycloid-${var.customer}-servicescatalog"
+

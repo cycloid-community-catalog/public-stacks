@@ -9,15 +9,19 @@
 
 #. magento_admin_firstname: admin
 #+ Magento install option admin-firstname.
+magento_admin_firstname: admin
 
 #. magento_admin_lastname: admin
 #+ Magento install option admin-lastname.
+magento_admin_lastname: admin
 
 #. magento_admin_email: root@localhost.local
 #+ Magento install option admin-email.
+magento_admin_email: root@localhost.local
 
 #. magento_admin_user: admin
 #+ Magento install option admin-user.
+magento_admin_user: admin
 
 #. magento_admin_password (optional): <provided by the pipeline>
 #+ Magento install option admin-password.

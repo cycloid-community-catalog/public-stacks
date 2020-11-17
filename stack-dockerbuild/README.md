@@ -103,6 +103,7 @@ Currently, Cycloid console doesn't support yet switching between different pipel
 |`k8s_namespace`|Kubernetes namespace to use for the deployment.|`-`|`($ environment $)`|`True`|
 |`k8s_path`|Path to the manifest(s) to apply in the config git repository, can be either a folder or a single file.|`-`|`($ project $)/k8s`|`True`|
 |`k8s_version`|Kubernetes version for the kubernetes concourse resource.|`-`|`'1.16'`|`True`|
+|`k8s_wait_ready_seconds`|How many seconds should the concourse kubernetes resource wait for the label selector.|`-`|`60`|`True`|
 |`k8s_wait_ready_selector`|Used to tell the concourse kubernetes resource to wait for a certain label selector to be ready.|`-`|`''`|`True`|
 |`project`|Name of the project.|`-`|`($ project $)`|`True`|
 |`registry_extra_tags`|Additional tags to put on the builded image. Separate each tag with a space.|`string`|`'tag1 tag2'`|`False`|

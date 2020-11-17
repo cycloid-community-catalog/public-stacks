@@ -20,10 +20,6 @@ aws_default_region: eu-west-1
 #+ AWS S3 bucket name to store terraform remote state file.
 terraform_storage_bucket_name: ($ organization_canonical $)-terraform-remote-state
 
-#. terraform_storage_bucket_path (required): ($ project $)/($ environment $)
-#+ AWS S3 bucket path to store terraform remote state file.
-terraform_storage_bucket_path: ($ project $)/($ environment $)
-
 
 #
 # Repos
@@ -57,3 +53,7 @@ project: ($ project $)
 #. customer (required): ($ organization_canonical $)
 #+ Name of the Cycloid Organization, used as customer variable name.
 customer: ($ organization_canonical $)
+
+#. terraform_storage_bucket_path (required): ($ project $)/($ environment $)
+#+ AWS S3 bucket path to store terraform remote state file.
+terraform_storage_bucket_path: ($ project $)/($ environment $)

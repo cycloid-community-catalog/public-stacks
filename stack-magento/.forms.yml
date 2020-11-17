@@ -1,0 +1,327 @@
+---
+default:
+  pipeline:
+    Terraform:
+      - name: "AWS access key"
+        description: "Amazon AWS access key for Terraform."
+        key: aws_access_key
+        widget: cy_cred
+        type: string
+        default: "((aws.access_key))"
+      - name: "AWS secret key"
+        description: "Amazon AWS secret key for Terraform."
+        key: aws_secret_key
+        widget: cy_cred
+        type: string
+        default: "((aws.secret_key))"
+      - name: "Amazon AWS region"
+        description: "Amazon AWS region to use for Terraform."
+        key: aws_default_region
+        widget: auto_complete
+        type: string
+        values: ["eu-north-1","ap-south-1","eu-west-3","eu-west-2","eu-west-1","ap-northeast-2","ap-northeast-1","sa-east-1","ca-central-1","ap-southeast-1","ap-southeast-2","eu-central-1","us-east-1","us-east-2","us-west-1","us-west-2"]
+        default: eu-west-1
+      - name: "Terraform storage bucket"
+        description: "AWS S3 bucket name to store terraform remote state file."
+        key: terraform_storage_bucket_name
+        widget: simple_text
+        type: string
+        default: ($ organization_canonical $)-terraform-remote-state
+      - name: "Aws RDS password"
+        description: "Password used for your rds."
+        key: rds_password
+        widget: simple_text
+        type: string
+        default: ((custom_rds_password))
+
+    Ansible:
+      - name: "Magento admin password"
+        description: "Password used for magento admin user."
+        key: magento_admin_password
+        widget: simple_text
+        type: string
+        default: ((custom_magento_admin_password))
+      - name: "Magento deploy bucket"
+        description: "AWS S3 bucket name in which we will store your magento built code."
+        key: magento_deploy_bucket_name
+        widget: simple_text
+        type: string
+        default: ($ project $)-deploy
+      - name: "Magento bucket object path"
+        description: "AWS S3 bucket path in which we will store your magento built code."
+        key: magento_deploy_bucket_object_path
+        widget: simple_text
+        type: string
+        default: /catalog-magento/($ environment $)/magento.tar.gz
+      - name: "Ansible vault password"
+        description: "Password used by ansible vault to decrypt your vaulted files."
+        key: ansible_vault_password
+        widget: simple_text
+        type: string
+        default: ""
+      - name: "Bastion URL"
+        description: "bastion URL used by ansible to connect on AWS EC2 instances."
+        key: bastion_url
+        widget: simple_text
+        type: string
+        default: "user@bastion.server.com"
+      - name: "Bastion SSH key"
+        description: "Bastion SSH private key used by ansible to connect on AWS EC2 instances and the bastion itself."
+        key: bastion_private_key_pair
+        widget: cy_cred
+        type: string
+        default: "((ssh_bastion.ssh_key))"
+
+    Repos:
+      - name: "Config repository"
+        key: config_git_repository
+        type: string
+        widget: cy_crs
+        description: "Git repository URL containing the config of the stack."
+        default: "git@github.com:MyUser/config-magento.git"
+        required: true
+      - name: "Config git key"
+        description: "SSH key pair to fetch the config Git repository."
+        key: config_git_private_key
+        type: string
+        widget: cy_cred
+        default: "((ssh_config.ssh_key))"
+        required: true
+      - name: "Config branch"
+        description: "Branch of the config Git repository."
+        key: config_git_branch
+        widget: cy_branch
+        type: string
+        description: "The branch used by the config repository"
+        source: config_git_repository
+        default: "config"
+        required: true
+
+      - name: "Magento git URL"
+        description: "Url to the git repository containing Magento source code."
+        key: magento_git_repository
+        widget: simple_text
+        type: string
+        default: "git@github.com:MyUser/code-magento.git"
+      - name: "Magento git branch"
+        description: "Branch of the magento source code git repository."
+        key: magento_git_branch
+        widget: simple_text
+        type: string
+        default: "master"
+      - name: "Magento git key"
+        description: "SSH key pair to fetch magento source code git repository."
+        key: magento_git_private_key
+        type: string
+        widget: cy_cred
+        default: "((ssh_magento.ssh_key))"
+
+    Cycloid:
+      - name: "Stack branch"
+        description: "Branch to use on the public stack Git repository."
+        key: stack_git_branch
+        widget: simple_text
+        type: string
+        default: master
+      - name: "Ansible version"
+        description: "Ansible version used in packer and cycloid-toolkit ansible runner."
+        key: ansible_version
+        widget: simple_text
+        type: string
+        default: "2.7"
+
+
+  terraform:
+    magento:
+      - name: "Front count"
+        description: "Number of Aws EC2 frontend server to create."
+        key: front_count
+        widget: simple_text
+        type: string
+        default: "1"
+      - name: "Front type"
+        description: "Type of Aws EC2 frontend servers."
+        key: front_type
+        widget: auto_complete
+        type: string
+        default: "t3.small"
+        values:
+            - "t3.micro"
+            - "t3.small"
+            - "t3.medium"
+            - "t3.large"
+      - name: "Front disk size"
+        unit: Go
+        description: "Disk size in Go of Aws EC2 frontend servers."
+        key: front_disk_size
+        widget: slider_range
+        type: integer
+        default: 60
+        values:
+            - 10
+            - 250
+      - name: "Front EBS optimized"
+        description: "Whether the Instance is EBS optimized or not, related to the instance type you choose."
+        key: front_ebs_optimized
+        widget: switch
+        type: boolean
+        default: false
+    network:
+      - name: "Aws VPC ID"
+        description: "Amazon VPC id on which create each components."
+        key: vpc_id
+        widget: simple_text
+        type: string
+        required: true
+      - name: "Private subnets IDs"
+        description: "Amazon subnets IDs on which create each components."
+        key: private_subnets_ids
+        widget: text_area
+        type: array
+        default:
+            - subnet-id1
+            - subnet-id2
+        required: true
+      - name: "Public subnets IDs"
+        description: "Public subnet IDs to use for the public ELB load balancer."
+        key: public_subnets_ids
+        widget: text_area
+        type: array
+        default:
+            - subnet-id1
+            - subnet-id2
+        required: true
+      - name: "Bastion allow security group"
+        description: "Amazon source security group ID which will be allowed to connect on Magento front port 22 (ssh)."
+        key: bastion_sg_allow
+        widget: simple_text
+        type: string
+        default: ""
+      - name: "Keypair name"
+        description: "SSH keypair name to use to deploy ec2 instances."
+        key: keypair_name
+        widget: simple_text
+        type: string
+        default: ""
+      - name: "Magento SSL"
+        description: "ARN of an Amazon certificate from Certificate Manager."
+        key: magento_ssl_cert
+        widget: simple_text
+        type: string
+        required: true
+    database:
+      - name: "RDS database"
+        description: "Name of the RDS database."
+        key: rds_database
+        widget: simple_text
+        type: string
+        default: "magento"
+      - name: "RDS username"
+        description: "User name of the RDS database."
+        key: rds_username
+        widget: simple_text
+        type: string
+        default: "magento"
+      - name: "RDS disk size"
+        unit: Go
+        description: "Size in Go of the RDS database."
+        key: rds_disk_size
+        widget: slider_range
+        type: integer
+        default: 10
+        values:
+            - 10
+            - 250
+      - name: "RDS multiaz"
+        description: "Enable multi AZ or not for the RDS database."
+        key: rds_multiaz
+        widget: switch
+        type: boolean
+        default: false
+      - name: "RDS type"
+        description: "AWS Instance type of the RDS database."
+        key: rds_type
+        widget: auto_complete
+        type: string
+        default: "db.t3.small"
+        values:
+            - "db.t3.micro"
+            - "db.t3.small"
+            - "db.t3.medium"
+            - "db.t3.large"
+            - "db.t3.xlarge"
+            - "db.t3.2xlarge"
+      - name: "RDS engine version"
+        description: "Version of the RDS engine."
+        key: rds_engine_version
+        widget: simple_text
+        type: string
+        default: "5.7.16"
+      - name: "RDS backup retention"
+        description: "RDS backup retention period in days."
+        key: rds_backup_retention
+        widget: number
+        type: integer
+        default: 7
+      - name: "RDS parameters"
+        description: "RDS parameters to assign to the RDS database."
+        key: rds_parameters
+        widget: simple_text
+        type: string
+        default: ""
+    cache:
+      - name: "Elasticache type"
+        description: "AWS elasticache instance type."
+        key: elasticache_type
+        widget: auto_complete
+        type: string
+        default: "cache.t2.small"
+        values:
+            - "cache.t2.micro"
+            - "cache.t2.small"
+            - "cache.t2.medium"
+            - "cache.t3.micro"
+            - "cache.t3.small"
+            - "cache.t3.medium"
+            - "cache.m4.large"
+            - "cache.m4.xlarge"
+            - "cache.m4.2xlarge"
+      - name: "Elasticsearch nodes"
+        description: "Number of AWS elasticache instances."
+        key: elasticache_nodes
+        widget: simple_text
+        type: string
+        default: "1"
+      - name: "Elasticsearch engine version"
+        description: "AWS elasticache engine version."
+        key: elasticache_engine_version
+        widget: simple_text
+        type: string
+        default: "5.0.0"
+
+  ansible:
+    magento:
+      - name: "Admin user"
+        description: "Magento install option admin-user."
+        key: magento_admin_user
+        widget: simple_text
+        type: string
+        default: "admin"
+      - name: "Admin firstname"
+        description: "Magento install option admin-firstname."
+        key: magento_admin_firstname
+        widget: simple_text
+        type: string
+        default: "admin"
+      - name: "Admin lastname"
+        description: "Magento install option admin-lastname."
+        key: magento_admin_lastname
+        widget: simple_text
+        type: string
+        default: "admin"
+      - name: "Admin email"
+        description: "Magento install option admin-email."
+        key: magento_admin_email
+        widget: simple_text
+        type: string
+        default: "root@example-cycloid.com"

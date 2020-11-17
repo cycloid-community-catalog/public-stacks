@@ -301,3 +301,4 @@ jobs:
       kubectl: |
         apply --kustomize kustomization/
       wait_until_ready_selector: ((k8s_wait_ready_selector))
+      wait_until_ready: ((k8s_wait_ready_seconds))
