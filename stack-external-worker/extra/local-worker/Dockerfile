@@ -1,4 +1,4 @@
-FROM concourse/concourse:5.6.0
+FROM concourse/concourse:6.7.1
 
 COPY entrypoint.sh /
 ENTRYPOINT ["dumb-init", "/entrypoint.sh"]
