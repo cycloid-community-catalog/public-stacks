@@ -177,6 +177,12 @@ _() {
     else
         apt-get install -y --no-install-recommends python-pip
     fi
+
+    # Hotfix for customer using debian 9 having an issue with AttributeError: 'module' object has no attribute 'Cryptography_HAS_TLSEXT_HOSTNAME'
+    if [[ "$(cat /etc/issue.net)" == "Debian GNU/Linux 9" ]]; then
+        dpkg --purge python-openssl
+    fi
+
     pip install -U cryptography
     pip install ansible==2.7
 
