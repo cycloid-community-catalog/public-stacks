@@ -208,39 +208,40 @@ Parameters:
 
 Mappings:
 # Generate :
+# From https://wiki.debian.org/Cloud/AmazonEC2Image/Buster
 # export regions="us-east-1 us-west-2 us-west-1 eu-west-1 eu-west-2 eu-west-3 eu-central-1 ap-northeast-1 ap-northeast-2 ap-northeast-3 ap-southeast-1 ap-southeast-2 ap-south-1 us-east-2 ca-central-1 sa-east-1 cn-north-1 cn-northwest-1"
-# for region in $regions; do image=$(aws --region $region ec2 describe-images --owners 379101102735 --filters "Name=name,Values=debian-stretch-*" "Name=architecture,Values=x86_64" "Name=virtualization-type,Values=hvm" |  jq -r '.Images[] | "\(.CreationDate) \(.ImageId)"' | sort | awk 'END{print $2}'); echo -e "    $region:\n      image: $image"; done
+# for region in $regions; do image=$(aws --region $region ec2 describe-images --owners 136693071363 --filters "Name=name,Values=debian-10-amd64-*" "Name=architecture,Values=x86_64" "Name=virtualization-type,Values=hvm" |  jq -r '.Images[] | "\(.CreationDate) \(.ImageId)"' | sort | awk 'END{print $2}'); echo -e "    $region:\n      image: $image"; done
   AWSRegionArch2AMI:
     us-east-1:
-      image: ami-0f9e7e8867f55fd8e
+      image: ami-095851f8e69aa9de1
     us-west-2:
-      image: ami-01d07e14f082b3ba1
+      image: ami-070f235fd371de8e4
     us-west-1:
-      image: ami-0afda78f1d0272d99
+      image: ami-0cf113e60d88599e9
     eu-west-1:
-      image: ami-035c67e6a9ef8f024
+      image: ami-0028c9055f981f26e
     eu-west-2:
-      image: ami-0ef10a4062f24d89d
+      image: ami-0cd9d59327b36aa1c
     eu-west-3:
-      image: ami-0cb185e7696ffe300
+      image: ami-06eda151b440c72f3
     eu-central-1:
-      image: ami-05449f21272b4ee56
+      image: ami-098413c4fa294ef48
     ap-northeast-1:
-      image: ami-0c4290d7ce45d7bbe
+      image: ami-015832e887d62021b
     ap-northeast-2:
-      image: ami-0fa1392d5d545f9e8
+      image: ami-0e26f975b4332d545
     ap-southeast-1:
-      image: ami-04c9740a9ed018dba
+      image: ami-0c26459b21df3be9d
     ap-southeast-2:
-      image: ami-0b91189c4f9f5cd9e
+      image: ami-039c5b41949c7a18a
     ap-south-1:
-      image: ami-0b6490868957ce747
+      image: ami-09f8f46d97bffedab
     us-east-2:
-      image: ami-00c5940f2b52c5d98
+      image: ami-094360103fccc58bb
     ca-central-1:
-      image: ami-0857efbad274a1a89
+      image: ami-024cbab5c1f8c6c57
     sa-east-1:
-      image: ami-0bc0ce4ab8b82305c
+      image: ami-0b769a56cdfce0133
 
 Conditions:
   EnabledScheduling: !Equals [!Ref ScheduledWorkersEnabled, 'true']
