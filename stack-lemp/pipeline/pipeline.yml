@@ -8,7 +8,7 @@ shared:
       type: docker-image
       source:
         repository: cycloid/cycloid-toolkit
-        tag: latest
+        tag: "((cycloid_toolkit_tag_prefix))((ansible_version))"
     run:
       path: /usr/bin/merge-stack-and-config
     outputs:
@@ -23,7 +23,7 @@ shared:
         type: docker-image
         source:
           repository: cycloid/cycloid-toolkit
-          tag: "v((ansible_version))"
+          tag: "((cycloid_toolkit_tag_prefix))((ansible_version))"
       run:
         path: /usr/bin/ansible-runner
       caches:
@@ -40,7 +40,7 @@ shared:
         type: docker-image
         source:
           repository: cycloid/cycloid-toolkit
-          tag: "v((ansible_version))"
+          tag: "((cycloid_toolkit_tag_prefix))((ansible_version))"
       run:
         path: /usr/bin/aws-ami-cleaner
       params:

@@ -57,7 +57,7 @@ In order to run this task, couple elements are required within the infrastructur
 |Name|Description|Type|Default|Required|
 |---|---|:---:|:---:|:---:|
 |`ansible_vault_password`|Password used by ansible vault to decrypt your vaulted files.|`-`|`((custom_ansible_vault_password))`|`False`|
-|`ansible_version`|Ansible version used in packer and cycloid-toolkit ansible runner|`-`|`"2.7"`|`True`|
+|`ansible_version`|Ansible version used in packer and cycloid-toolkit ansible runner|`-`|`"2.9"`|`True`|
 |`aws_access_key`|Amazon AWS access key for Terraform. See value format [here](https://docs.cycloid.io/advanced-guide/integrate-and-use-cycloid-credentials-manager.html#vault-in-the-pipeline)|`-`|`((aws.access_key))`|`True`|
 |`aws_default_region`|Amazon AWS region to use for Terraform.|`-`|`eu-west-1`|`True`|
 |`aws_secret_key`|Amazon AWS secret key for Terraform. See value format [here](https://docs.cycloid.io/advanced-guide/integrate-and-use-cycloid-credentials-manager.html#vault-in-the-pipeline)|`-`|`((aws.secret_key))`|`True`|
@@ -70,6 +70,7 @@ In order to run this task, couple elements are required within the infrastructur
 |`config_pipeline_path`|Path of pipeline task yml files in the config Git repository. Used to override pipeline yask like build-release.yml|`-`|`($ project $)/pipeline`|`True`|
 |`config_terraform_path`|Path of Terraform files in the config git repository|`-`|`($ project $)/terraform/($ environment $)`|`True`|
 |`customer`|Name of the Cycloid Organization, used as customer variable name.|`-`|`($ organization_canonical $)`|`True`|
+|`cycloid_toolkit_tag_prefix`|Prefix used with ansible_version to match cycloid-toolkit docker image tag. (example with "a": cycloid/cycloid-toolkit:a2.9).|`-`|`"a"`|`True`|
 |`debug_public_key`|SSH pubkey injected by packer during the ec2 ami build. Used only to debug failure.|`-`|`""`|`False`|
 |`deploy_bucket_name`|AWS S3 bucket name in which store the builded code of the website.|`-`|`($ project $)-deploy`|`True`|
 |`deploy_bucket_object_path`|AWS S3 bucket path in which store the builded code of the website.|`-`|`/catalog-lemp-app/($ environment $)/lemp-app.tar.gz`|`True`|

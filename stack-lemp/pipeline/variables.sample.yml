@@ -113,9 +113,13 @@ config_terraform_path: ($ project $)/terraform/($ environment $)
 #+ Path of pipeline task yml files in the config Git repository. Used to override pipeline yask like build-release.yml
 config_pipeline_path: ($ project $)/pipeline
 
-#. ansible_version (required): "2.7"
+#. cycloid_toolkit_tag_prefix (required): "a"
+#+ Prefix used with ansible_version to match cycloid-toolkit docker image tag. (example with "a": cycloid/cycloid-toolkit:a2.9).
+cycloid_toolkit_tag_prefix: "a"
+
+#. ansible_version (required): "2.9"
 #+ Ansible version used in packer and cycloid-toolkit ansible runner
-ansible_version: "2.7"
+ansible_version: "2.9"
 
 #. debug_public_key (optional): ""
 #+ SSH pubkey injected by packer during the ec2 ami build. Used only to debug failure.
