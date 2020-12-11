@@ -108,6 +108,19 @@
 
     - role: cycloid.systemd
       systemd_type: dropin
+      systemd_dropin_service_name: "concourse-worker-cleaner"
+      systemd_dropin_name: storage
+      systemd_dropin_priority: "01"
+      systemd_dropin_content:
+        - "[Unit]"
+        - "After={{ systemd_mount_name.stdout }}"
+        - "Requires={{ systemd_mount_name.stdout }}"
+      when: var_lib_device != "nodevice" and concourse_service_worker_cleaner_enabled is defined and concourse_service_worker_cleaner_enabled
+      tags:
+       - notforbuild
+
+    - role: cycloid.systemd
+      systemd_type: dropin
       systemd_dropin_service_name: "concourse-worker"
       systemd_dropin_name: storage
       systemd_dropin_priority: "01"

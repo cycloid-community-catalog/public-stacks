@@ -8,6 +8,9 @@ use_local_device: false
 # Run the mapping/symlink of device via ansible instead of udev. Sould be false if building an ami.
 nvme_mapping_run: false
 
+# Cleanup workers at boot
+concourse_service_worker_cleaner_enabled: false
+
 concourse_worker: yes
 # Don't start as we don't want worker to start during the build
 concourse_worker_name: "$(hostname)"
