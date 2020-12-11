@@ -1,0 +1,53 @@
+---
+default:
+  pipeline:
+    Ansible:
+      - name: "Cycloid toolkit Ansible version"
+        description: "cycloid-toolkit docker image tag to use (https://hub.docker.com/r/cycloid/cycloid-toolkit/tags"
+        key: ansible_version
+        widget: simple_text
+        type: string
+        default: "v2.7"
+      - name: "Ansible params"
+        description: "Parameters of ansible-runner script. Can be found here: https://github.com/cycloidio/cycloid-images/tree/master/cycloid-toolkit#ansible-runner"
+        key: ansible_params
+        widget: text_area
+        type: map
+        default:
+          SSH_JUMP_URL: user1@Bastion1
+          SSH_PRIVATE_KEYS:
+            - ((ssh_bastion.ssh_key))
+          ANSIBLE_VAULT_PASSWORD: ((raw_ansible_password))
+          # ANSIBLE_PLAYBOOK_PATH should be "ansible-playbook/" + (git_ansible_path)
+          ANSIBLE_PLAYBOOK_PATH: ansible-playbook/
+          ANSIBLE_PLAYBOOK_NAME: playbook.yml
+          EXTRA_ANSIBLE_VARS:
+            customer: ($ organization_canonical $)
+            project: ($ project $)
+            env: ($ environment $)
+    Repos:
+      - name: "Code git URL"
+        description: "URL to the Git repository containing terraform source code."
+        key: git_repository
+        widget: simple_text
+        type: string
+        default: "git@github.com:MyUser/code.git"
+      - name: "Code git branch"
+        description: "Branch of the terraform source code Git repository."
+        key: git_branch
+        widget: simple_text
+        type: string
+        default: "master"
+      - name: "Code git key"
+        description: "SSH key pair to fetch terraform source code Git repository."
+        key: git_private_key
+        type: string
+        widget: cy_cred
+        default: "((ssh_config.ssh_key))"
+      - name: "Code Ansible path"
+        description: "Path of Ansible files in the git repository."
+        key: git_ansible_path
+        widget: simple_text
+        type: string
+        default: "./"
+

@@ -1,4 +1,5 @@
 ---
+version: '2'
 # Configuration of the Cycloid stack
 name: 'ansible-runner'
 canonical: 'stack-ansible-runner'
@@ -18,10 +19,13 @@ technologies:
     version: n/a
 
 config:
-  # Configuration of the CI pipeline
-  pipeline:
+  default:
+    name: 'Default'
+    description: 'Default pipeline usecase'
+    # Configuration of the CI pipeline
     pipeline:
-      path: 'pipeline/pipeline.yml'
-    variables:
-      path: 'pipeline/variables.sample.yml'
-      destination: '($ project $)/pipeline/variables-($ environment $).yml'
+      pipeline:
+        path: 'pipeline/pipeline.yml'
+      variables:
+        path: 'pipeline/variables.sample.yml'
+        destination: '($ project $)/pipeline/variables-($ environment $).yml'
