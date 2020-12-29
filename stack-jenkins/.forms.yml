@@ -155,7 +155,7 @@ default:
         required: true
         default: "${data.terraform_remote_state.infrastructure.outputs.infra_public_subnets}"
       - name: "Extra AWS tags"
-        description: "Dict of extra tags to add on aws resources. format { "foo" = "bar" }."
+        description: 'Dict of extra tags to add on aws resources. format { "foo" = "bar" }.'
         key: extra_tags
         widget: text_area
         type: map
