@@ -1,4 +1,5 @@
 ---
+version: '2'
 # Configuration of the Cycloid stack
 name: 'Lemp'
 canonical: 'stack-lemp'
@@ -33,22 +34,25 @@ technologies:
     version: n/a
 
 config:
-  # Configuration of the CI pipeline
-  pipeline:
+  default:
+    name: 'Default'
+    description: 'Default pipeline usecase'
+    # Configuration of the CI pipeline
     pipeline:
-      path: 'pipeline/pipeline.yml'
-    variables:
-      path: 'pipeline/variables.sample.yml'
-      destination: '($ project $)/pipeline/variables-($ environment $).yml'
+      pipeline:
+        path: 'pipeline/pipeline.yml'
+      variables:
+        path: 'pipeline/variables.sample.yml'
+        destination: '($ project $)/pipeline/variables-($ environment $).yml'
 
-  # Configuration of ansible for provisionning
-  ansible:
-    front:
-      path: 'ansible/environments/front.yml.sample'
-      destination: '($ project $)/ansible/environments/($ environment $)-front.yml'
+    # Configuration of ansible for provisionning
+    ansible:
+      front:
+        path: 'ansible/environments/front.yml.sample'
+        destination: '($ project $)/ansible/environments/($ environment $)-front.yml'
 
-  # Configuration of terraform to setup the infrastructure
-  terraform:
-    lemp:
-      path: 'terraform/lemp.tf.sample'
-      destination: '($ project $)/terraform/($ environment $)/lemp.tf'
+    # Configuration of terraform to setup the infrastructure
+    terraform:
+      lemp:
+        path: 'terraform/lemp.tf.sample'
+        destination: '($ project $)/terraform/($ environment $)/lemp.tf'

@@ -22,6 +22,7 @@
 #nginx_vhost_extra_directive: |
 #    satisfy any;
 #    allow 127.0.0.1;
+#    allow 127.0.0.2;
 #    auth_basic "Resctricted";
 #    auth_basic_user_file auth_basic/cycloid;
 #    if ($ssl != "on") { rewrite ^(.*)$ https://$server_name$1 permanent; }
@@ -77,7 +78,7 @@
 #   conntrack:
 #   nginx:
 #     config:
-#         - urls = ["http://127.0.0.1/nginx_status"]
+#         - urls = ["http://localhost/nginx_status"]
 #   phpfpm:
 #     config:
-#         - urls = ["http://127.0.0.1/fpm-status"]
+#         - urls = ["http://localhost/fpm-status"]

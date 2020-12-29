@@ -132,16 +132,18 @@ nginx_application_vhost:
 nginx_sites:
   00-metrics:
     - listen 80
-    - server_name 127.0.0.1
+    - server_name 127.0.0.1 127.0.0.2
     - location /nginx_status {
         stub_status on;
         access_log   off;
         allow 127.0.0.1;
+        allow 127.0.0.2;
         deny all;
       }
     - location ~ "/fpm-(status|ping)" {
         access_log   off;
         allow 127.0.0.1;
+        allow 127.0.0.2;
         deny all;
         fastcgi_pass php;
         include fastcgi_params;

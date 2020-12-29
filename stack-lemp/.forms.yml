@@ -1,0 +1,350 @@
+---
+default:
+  pipeline:
+    Terraform:
+      - name: "AWS access key"
+        description: "Amazon AWS access key for Terraform."
+        key: aws_access_key
+        widget: cy_cred
+        type: string
+        default: "((aws.access_key))"
+      - name: "AWS secret key"
+        description: "Amazon AWS secret key for Terraform."
+        key: aws_secret_key
+        widget: cy_cred
+        type: string
+        default: "((aws.secret_key))"
+      - name: "Amazon AWS region"
+        description: "Amazon AWS region to use for Terraform."
+        key: aws_default_region
+        widget: auto_complete
+        type: string
+        values: ["eu-north-1","ap-south-1","eu-west-3","eu-west-2","eu-west-1","ap-northeast-2","ap-northeast-1","sa-east-1","ca-central-1","ap-southeast-1","ap-southeast-2","eu-central-1","us-east-1","us-east-2","us-west-1","us-west-2"]
+        default: eu-west-1
+      - name: "Terraform storage bucket"
+        description: "AWS S3 bucket name to store terraform remote state file."
+        key: terraform_storage_bucket_name
+        widget: simple_text
+        type: string
+        default: ($ organization_canonical $)-terraform-remote-state
+      - name: "Aws RDS password"
+        description: "Password used for your rds. Set 'empty' if you dont use databases."
+        key: rds_password
+        widget: simple_text
+        type: string
+        default: ((custom_rds_password))
+
+    Ansible:
+      - name: "Magento admin password"
+        description: "Password used for magento admin user."
+        key: magento_admin_password
+        widget: simple_text
+        type: string
+        default: ((custom_magento_admin_password))
+      - name: "Magento deploy bucket"
+        description: "AWS S3 bucket name in which we will store your magento built code."
+        key: magento_deploy_bucket_name
+        widget: simple_text
+        type: string
+        default: ($ project $)-deploy
+      - name: "Magento bucket object path"
+        description: "AWS S3 bucket path in which we will store your magento built code."
+        key: magento_deploy_bucket_object_path
+        widget: simple_text
+        type: string
+        default: /catalog-magento/($ environment $)/magento.tar.gz
+      - name: "Ansible vault password"
+        description: "Password used by ansible vault to decrypt your vaulted files."
+        key: ansible_vault_password
+        widget: cy_cred
+        type: string
+        default: ""
+      - name: "Bastion URL"
+        description: "bastion URL used by ansible to connect on AWS EC2 instances."
+        key: bastion_url
+        widget: simple_text
+        type: string
+        default: "user@bastion.server.com"
+      - name: "Bastion SSH key"
+        description: "Bastion SSH private key used by ansible to connect on AWS EC2 instances and the bastion itself."
+        key: bastion_private_key_pair
+        widget: cy_cred
+        type: string
+        default: "((ssh_bastion.ssh_key))"
+
+
+    Repos:
+      - name: "Config repository"
+        key: config_git_repository
+        type: string
+        widget: cy_crs
+        description: "Git repository URL containing the config of the stack."
+        default: "git@github.com:MyUser/config.git"
+        required: true
+      - name: "Config git key"
+        description: "SSH key pair to fetch the config Git repository."
+        key: config_git_private_key
+        type: string
+        widget: cy_cred
+        default: "((ssh_config.ssh_key))"
+        required: true
+      - name: "Config branch"
+        description: "Branch of the config Git repository."
+        key: config_git_branch
+        widget: cy_branch
+        type: string
+        description: "The branch used by the config repository"
+        source: config_git_repository
+        default: "config"
+        required: true
+
+      - name: "Code git URL"
+        description: "URL to the Git repository containing LEMP website source code."
+        key: lemp_git_repository
+        widget: simple_text
+        type: string
+        default: "git@github.com:MyUser/code.git"
+      - name: "Code git branch"
+        description: "Branch of the source code git repository."
+        key: lemp_git_branch
+        widget: simple_text
+        type: string
+        default: "master"
+      - name: "Code git key"
+        description: "SSH key pair to fetch the source code git repository."
+        key: lemp_git_private_key
+        type: string
+        widget: cy_cred
+        default: "((ssh_lemp_app.ssh_key))"
+
+    Cycloid:
+      - name: "Stack branch"
+        description: "Branch to use on the public stack Git repository."
+        key: stack_git_branch
+        widget: simple_text
+        type: string
+        default: master
+      - name: "Ansible version"
+        description: "Ansible version used in packer and cycloid-toolkit ansible runner."
+        key: ansible_version
+        widget: simple_text
+        type: string
+        default: "2.7"
+      - name: "Debug SSH key"
+        description: "SSH pubkey injected by packer during the ec2 ami build. Used only to debug failure."
+        key: debug_public_key
+        widget: text_area
+        type: string
+        default: ""
+
+
+  terraform:
+    application:
+      - name: "Front count"
+        description: "Number of Aws EC2 frontend server to create."
+        key: front_count
+        widget: simple_text
+        type: string
+        default: "1"
+      - name: "Front type"
+        description: "Type of Aws EC2 frontend servers."
+        key: front_type
+        widget: auto_complete
+        type: string
+        default: "t3.small"
+        values:
+            - "t3.micro"
+            - "t3.small"
+            - "t3.medium"
+            - "t3.large"
+      - name: "Front disk size"
+        unit: Go
+        description: "Disk size of Aws EC2 frontend servers."
+        key: front_disk_size
+        widget: slider_range
+        type: integer
+        default: 30
+        values:
+            - 10
+            - 250
+      - name: "Front EBS optimized"
+        description: "Whether the Instance is EBS optimized or not, related to the instance type you choose."
+        key: front_ebs_optimized
+        widget: switch
+        type: boolean
+        default: false
+      - name: "Max front servers (ASG)"
+        description: "Maximum number of front server allowed in the AutoScaling group."
+        key: front_asg_max_size
+        widget: number
+        type: integer
+        default: 5
+
+      - name: "Application SSL"
+        description: "ARN of an Amazon certificate from Certificate Manager."
+        key: application_ssl_cert
+        widget: simple_text
+        type: string
+        default: ""
+
+    network:
+      - name: "Aws VPC ID"
+        description: "Amazon VPC id on which create each components."
+        key: vpc_id
+        widget: simple_text
+        type: string
+        required: true
+
+      - name: "Private subnets IDs"
+        description: "Amazon subnets IDs on which create each components."
+        key: private_subnets_ids
+        widget: text_area
+        type: array
+        default:
+            - subnet-id1
+            - subnet-id2
+        required: true
+      - name: "Public subnets IDs"
+        description: "Public subnet IDs to use for the public ELB load balancer."
+        key: public_subnets_ids
+        widget: text_area
+        type: array
+        default:
+            - subnet-id1
+            - subnet-id2
+        required: true
+      - name: "Bastion allow security group"
+        description: "Amazon source security group ID which will be allowed to connect on fronts port 22 (ssh)."
+        key: bastion_sg_allow
+        widget: simple_text
+        type: string
+        default: ""
+      - name: "Metrics allow security group"
+        description: "Additionnal security group ID to assign to servers. Goal is to allow monitoring server to query metrics."
+        key: metrics_sg_allow
+        widget: simple_text
+        type: string
+        default: ""
+      - name: "Keypair name"
+        description: "SSH keypair name to use to deploy EC2 instances."
+        key: keypair_name
+        widget: simple_text
+        type: string
+        default: ""
+
+    database:
+      - name: "Use RDS"
+        description: "Define if we want to create or not an RDS database."
+        key: create_rds
+        widget: switch
+        type: boolean
+        default: false
+      - name: "RDS database"
+        description: "Name of the RDS database."
+        key: rds_database
+        widget: simple_text
+        type: string
+        default: "application"
+      - name: "RDS username"
+        description: "User name of the RDS database."
+        key: rds_username
+        widget: simple_text
+        type: string
+        default: "application"
+      - name: "RDS disk size"
+        unit: Go
+        description: "Size in Go of the RDS database."
+        key: rds_disk_size
+        widget: slider_range
+        type: integer
+        default: 10
+        values:
+            - 10
+            - 250
+      - name: "RDS multiaz"
+        description: "Enable multi AZ or not for the RDS database."
+        key: rds_multiaz
+        type: boolean
+        widget: switch
+      - name: "RDS type"
+        description: "AWS Instance type of the RDS database."
+        key: rds_type
+        widget: auto_complete
+        type: string
+        default: "db.t3.small"
+        values:
+            - "db.t3.micro"
+            - "db.t3.small"
+            - "db.t3.medium"
+            - "db.t3.large"
+            - "db.t3.xlarge"
+            - "db.t3.2xlarge"
+      - name: "RDS engine version"
+        description: "Version of the RDS engine."
+        key: rds_engine_version
+        widget: simple_text
+        type: string
+        default: "5.7.16"
+      - name: "RDS backup retention"
+        description: "RDS backup retention period in days."
+        key: rds_backup_retention
+        widget: number
+        type: integer
+        default: 7
+      - name: "RDS parameters"
+        description: "RDS parameters to assign to the RDS database."
+        key: rds_parameters
+        widget: simple_text
+        type: string
+        default: "default.mysql5.7"
+
+    cache:
+      - name: "Use Cache"
+        description: "Define if we want to create or not an Amazon ElastiCache."
+        key: create_elasticache
+        widget: switch
+        type: boolean
+        default: true
+      - name: "Elasticache type"
+        description: "AWS elasticache instance type."
+        key: elasticache_type
+        widget: auto_complete
+        type: string
+        default: "cache.t2.micro"
+        values:
+            - "cache.t2.micro"
+            - "cache.t2.small"
+            - "cache.t2.medium"
+            - "cache.t3.micro"
+            - "cache.t3.small"
+            - "cache.t3.medium"
+            - "cache.m4.large"
+            - "cache.m4.xlarge"
+            - "cache.m4.2xlarge"
+      - name: "Elasticsearch nodes"
+        description: "Number of AWS elasticache instances."
+        key: elasticache_nodes
+        widget: simple_text
+        type: string
+        default: "1"
+      - name: "Elasticsearch engine version"
+        description: "AWS elasticache engine version."
+        key: elasticache_engine_version
+        widget: simple_text
+        type: string
+        default: "5.0.6"
+    s3-medias:
+      - name: "Create medias S3 bucket"
+        description: "Create a S3 bucket dedicated to medias for the LEMP application."
+        key: create_s3_medias
+        widget: switch
+        type: boolean
+        default: false
+    ses-access:
+      - name: "Create SES access"
+        description: "Create a iam user and instance profile to use AWS SES."
+        key: create_ses_access
+        widget: switch
+        type: boolean
+        default: false
+
