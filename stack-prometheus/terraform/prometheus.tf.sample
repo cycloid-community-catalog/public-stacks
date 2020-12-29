@@ -29,36 +29,46 @@ module "prometheus" {
   #. private_subnets_ids (optional, array): []
   #+ Amazon subnets IDs on which create each components. Used when create_rds_database is true.
   #private_subnets_ids = data.terraform_remote_state.infrastructure.outputs.infra_private_subnets
+  private_subnets_ids = []
 
   #. extra_tags (optional): {}
   #+ Dict of extra tags to add on aws resources. format { "foo" = "bar" }.
 
   #. prometheus_type (optional): t3.small
   #+ Amazon EC2 instance type for Prometheus server.
+  prometheus_type = "t3.small"
 
   #. prometheus_disk_size (optional): 60
   #+ Disk size for the Prometheus server.
+  prometheus_disk_size = 60
 
   #. enable_https (optional, bool): false
   #+ Open or not the HTTPS port on the EC2 instance.
+  enable_https = false
 
   #. create_rds_database (optional, bool): true
   #+ create a rds database generaly used for grafana. **false** will not create the database
+  create_rds_database = true
 
   #. rds_type (optional): db.t3.small
   #+ RDS database instance size
+  rds_type = "db.t3.small"
 
   #. rds_disk_size (optional): 10
   #+ RDS database disk size
+  rds_disk_size = 10
 
   #. rds_database (optional): grafana
   #+ RDS database name
+  rds_database = "grafana"
 
   #. rds_username (optional): grafana
   #+ RDS database username
+  rds_username = "grafana"
 
   #. rds_password (optional): ChangeMePls
   #+ RDS password. expected value is var.rds_password to get it from the pipeline.
+  rds_password = var.rds_password
 }
 
 # Example of security group to allow prometheus server to reach your infra and prod vpc
