@@ -27,10 +27,13 @@ module "jenkins" {
 
   #. extra_tags (optional): {}
   #+ Dict of extra tags to add on aws resources. format { "foo" = "bar" }.
+  extra_tags = {}
 
   #. jenkins_type (optional): t3.small
   #+ Amazon EC2 instance type for Jenkins server.
+  jenkins_type = "t3.small"
 
   #. jenkins_disk_size (optional): 60
   #+ Disk size for the Jenkins server.
+  jenkins_disk_size = 60
 }

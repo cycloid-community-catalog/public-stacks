@@ -1,4 +1,5 @@
 ---
+version: '2'
 # Configuration of the Cycloid stack
 name: 'Jenkins'
 canonical: 'stack-jenkins'
@@ -21,22 +22,25 @@ technologies:
     version: 2.215-slim
 
 config:
-  # Configuration of the pipeline
-  pipeline:
+  default:
+    name: 'Default'
+    description: 'Default pipeline usecase'
+    # Configuration of the CI pipeline
     pipeline:
-      path: 'pipeline/pipeline.yml'
-    variables:
-      path: 'pipeline/variables.sample.yml'
-      destination: '($ project $)/pipeline/variables-($ environment $).yml'
+      pipeline:
+        path: 'pipeline/pipeline.yml'
+      variables:
+        path: 'pipeline/variables.sample.yml'
+        destination: '($ project $)/pipeline/variables-($ environment $).yml'
 
-  # Configuration of ansible for provisionning
-  ansible:
-    jenkins:
-      path: 'ansible/environments/jenkins.yml.sample'
-      destination: '($ project $)/ansible/environments/($ environment $)-jenkins.yml'
+    # Configuration of ansible for provisionning
+    ansible:
+      jenkins:
+        path: 'ansible/environments/jenkins.yml.sample'
+        destination: '($ project $)/ansible/environments/($ environment $)-jenkins.yml'
 
-  # Configuration of terraform to setup the infrastructure
-  terraform:
-    jenkins:
-      path: 'terraform/jenkins.tf.sample'
-      destination: '($ project $)/terraform/($ environment $)/jenkins.tf'
+    # Configuration of terraform to setup the infrastructure
+    terraform:
+      jenkins:
+        path: 'terraform/jenkins.tf.sample'
+        destination: '($ project $)/terraform/($ environment $)/jenkins.tf'

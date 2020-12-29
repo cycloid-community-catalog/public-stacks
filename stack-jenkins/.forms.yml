@@ -1,0 +1,162 @@
+---
+default:
+  pipeline:
+    Terraform:
+      - name: "AWS access key"
+        description: "Amazon AWS access key for Terraform."
+        key: aws_access_key
+        widget: cy_cred
+        type: string
+        default: "((aws.access_key))"
+      - name: "AWS secret key"
+        description: "Amazon AWS secret key for Terraform."
+        key: aws_secret_key
+        widget: cy_cred
+        type: string
+        default: "((aws.secret_key))"
+      - name: "Amazon AWS region"
+        description: "Amazon AWS region to use for Terraform."
+        key: aws_default_region
+        widget: auto_complete
+        type: string
+        values: ["eu-north-1","ap-south-1","eu-west-3","eu-west-2","eu-west-1","ap-northeast-2","ap-northeast-1","sa-east-1","ca-central-1","ap-southeast-1","ap-southeast-2","eu-central-1","us-east-1","us-east-2","us-west-1","us-west-2"]
+        default: eu-west-1
+      - name: "Terraform storage bucket"
+        description: "AWS S3 bucket name to store terraform remote state file."
+        key: terraform_storage_bucket_name
+        widget: simple_text
+        type: string
+        default: ($ organization_canonical $)-terraform-remote-state
+    Ansible:
+      - name: "Ansible runner parameters"
+        description: "Parameters of ansible-runner script."
+        key: ansible_params
+        widget: text_area
+        type: map
+        default:
+            SSH_JUMP_URL: user1@Bastion1
+            SSH_PRIVATE_KEYS:
+              - ((ssh_bastion.ssh_key))
+            ANSIBLE_PLAYBOOK_PATH: ansible-playbook/
+            ANSIBLE_PLAYBOOK_NAME: playbook.yml
+            EXTRA_ANSIBLE_VARS:
+              customer: ($ organization_canonical $)
+              project: ($ project $)
+              env: ($ environment $)
+    Repos:
+      - name: "Config repository"
+        key: git_repository
+        type: string
+        widget: cy_crs
+        description: "Git repository URL containing the config of the stack."
+        default: "git@github.com:MyUser/config.git"
+        required: true
+      - name: "Config git key"
+        description: "SSH key pair to fetch the config Git repository."
+        key: git_private_key
+        type: string
+        widget: cy_cred
+        default: "((ssh_config.ssh_key))"
+        required: true
+      - name: "Config branch"
+        description: "Branch of the config Git repository."
+        key: git_branch
+        widget: cy_branch
+        type: string
+        description: "The branch used by the config repository"
+        source: git_repository
+        default: "config"
+        required: true
+    Cycloid:
+      - name: "Terraform version"
+        description: "terraform version used to execute your code."
+        key: terraform_version
+        widget: simple_text
+        type: string
+        default: "0.12.17"
+      - name: "Ansible version"
+        description: "Ansible version used in packer and cycloid-toolkit ansible runner."
+        key: ansible_version
+        widget: simple_text
+        type: string
+        default: "2.7"
+      - name: "Debug SSH key"
+        description: "SSH pubkey injected by packer during the ec2 ami build. Used only to debug failure."
+        key: debug_public_key
+        widget: text_area
+        type: string
+        default: ""
+
+  ansible:
+    application:
+      - name: "Jenkins version"
+        description: "Version of Jenkins based on docker image tag"
+        key: jenkins_version
+        widget: simple_text
+        type: string
+        default: "2.60.3"
+      - name: "Jenkins port"
+        description: "port to reach Jenkins"
+        key: jenkins_port
+        widget: number
+        type: integer
+        default: 80
+
+  terraform:
+    application:
+      - name: "Instance type"
+        description: "Amazon EC2 instance type for Jenkins server."
+        key: jenkins_type
+        widget: auto_complete
+        type: string
+        default: "t3.small"
+        values:
+            - "t3.micro"
+            - "t3.small"
+            - "t3.medium"
+            - "t3.large"
+      - name: "Instance disk size"
+        unit: Go
+        description: "Disk size for the Jenkins server."
+        key: jenkins_disk_size
+        widget: slider_range
+        type: integer
+        default: 60
+        values:
+            - 10
+            - 250
+    network:
+      - name: "Aws VPC ID"
+        description: "Amazon VPC id on which create each components."
+        key: vpc_id
+        widget: simple_text
+        type: string
+        required: true
+        default: "${data.terraform_remote_state.infrastructure.outputs.infra_vpc_id}"
+      - name: "Keypair name"
+        description: "SSH keypair name to use to deploy ec2 instances."
+        key: keypair_name
+        widget: simple_text
+        type: string
+        required: true
+        default: "${data.terraform_remote_state.infrastructure.outputs.keypair_name}"
+      - name: "Bastion security group allow"
+        description: "Amazon source security group ID which will be allowed to connect on Fronts port 22 (ssh)."
+        key: bastion_sg_allow
+        widget: simple_text
+        type: string
+        required: true
+        default: "${data.terraform_remote_state.infrastructure.outputs.infra_bastion_sg_allow}"
+      - name: "Public subnets ids"
+        description: "Amazon subnets IDs on which create each components."
+        key: public_subnets_ids
+        widget: simple_text
+        type: string
+        required: true
+        default: "${data.terraform_remote_state.infrastructure.outputs.infra_public_subnets}"
+      - name: "Extra AWS tags"
+        description: "Dict of extra tags to add on aws resources. format { "foo" = "bar" }."
+        key: extra_tags
+        widget: text_area
+        type: map
+        default: {}

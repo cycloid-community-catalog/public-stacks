@@ -3,7 +3,9 @@
 
 #. jenkins_version: 2.60.3
 #+ Version of Jenkins based on docker image tag
+jenkins_version: 2.60.3
 
 #. jenkins_port: 80
 #+ port to reach Jenkins
+jenkins_port: 80
 
