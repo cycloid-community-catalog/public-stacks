@@ -24,6 +24,14 @@
     - [ "environments/{{ env }}-secrets.yml", "environments/empty.yml" ]
 
   pre_tasks:
+
+    # Force get fact for ansible php & fluentd when --tags
+    # Issue https://github.com/ansible/ansible/issues/57529
+    - setup:
+        filter: ansible_*
+      tags:
+        - always
+
     - name: Restart fluentd to use the hostname on boot
       service:
         name: td-agent

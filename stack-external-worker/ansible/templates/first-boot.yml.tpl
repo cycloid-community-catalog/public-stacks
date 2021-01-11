@@ -7,6 +7,7 @@
     ami_hostname: "{{ ansible_hostname }}"
     ami_ip_address: "{{ ansible_default_ipv4.address|default(ansible_all_ipv4_addresses[0]) }}"
     var_lib_device: "{{var_lib_device}}"
+    cloud_provider: "{{cloud_provider}}"
     use_local_device: "{{use_local_device}}"
     fs_volume_type: "{{fs_volume_type}}"
     fs_volume_options:
@@ -81,6 +82,7 @@
 
    - name: "Setup instance hostname"
      hostname: name="{{ ansible_hostname | truncate(64, False, '') }}"
+     when: cloud_provider != "baremetal"
 
    - name: "Setup instance AWS Hosts file"
      lineinfile: dest=/etc/hosts

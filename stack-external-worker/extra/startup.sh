@@ -93,7 +93,7 @@ _() {
 
     usage() {
         echo "Usage: $SCRIPT_NAME [-d] [-b BRANCH_NAME] [<cloud_provider>]" >&2
-        echo "The <cloud_provider> argument is optional, it can be either `aws`, `azure`, `gcp`, `flexible-engine` or `scaleway`." >&2
+        echo "The <cloud_provider> argument is optional, it can be either `aws`, `azure`, `gcp`, `flexible-engine`, `scaleway` or `baremetal`." >&2
         echo '' >&2
         echo '  -d           Debug mode.' >&2
         echo '  -b           Branch to use for the external-worker stack (default: master).' >&2
@@ -234,6 +234,7 @@ concourse_tsa_worker_key: "{{ concourse_tsa_worker_key_base64 | b64decode}}"
 concourse_worker_team: "${TEAM_ID}"
 nvme_mapping_run: true
 var_lib_device: ${VAR_LIB_DEVICE}
+cloud_provider: ${CLOUD_PROVIDER}
 EOF
 
     ansible-galaxy install -r requirements.yml --force --roles-path=/etc/ansible/roles

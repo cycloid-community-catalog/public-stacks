@@ -5,6 +5,8 @@ var_lib_device: "nodevice"
 # if true, search to use /dev/xvdg or /dev/local0. If not found keep the var_lib_device
 use_local_device: false
 
+cloud_provider: ""
+
 # Run the mapping/symlink of device via ansible instead of udev. Sould be false if building an ami.
 nvme_mapping_run: false
 
