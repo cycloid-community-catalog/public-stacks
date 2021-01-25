@@ -173,7 +173,7 @@ _() {
     apt-get install -y --no-install-recommends git python-setuptools curl jq
 
     if command -v easy_install >/dev/null 2>&1; then
-        easy_install pip
+        easy_install pip==20.3.4
     else
         apt-get install -y --no-install-recommends python-pip
     fi
