@@ -115,7 +115,7 @@ module "eks" {
   #. cluster_enabled_log_types (optional): ["api", "audit", "authenticator", "controllerManager", "scheduler"]
   #+ EKS cluster enabled log types.
 
-  #. control_plane_allowed_ips (optional): [] 
+  #. control_plane_allowed_ips (optional): ["0.0.0.0/0"] 
   #+ Allow Inbound IP CIDRs to access the Kubernetes API.
 
   ###

@@ -84,5 +84,5 @@ variable "cluster_enabled_log_types" {
 
 variable "control_plane_allowed_ips" {
   description = "Allow Inbound IP CIDRs to access the Kubernetes API."
-  default     = []
+  default     = ["0.0.0.0/0"]
 }

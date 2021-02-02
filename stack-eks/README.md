@@ -69,7 +69,7 @@ In order to run this task, couple elements are required within the infrastructur
 |`bastion_sg_allow`|Additionnal security group ID to assign to servers. Goal is to allow bastion server to connect on nodes port 22 (SSH). Make sure the bastion VPC is peered.|`-`|``|`False`|
 |`cluster_enabled_log_types`|EKS cluster enabled log types.|`-`|`["api", "audit", "authenticator", "controllerManager", "scheduler"]`|`False`|
 |`cluster_version`|EKS cluster version.|`-`|`1.16`|`False`|
-|`control_plane_allowed_ips`|Allow Inbound IP CIDRs to access the Kubernetes API.|`-`|`[]`|`False`|
+|`control_plane_allowed_ips`|Allow Inbound IP CIDRs to access the Kubernetes API.|`-`|`["0.0.0.0/0"]`|`False`|
 |`enable_dynamodb_endpoint`|Should be true if you want to provision a DynamoDB endpoint to the VPC.|`bool`|`false`|`False`|
 |`enable_s3_endpoint`|Should be true if you want to provision an S3 endpoint to the VPC.|`bool`|`false`|`False`|
 |`extra_tags`|Dict of extra tags to add on aws resources. format { "foo" = "bar" }.|`-`|`{}`|`False`|
