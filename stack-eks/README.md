@@ -49,7 +49,7 @@ In order to run this task, couple elements are required within the infrastructur
 |`aws_secret_key`|Amazon AWS secret key for Terraform. See value format [here](https://docs.cycloid.io/advanced-guide/integrate-and-use-cycloid-credentials-manager.html#vault-in-the-pipeline)|`-`|`((aws.secret_key))`|`True`|
 |`config_git_branch`|Branch of the config Git repository.|`-`|`master`|`True`|
 |`config_git_private_key`|SSH key pair to fetch the config Git repository.|`-`|`((ssh_config.ssh_key))`|`True`|
-|`config_git_repository`|Git repository URL containing the config of the stack.|`-`|`git@github.com:MyUser/config-eks.git`|`True`|
+|`config_git_repository`|Git repository URL containing the config of the stack.|`-`|`git@github.com:MyUser/config.git`|`True`|
 |`config_terraform_path`|Path of Terraform files in the config git repository|`-`|`($ project $)/terraform/($ environment $)`|`True`|
 |`customer`|Name of the Cycloid Organization, used as customer variable name.|`-`|`($ organization_canonical $)`|`True`|
 |`env`|Name of the project's environment.|`-`|`($ environment $)`|`True`|
@@ -66,7 +66,7 @@ In order to run this task, couple elements are required within the infrastructur
 |Name|Description|Type|Default|Required|
 |---|---|:---:|:---:|:---:|
 |`aws_zones`|To use specific AWS Availability Zones.|`-`|`{}`|`False`|
-|`bastion_sg_allow`|Additionnal security group ID to assign to servers. Goal is to allow bastion server to connect on nodes port 22 (SSH). Make sure the bastion VPC is peered.|`-`|``|`False`|
+|`bastion_sg_allow`|Additionnal security group ID to assign to servers. Goal is to allow bastion server to connect on nodes port 22 (SSH). Make sure the bastion VPC is peered.|`-`|`""`|`False`|
 |`cluster_enabled_log_types`|EKS cluster enabled log types.|`-`|`["api", "audit", "authenticator", "controllerManager", "scheduler"]`|`False`|
 |`cluster_version`|EKS cluster version.|`-`|`1.16`|`False`|
 |`control_plane_allowed_ips`|Allow Inbound IP CIDRs to access the Kubernetes API.|`-`|`["0.0.0.0/0"]`|`False`|
@@ -80,12 +80,12 @@ In order to run this task, couple elements are required within the infrastructur
 |`node_count`|Desired number of node servers.|`-`|`1`|`False`|
 |`node_disk_size`|EKS nodes root disk size.|`-`|`60`|`False`|
 |`node_disk_type`|EKS nodes root disk type.|`-`|`gp2`|`False`|
-|`node_ebs_optimized`|Should be true if the instance type is using EBS optimized volumes.|`-`|`false`|`False`|
-|`node_enable_cluster_autoscaler_tags`|hould be true to add Cluster Autoscaler ASG tags.|`bool`|`false`|`False`|
+|`node_ebs_optimized`|Should be true if the instance type is using EBS optimized volumes.|`-`|`true`|`False`|
+|`node_enable_cluster_autoscaler_tags`|Should be true to add Cluster Autoscaler ASG tags.|`-`|`false`|`False`|
 |`node_group_name`|Node group given name.|`-`|`standard`|`False`|
 |`node_launch_template_profile`|EKS nodes profile, can be either `ondemand` or `spot`.|`-`|`ondemand`|`False`|
 |`node_spot_price`|EKS nodes spot price when `node_market_type = spot`.|`-`|`0.3`|`False`|
-|`node_type`|Type of instance to use for node servers.|`-`|`c3.xlarge`|`False`|
+|`node_type`|Type of instance to use for node servers.|`-`|`c5.xlarge`|`False`|
 |`private_subnets`|The private subnets for the VPC.|`list`|`["10.8.0.0/24", "10.8.2.0/24", "10.8.4.0/24"]`|`False`|
 |`private_subnets_ids`|Amazon subnets IDs on which create each components.|`array`|``|`True`|
 |`public_subnets`|The public subnets for the VPC.|`list`|`["10.8.1.0/24", "10.8.3.0/24", "10.8.5.0/24"]`|`False`|
@@ -105,6 +105,7 @@ In order to run this task, couple elements are required within the infrastructur
 | `private_route_table_ids` | EKS Cluster dedicated VPC private route table IDs.
 | `private_zone_id` | EKS Cluster dedicated VPC private zone ID. |
 | `private_zone_name` | EKS Cluster dedicated VPC private zone name. |
+| `region`| Amazon AWS region used to deploy the cluster.|
 | `cluster_name` | EKS Cluster name. |
 | `cluster_version` | EKS Cluster version. |
 | `cluster_platform_version` | EKS Cluster plateform version. |
@@ -115,6 +116,18 @@ In order to run this task, couple elements are required within the infrastructur
 | `node_iam_role_arn` | EKS nodes IAM role ARN. |
 | `node_iam_instance_profile_name` | EKS nodes IAM instance profile name. |
 | `kubeconfig` | Kubernetes config to connect to the EKS cluster. |
+
+
+# Help
+
+## How to connect the k8s api from linux with aws cli
+
+Generate your kubeconfig with [aws eks](https://docs.aws.amazon.com/eks/latest/userguide/create-kubeconfig.html#create-kubeconfig-manually) command
+```
+export AWS_ACCESS_KEY_ID=AKI....
+export AWS_SECRET_ACCESS_KEY=Secret
+aws eks --region <region> update-kubeconfig --name <cluster_name>
+```
 
 # Known Issues
 

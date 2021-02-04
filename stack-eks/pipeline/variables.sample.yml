@@ -25,9 +25,9 @@ terraform_storage_bucket_name: ($ organization_canonical $)-terraform-remote-sta
 # Repos
 #
 
-#. config_git_repository (required): git@github.com:MyUser/config-eks.git
+#. config_git_repository (required): git@github.com:MyUser/config.git
 #+ Git repository URL containing the config of the stack.
-config_git_repository: git@github.com:MyUser/config-eks.git
+config_git_repository: git@github.com:MyUser/config.git
 
 #. config_git_branch (required): master
 #+ Branch of the config Git repository.

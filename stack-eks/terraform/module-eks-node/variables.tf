@@ -129,7 +129,7 @@ variable "node_spot_price" {
 
 variable "node_type" {
   description = "EKS nodes instance type."
-  default     = "c3.xlarge"
+  default     = "c5.xlarge"
 }
 
 variable "node_count" {
@@ -169,7 +169,7 @@ variable "node_disk_size" {
 
 variable "node_ebs_optimized" {
   description = "Should be true if the instance type is using EBS optimized volumes."
-  default     = false
+  default     = true
 }
 
 locals {

@@ -40,6 +40,11 @@ output "private_zone_name" {
   value       = module.vpc.private_zone_name
 }
 
+output "aws_region" {
+  description = "EKS Region."
+  value       = var.aws_region
+}
+
 # EKS Cluster
 output "cluster_name" {
   description = "EKS Cluster name."

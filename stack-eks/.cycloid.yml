@@ -1,4 +1,5 @@
 ---
+version: '2'
 # Configuration of the Cycloid stack
 name: 'Amazon EKS'
 canonical: 'stack-eks'
@@ -19,16 +20,16 @@ technologies:
     version: 1.14
 
 config:
-  # Configuration of the CI pipeline
-  pipeline:
+  default:
     pipeline:
-      path: 'pipeline/pipeline.yml'
-    variables:
-      path: 'pipeline/variables.sample.yml'
-      destination: '($ project $)/pipeline/variables-($ environment $).yml'
+      pipeline:
+        path: 'pipeline/pipeline.yml'
+      variables:
+        path: 'pipeline/variables.sample.yml'
+        destination: '($ project $)/pipeline/variables-($ environment $).yml'
 
-  # Configuration of terraform to setup the infrastructure
-  terraform:
-    eks:
-      path: 'terraform/eks.tf.sample'
-      destination: '($ project $)/terraform/($ environment $)/eks.tf'
+    # Configuration of terraform to setup the infrastructure
+    terraform:
+      eks:
+        path: 'terraform/eks.tf.sample'
+        destination: '($ project $)/terraform/($ environment $)/eks.tf'

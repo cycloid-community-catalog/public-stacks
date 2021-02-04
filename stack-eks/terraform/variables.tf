@@ -26,6 +26,9 @@ variable "aws_region" {
 }
 
 # EKS
-locals {
-  eks_cluster_name = length(local.cluster_name) > 0 ? local.cluster_name : "${var.project}-${var.env}"
+# Put here a custom name for the EKS Cluster
+# Otherwise `${var.project}-${var.env}` will be used
+variable "cluster_name" {
+  description = "EKS Cluster given name."
+  default     = ""
 }

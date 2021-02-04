@@ -1,7 +1,16 @@
-# Put here a custom name for the EKS Cluster
-# Otherwise `${var.project}-${var.env}` will be used
-locals {
-  cluster_name = ""
+# Config module is used to generate special datas shared with other modules like cluster_name
+module "config" {
+  #####################################
+  # Do not modify the following lines #
+  source = "./module-config"
+
+  project  = var.project
+  env      = var.env
+  customer = var.customer
+
+  #####################################
+
+  cluster_name = var.cluster_name
 }
 
 # By default this stack will create a dedicated VPC for the EKS Cluster
@@ -64,7 +73,7 @@ module "vpc" {
   # Required (should probably not be touched)
   ###
 
-  cluster_name = local.eks_cluster_name
+  cluster_name = module.config.cluster_name
 }
 
 module "eks" {
@@ -115,14 +124,14 @@ module "eks" {
   #. cluster_enabled_log_types (optional): ["api", "audit", "authenticator", "controllerManager", "scheduler"]
   #+ EKS cluster enabled log types.
 
-  #. control_plane_allowed_ips (optional): ["0.0.0.0/0"] 
+  #. control_plane_allowed_ips (optional): ["0.0.0.0/0"]
   #+ Allow Inbound IP CIDRs to access the Kubernetes API.
 
   ###
   # Required (should probably not be touched)
   ###
 
-  cluster_name = local.eks_cluster_name
+  cluster_name = module.config.cluster_name
 }
 
 # You can duplicate this module to create mutiple EKS node groups.
@@ -180,9 +189,9 @@ module "eks-node" {
   #+ Node group given name.
   node_group_name = "standard"
 
-  #. node_type (optional): c3.xlarge
+  #. node_type (optional): c5.xlarge
   #+ Type of instance to use for node servers.
-  node_type = "c3.xlarge"
+  node_type = "c5.xlarge"
 
   #. node_count (optional): 1
   #+ Desired number of node servers.
@@ -190,27 +199,35 @@ module "eks-node" {
 
   #. node_asg_min_size (optional): 1
   #+ Minimum number of node servers allowed in the Auto Scaling Group.
+  node_asg_min_size = 1
 
   #. node_asg_max_size (optional): 10
   #+ Maximum number of node servers allowed in the Auto Scaling Group.
+  node_asg_max_size = 10
 
   #. node_disk_type (optional): gp2
   #+ EKS nodes root disk type.
+  node_disk_type = "gp2"
 
   #. node_disk_size (optional): 60
   #+ EKS nodes root disk size.
+  node_disk_size = 60
 
-  #. node_ebs_optimized (optional): false
+  #. node_ebs_optimized (optional): true
   #+ Should be true if the instance type is using EBS optimized volumes.
+  node_ebs_optimized = true
 
   #. node_launch_template_profile (optional): ondemand
   #+ EKS nodes profile, can be either `ondemand` or `spot`.
+  node_launch_template_profile = "ondemand"
 
   #. node_spot_price (optional): 0.3
   #+ EKS nodes spot price when `node_market_type = spot`.
+  node_spot_price = 0.3
 
   #. node_enable_cluster_autoscaler_tags (optional): false
   #+ Should be true to add Cluster Autoscaler ASG tags.
+  node_enable_cluster_autoscaler_tags = false
 
   ###
   # Required (should probably not be touched)

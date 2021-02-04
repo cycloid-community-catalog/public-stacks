@@ -71,10 +71,13 @@ users:
   user:
     exec:
       apiVersion: client.authentication.k8s.io/v1alpha1
-      command: aws-iam-authenticator
+      command: aws
       args:
-        - "token"
-        - "-i"
+        - --region
+        - "${data.aws_region.current.name}"
+        - eks
+        - get-token
+        - --cluster-name
         - "${var.cluster_name}"
 KUBECONFIG
 }
