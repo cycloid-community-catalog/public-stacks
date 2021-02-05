@@ -14,20 +14,20 @@ registry_username: ''
 #+ Password for regular image repository, otherwise leave it as a empty string.
 registry_password: ''
 
-#. aws_access_key (optional, string): ((aws.access_key))
+#. registry_aws_access_key (optional, string): ((aws.access_key))
 #+ AWS access key if pushing to AWS ECR, otherwise leave it as a empty string.
-aws_access_key: ''
+registry_aws_access_key: ''
 
-#. aws_secret_key (optional, string): ((aws.secret_key))
+#. registry_aws_secret_key (optional, string): ((aws.secret_key))
 #+ AWS secret key if pushing to AWS ECR, otherwise leave it as a empty string.
-aws_secret_key: ''
+registry_aws_secret_key: ''
 
-#. aws_region (optional, string): eu-west-1
+#. registry_aws_region (optional, string): eu-west-1
 #+ AWS region if pushing to AWS ECR, otherwise leave it as a empty string.
-aws_region: ''
+registry_aws_region: ''
 
 #. registry_tag (required, string): ($ environment $)
-#+ tag to put on the builded image (eg latest).
+#+ Tag to put on the builded image (eg latest).
 registry_tag: ($ environment $)
 
 #. registry_extra_tags (optional, string): 'tag1 tag2'
@@ -48,11 +48,11 @@ registry_tag_custom_script: false
 
 
 #
-# Repos
+# Code
 #
 
 #. code_git_repository (required, string): git@github.com:...
-#+ Git repository URL containing the code of the stack.
+#+ Git repository url containing the code of the stack.
 code_git_repository: git@github.com:...
 
 #. code_git_branch (required, string): master
@@ -68,12 +68,73 @@ code_git_private_key: ((ssh_code.ssh_key))
 code_build_context: .
 
 #. code_dockerfile_location (required, string): Dockerfile
-#+ Dockerfile location relative to code_build_context.
+#+ Dockerfile location related to code_build_context
 code_dockerfile_location: Dockerfile
 
 #. code_build_args (optional, dict):
-#+ Set build-time variables for the Docker build.
+#+ Set build-time variables for the Docker build
 code_build_args:
+
+
+#
+# K8s
+#
+
+#. config_git_repository (required): git@github.com:MyUser/config-dockerbuild.git
+#+ Git repository URL containing the K8s config of the stack.
+config_git_repository: git@github.com:MyUser/config-dockerbuild.git
+
+#. config_git_branch (required): master
+#+ Branch of the config Git repository.
+config_git_branch: master
+
+#. config_git_private_key (required): ((ssh_config.ssh_key))
+#+ SSH key pair to fetch the config Git repository.
+config_git_private_key: ((ssh_config.ssh_key))
+
+#. k8s_continuous_deployment (required): true
+#+ If the K8s deployment should be trigger automaticaly after the build or not.
+k8s_continuous_deployment: true
+
+#. k8s_kubeconfig (required): ((custom_kubeconfig))
+#+ Kubernetes config used to connect to the cluster.
+k8s_kubeconfig: ((custom_kubeconfig))
+
+#. k8s_aws_access_key (optional, string): ((aws.access_key))
+#+ AWS access key if deploying to AWS EKS, otherwise leave it as a empty string.
+k8s_aws_access_key: ''
+
+#. k8s_aws_secret_key (optional, string): ((aws.secret_key))
+#+ AWS secret key if deploying to AWS EKS, otherwise leave it as a empty string.
+k8s_aws_secret_key: ''
+
+#. k8s_namespace (required): ($ environment $)
+#+ Kubernetes namespace to use for the deployment.
+k8s_namespace: ($ environment $)
+
+#. k8s_path (required): ($ project $)/k8s
+#+ Path to the manifest(s) to apply in the config git repository, can be either a folder or a single file.
+k8s_path: ($ project $)/k8s
+
+#. k8s_base_path (required): base
+#+ Path to the directory containing the base kustomization.yaml file to watch in the config git repository. Relative to k8s_path.
+k8s_base_path: base
+
+#. k8s_env_path (required): overlays/($ environment $)
+#+ Path to the overlay directory containing the env-specific kustomization.yaml file to watch in the config git repository. Relative to k8s_path.
+k8s_env_path: overlays/($ environment $)
+
+#. k8s_wait_ready_selector (required): ''
+#+ Used to tell the concourse kubernetes resource to wait for a certain label selector to be ready.
+k8s_wait_ready_selector: ''
+
+#. k8s_wait_ready_seconds (required): 60
+#+ How many seconds should the concourse kubernetes resource wait for the label selector.
+k8s_wait_ready_seconds: 60
+
+#. k8s_version (required): '1.16'
+#+ Kubernetes version for the kubernetes concourse resource.
+k8s_version: '1.16'
 
 
 #

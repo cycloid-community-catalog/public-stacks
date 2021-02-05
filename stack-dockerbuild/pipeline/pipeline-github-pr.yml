@@ -25,52 +25,39 @@ shared:
         fi
     outputs:
       - name: merged-stack
-        path: "merged-stack"
 
 resource_types:
-
-- name: registry-image
-  type: docker-image
-  privileged: true
-  source:
-    repository: concourse/registry-image-resource
-    tag: latest
-
-- name: pull-request
-  type: docker-image
-  source:
-    repository: teliaoss/github-pr-resource
-    tag: v0.15.0
+  - name: pull-request
+    type: docker-image
+    source:
+      repository: teliaoss/github-pr-resource
+      tag: v0.15.0
 
 resources:
+  - name: git_stack
+    type: git
+    icon: git
+    source:
+      uri: https://github.com/cycloid-community-catalog/stack-dockerbuild
+      branch: ((stack_git_branch))
+      paths:
+        - docker/*
 
-- name: git_stack
-  type: git
-  icon: git
-  check_every: 2m
-  source:
-    uri: https://github.com/cycloid-community-catalog/stack-dockerbuild
-    branch: ((stack_git_branch))
-    paths:
-      - docker/*
-
-- name: pull-request
-  type: pull-request
-  icon: github-circle
-  source:
-    repository: ((code_git_repository))
-    access_token: ((code_github_access_token))
+  - name: pull-request
+    type: pull-request
+    icon: github-circle
+    source:
+      repository: ((code_git_repository))
+      access_token: ((code_github_access_token))
 
 jobs:
-
-- name: build
-  build_logs_to_retain: 3
-  plan:
-  - do:
-    - aggregate:
+  - name: build
+    max_in_flight: 1
+    build_logs_to_retain: 3
+    plan:
+    - in_parallel:
       - get: git_stack
         trigger: true
-
       - get: pull-request
         trigger: true
         version: every
@@ -89,10 +76,10 @@ jobs:
       config:
         <<: *merge-stack-and-config
         inputs:
-        - name: pull-request
-          path: "config"
-        - name: git_stack
-          path: "stack"
+          - name: pull-request
+            path: config
+          - name: git_stack
+            path: stack
       params:
         CONFIG_PATH: ((code_build_context))
         STACK_PATH: docker

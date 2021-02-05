@@ -31,109 +31,98 @@ shared:
         path: "merged-stack"
 
 resource_types:
-
-- name: git
-  type: docker-image
-  source:
-    repository: concourse/git-resource
-    tag: latest
-
-- name: registry-image
-  type: docker-image
-  privileged: true
-  source:
-    repository: concourse/registry-image-resource
-    tag: latest
+  - name: git
+    type: docker-image
+    source:
+      repository: concourse/git-resource
+      tag: latest
 
 resources:
+  - name: image
+    type: registry-image
+    icon: docker
+    source:
+      #version: every
+      repository: ((registry_image_name))
+      tag: ((registry_tag))
+      username: ((registry_username))
+      password: ((registry_password))
+      aws_access_key_id: ((aws_access_key))
+      aws_secret_access_key: ((aws_secret_key))
+      aws_region: ((aws_region))
 
-- name: image
-  type: registry-image
-  icon: docker
-  source:
-    #version: every
-    repository: ((registry_image_name))
-    tag: ((registry_tag))
-    username: ((registry_username))
-    password: ((registry_password))
-    aws_access_key_id: ((aws_access_key))
-    aws_secret_access_key: ((aws_secret_key))
-    aws_region: ((aws_region))
+  - name: git_stack
+    type: git
+    icon: git
+    source:
+      uri: https://github.com/cycloid-community-catalog/stack-dockerbuild
+      branch: ((stack_git_branch))
+      paths:
+        - docker/*
 
-- name: git_stack
-  type: git
-  icon: git
-  check_every: 2m
-  source:
-    uri: https://github.com/cycloid-community-catalog/stack-dockerbuild
-    branch: ((stack_git_branch))
-    paths:
-      - docker/*
-
-- name: git_code
-  type: git
-  icon: git
-  check_every: 2m
-  source:
-    uri: ((code_git_repository))
-    branch: ((code_git_branch))
-    private_key: ((code_git_private_key))
-    paths:
-      - ((code_build_context))/*
+  - name: git_code
+    type: git
+    icon: git
+    source:
+      uri: ((code_git_repository))
+      branch: ((code_git_branch))
+      private_key: ((code_git_private_key))
+      paths:
+        - ((code_build_context))/*
 
 jobs:
 
-- name: build
-  build_logs_to_retain: 3
-  plan:
+  - name: build
+    max_in_flight: 1
+    build_logs_to_retain: 3
+    plan:
+    - in_parallel:
+      - get: git_stack
+        trigger: true
+      - get: git_code
+        params:
+          describe_ref_options: --always --tags
+        trigger: true
 
-  - aggregate:
-    - get: git_stack
-      trigger: true
-    - get: git_code
+    - task: merge-stack-and-config
+      config:
+        <<: *merge-stack-and-config
+        inputs:
+        - name: git_code
+          path: "config"
+        - name: git_stack
+          path: "stack"
       params:
-        describe_ref_options: --always --tags
-      trigger: true
+        CONFIG_PATH: ((code_build_context))
+        STACK_PATH: docker
+        BUILD_ARGS: ((code_build_args))
+        EXTRA_TAGS: ((registry_extra_tags))
+        TAG_COMMIT_ID: ((registry_tag_commit_id))
+        TAG_DESCRIBE_REF: ((registry_tag_describe_ref))
+        TAG_CUSTOM_SCRIPT: ((registry_tag_custom_script))
 
-  - task: merge-stack-and-config
-    config:
-      <<: *merge-stack-and-config
-      inputs:
-      - name: git_code
-        path: "config"
-      - name: git_stack
-        path: "stack"
-    params:
-      CONFIG_PATH: ((code_build_context))
-      STACK_PATH: docker
-      BUILD_ARGS: ((code_build_args))
-      EXTRA_TAGS: ((registry_extra_tags))
-      TAG_COMMIT_ID: ((registry_tag_commit_id))
-      TAG_DESCRIBE_REF: ((registry_tag_describe_ref))
-      TAG_CUSTOM_SCRIPT: ((registry_tag_custom_script))
+    - task: tests
+      file: merged-stack/.ci/tests.yml
+      privileged: true
 
-  - task: tests
-    file: merged-stack/.ci/tests.yml
-    privileged: true
+    - task: build
+      file: merged-stack/.ci/build.yml
+      privileged: true
+      params:
+        REPOSITORY: ((registry_image_name))
+        TAG: ((registry_tag))
+        CONTEXT: merged-stack
+        DOCKERFILE: merged-stack/((code_dockerfile_location))
+        BUILD_ARGS_FILE: merged-stack/.ci/build_args_file
 
-  - task: build
-    file: merged-stack/.ci/build.yml
-    privileged: true
-    params:
-      REPOSITORY: ((registry_image_name))
-      TAG: ((registry_tag))
-      CONTEXT: merged-stack
-      DOCKERFILE: merged-stack/((code_dockerfile_location))
-      BUILD_ARGS_FILE: merged-stack/.ci/build_args_file
+    - task: post-tests
+      file: merged-stack/.ci/post-tests.yml
+      privileged: true
+      params:
+        TAG: ((registry_tag))
+        REPOSITORY: ((registry_image_name))
 
-  - task: post-tests
-    file: merged-stack/.ci/post-tests.yml
-    privileged: true
-    params:
-      TAG: ((registry_tag))
-      REPOSITORY: ((registry_image_name))
-
-  - put: image
-    params:
-      additional_tags: merged-stack/.ci/TAGS
-      image: image/image.tar
+    - put: image
+      params:
+        additional_tags: merged-stack/.ci/TAGS
+        image: image/image.tar
