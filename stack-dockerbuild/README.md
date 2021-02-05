@@ -25,10 +25,10 @@ Those steps can be configured for your own usage by putting the file from `docke
 **Variations**
 
 There are 3 versions of the pipeline supported in this stack:
-  * Single job: `pipeline.yml` + `variables.sample.yml` (default)
-  * Split jobs: `pipeline-split-jobs.yml` + `variables.sample.yml`
+  * build and push: `pipeline.yml` + `variables.sample.yml` (default)
   * Github PRs: `pipeline-github-pr.yml` + `variables-github-pr.sample.yml`
-  * Build + Deploy to K8s: `pipeline-deploy-k8s.yml` + `variables-deploy-k8s.sample.yml`
+  * Build + Deploy to K8s: `pipeline-build-deploy-k8s.yml` + `variables-build-deploy-k8s.sample.yml`
+  * Deploy to k8s: `pipeline-deploy-k8s.yml` + `variables-deploy-k8s.sample.yml`
 
 Currently, Cycloid console doesn't support yet switching between different pipeline variations, you will have to manually copy+paste pipeline+variables from GIT inside the Cycloid console to use them.
 

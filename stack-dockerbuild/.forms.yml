@@ -95,11 +95,11 @@ default:
 
     Code:
       - name: "Code repository"
-        description: "Git repository URL containing the code of the stack."
+        description: "Git repository URL containing the Dockerfile."
         key: code_git_repository
         type: string
-        default: "git@github.com:..."
-        widget: cy_crs
+        default: "git@github.com:MyUser/config-dockerbuild.git"
+        widget: simple_text
         required: true
       - name: "Code repository key"
         description: "SSH key pair to fetch the code git repository."
@@ -271,11 +271,11 @@ build-deploy-k8s:
 
     Code:
       - name: "Code repository"
-        description: "Git repository URL containing the code of the stack."
+        description: "Git repository URL containing the Dockerfile."
         key: code_git_repository
         type: string
-        default: "git@github.com:..."
-        widget: cy_crs
+        default: "git@github.com:MyUser/config-dockerbuild.git"
+        widget: simple_text
         required: true
       - name: "Code repository key"
         description: "SSH key pair to fetch the code git repository."
@@ -313,7 +313,7 @@ build-deploy-k8s:
 
     K8s:
       - name: "Kubernetes config repository"
-        description: "Git repository URL containing the K8s config of the stack."
+        description: "Git repository URL containing the K8s configuration (kustomize yaml)."
         key: config_git_repository
         type: string
         default: "git@github.com:MyUser/config-dockerbuild.git"
@@ -475,7 +475,7 @@ deploy-k8s:
 
     K8s:
       - name: "Kubernetes config repository"
-        description: "Git repository URL containing the K8s config of the stack."
+        description: "Git repository URL containing the K8s configuration (kustomize yaml)."
         key: config_git_repository
         type: string
         default: "git@github.com:MyUser/config-dockerbuild.git"
@@ -564,4 +564,3 @@ deploy-k8s:
         type: string
         default: "1.16"
         widget: simple_text
-
