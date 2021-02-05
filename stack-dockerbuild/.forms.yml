@@ -113,8 +113,7 @@ default:
         key: code_git_branch
         type: string
         default: "master"
-        widget: cy_branch
-        source: code_git_repository
+        widget: simple_text
         required: true
       - name: "Docker build context path"
         description: "Path from the repository root to the files to build. The Dockerfile location is relative to this path."
@@ -289,8 +288,7 @@ build-deploy-k8s:
         key: code_git_branch
         type: string
         default: "master"
-        widget: cy_branch
-        source: code_git_repository
+        widget: simple_text
         required: true
       - name: "Docker build context path"
         description: "Path from the repository root to the files to build. The Dockerfile location is relative to this path."
