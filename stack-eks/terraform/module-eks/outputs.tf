@@ -71,16 +71,23 @@ users:
   user:
     exec:
       apiVersion: client.authentication.k8s.io/v1alpha1
-      command: aws
+      command: aws-iam-authenticator
       args:
-        - --region
-        - "${data.aws_region.current.name}"
-        - eks
-        - get-token
-        - --cluster-name
+        - "token"
+        - "-i"
         - "${var.cluster_name}"
 KUBECONFIG
 }
+
+# The following lines can be used to generate kubeconfig using awscli as authentication client
+# command: aws
+# args:
+#   - --region
+#   - "${data.aws_region.current.name}"
+#   - eks
+#   - get-token
+#   - --cluster-name
+#   - "${var.cluster_name}"
 
 output "kubeconfig" {
   description = "Kubernetes config to connect to the EKS Cluster."
