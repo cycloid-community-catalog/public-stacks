@@ -15,9 +15,9 @@ image: |
   https://raw.githubusercontent.com/cycloid-community-catalog/stack-eks/master/icon.png
 technologies:
   - technology: Amazon Elastic Kubernetes Service
-    version: 1.14
+    version: 1.16
   - technology: Amazon EKS-Optimized AMI
-    version: 1.14
+    version: 1.16
 
 config:
   default:

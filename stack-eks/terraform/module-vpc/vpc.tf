@@ -4,7 +4,7 @@
 
 module "aws-vpc" {
   source  = "terraform-aws-modules/vpc/aws"
-  version = "~> v2.0"
+  version = "~> v2.70.0"
 
   name = "${var.project}-eks-${var.env}"
   azs  = local.aws_availability_zones
