@@ -128,10 +128,9 @@ default:
         default: "Dockerfile"
         widget: simple_text
       - name: "Docker build args"
-        description: "Set build-time variables for the Docker build."
+        description: "Set build-time variables for the Docker build defined in json. e.g. `{\"DO_THING\": \"false\"}`"
         key: code_build_args
-        type: map
-        default: {}
+        type: string
         widget: text_area
 
 github-pr:
@@ -192,10 +191,9 @@ github-pr:
         default: "Dockerfile"
         widget: simple_text
       - name: "Docker build args"
-        description: "Set build-time variables for the Docker build."
+        description: "Set build-time variables for the Docker build defined in json. e.g. `{\"DO_THING\": \"false\"}`"
         key: code_build_args
-        type: map
-        default: {}
+        type: string
         widget: text_area
 
 build-deploy-k8s:
@@ -303,10 +301,9 @@ build-deploy-k8s:
         default: "Dockerfile"
         widget: simple_text
       - name: "Docker build args"
-        description: "Set build-time variables for the Docker build."
+        description: "Set build-time variables for the Docker build defined in json. e.g. `{\"DO_THING\": \"false\"}`"
         key: code_build_args
-        type: map
-        default: {}
+        type: string
         widget: text_area
 
     K8s:

@@ -22,7 +22,7 @@ technologies:
 
 config:
   default:
-    name: 'build and push'
+    name: 'Build and push'
     description: 'Used to build, tests and push docker images from branches (single job variant).'
     pipeline:
       pipeline:
