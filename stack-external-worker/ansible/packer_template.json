@@ -59,7 +59,7 @@
         "echo '{{user `public_key`}}' > /home/admin/.ssh/authorized_keys",
         "sudo apt-get update -qq > /dev/null",
         "sudo apt-get install -yqq build-essential libssl-dev libffi-dev python-dev python-setuptools git curl > /dev/null",
-        "sudo easy_install --quiet pip",
+        "if command -v easy_install >/dev/null 2>&1; then sudo easy_install --quiet pip==20.3.4; else sudo apt-get install -yqq --no-install-recommends python-pip; fi",
         "sudo pip install -U cryptography",
         "sudo pip -q install ansible=={{user `ansible_version`}}",
         "echo 'Host *' >> /home/admin/.ssh/config",
