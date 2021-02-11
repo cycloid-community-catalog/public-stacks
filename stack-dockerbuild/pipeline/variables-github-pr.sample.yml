@@ -23,9 +23,9 @@ registry_tag_commit_id: false
 # Repos
 #
 
-#. code_git_repository (required): git@github.com:...
+#. code_git_repository (required): myuser/repositoryname
 #+ Git repository url containing the code of the stack.
-code_git_repository: git@github.com:...
+code_git_repository: myuser/repositoryname
 
 #. code_github_access_token (required): ((custom_github.access_token))
 #+ Github access token for Github PRs
