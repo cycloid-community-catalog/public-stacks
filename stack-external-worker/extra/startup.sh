@@ -188,6 +188,7 @@ _() {
         dpkg --purge python-openssl
     fi
 
+    pip install wheel
     pip install -U cryptography
     pip install ansible==2.7
 
