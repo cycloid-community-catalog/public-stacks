@@ -169,6 +169,11 @@ _() {
     handle_envvars
 
     echo "### starting setup of cycloid worker"
+
+    # Avoid apt lock issue if there is another apt process at startup.
+    # This is mostly the case with agent like waagent on Azure.
+    timeout 300 bash -c "while pgrep apt > /dev/null; do sleep 1; done"
+
     apt-get update
     apt-get install -y --no-install-recommends git python-setuptools curl jq
 

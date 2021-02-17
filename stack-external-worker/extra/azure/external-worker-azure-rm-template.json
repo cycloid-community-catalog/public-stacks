@@ -270,7 +270,7 @@
     },
     "sgAuthorizedCidrs": {
       "type": "array",
-      "defaultValue": [],
+      "defaultValue": ["0.0.0.0/0"],
       "metadata": {
         "description": "Authorized CIDRs to access the worker from the outside."
       }
@@ -331,9 +331,9 @@
   "variables": {
     "namePrefix": "[toLower(concat(parameters('customerTag'), '-', parameters('projectTag'), '-', parameters('environmentTag')))]",
     "imageRef": {
-      "publisher": "Canonical",
-      "offer": "UbuntuServer",
-      "sku": "18.04-LTS",
+      "publisher": "Debian",
+      "offer": "debian-10",
+      "sku": "10",
       "version": "latest"
     },
     "instanceNsgName": "[concat(variables('namePrefix'), '-nsg')]",
