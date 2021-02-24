@@ -1,7 +1,3 @@
-locals {
-  admin-users = compact(concat(aws_iam_user.infra.*.name, var.extra_admin_users))
-}
-
 resource "aws_iam_user" "infra" {
   count = var.create_infra_user ? 1 : 0
 
@@ -14,16 +10,21 @@ resource "aws_iam_access_key" "infra" {
   user  = aws_iam_user.infra[0].name
 }
 
-resource "aws_iam_role_policy_attachment" "infra_administrator_access_role" {
-  count = var.create_infra_user ? 1 : 0
+resource "aws_iam_user_policy_attachment" "infra_administrator_access_user" {
+  count      = var.create_infra_user ? 1 : 0
+  user       = aws_iam_user.infra[0].name
+  policy_arn = "arn:aws:iam::aws:policy/AdministratorAccess"
+}
 
+resource "aws_iam_role_policy_attachment" "infra_administrator_access_role" {
+  count      = var.create_infra_user ? 1 : 0
   role       = "admin"
   policy_arn = "arn:aws:iam::aws:policy/AdministratorAccess"
 }
 
-resource "aws_iam_user_policy_attachment" "infra_administrator_access_user" {
-  count      = length(local.admin-users)
-  user       = element(local.admin-users, count.index)
+resource "aws_iam_user_policy_attachment" "infra_administrator_access_extra_users" {
+  count      = length(var.extra_admin_users)
+  user       = element(var.extra_admin_users, count.index)
   policy_arn = "arn:aws:iam::aws:policy/AdministratorAccess"
 }
 

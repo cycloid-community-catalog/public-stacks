@@ -34,7 +34,7 @@ module "infrastructure" {
 
   #. infra_cidr: 10.0.0.0/16
   #+ The CIDR of the infra VPC
-  infra_cidr            = "10.0.0.0/16"
+  infra_cidr = "10.0.0.0/16"
 
   #. infra_private_subnets (optional, list): ["10.0.0.0/24", "10.0.2.0/24", "10.0.4.0/24"]
   #+ The private subnets for the infra VPC
@@ -42,7 +42,7 @@ module "infrastructure" {
 
   #. infra_public_subnets (optional, list): ["10.0.1.0/24", "10.0.3.0/24", "10.0.5.0/24"]
   #+ The public subnets for the infra VPC
-  infra_public_subnets  = ["10.0.1.0/24", "10.0.3.0/24", "10.0.5.0/24"]
+  infra_public_subnets = ["10.0.1.0/24", "10.0.3.0/24", "10.0.5.0/24"]
 
   #. infra_associate_vpc_to_all_private_zones (optional, bool): false
   #+ Should be true if you want to associate the infra VPC to staging and prod privates zones.
@@ -54,19 +54,19 @@ module "infrastructure" {
 
   #. staging_cidr: 10.1.0.0/16
   #+ The CIDR of the staging VPC
-  staging_cidr                = "10.1.0.0/16"
+  staging_cidr = "10.1.0.0/16"
 
   #. staging_private_subnets (optional, list): ["10.1.0.0/24", "10.1.2.0/24", "10.1.4.0/24"]
   #+ The private subnets for the staging VPC
-  staging_private_subnets     = ["10.1.0.0/24", "10.1.4.0/24", "10.1.8.0/24"]
+  staging_private_subnets = ["10.1.0.0/24", "10.1.4.0/24", "10.1.8.0/24"]
 
   #. staging_public_subnets (optional, list): ["10.1.1.0/24", "10.1.3.0/24", "10.1.5.0/24"]
   #+ The public subnets for the staging VPC
-  staging_public_subnets      = ["10.1.1.0/24", "10.1.5.0/24", "10.1.9.0/24"]
+  staging_public_subnets = ["10.1.1.0/24", "10.1.5.0/24", "10.1.9.0/24"]
 
   #. staging_rds_subnets (optional, list): ["10.1.2.0/24", "10.1.6.0/24", "10.1.10.0/24"]
   #+ The RDS subnets for the staging VPC
-  staging_rds_subnets         = ["10.1.2.0/24", "10.1.6.0/24", "10.1.10.0/24"]
+  staging_rds_subnets = ["10.1.2.0/24", "10.1.6.0/24", "10.1.10.0/24"]
 
   #. staging_elasticache_subnets (optional, list): []
   #+ The Elasticache subnets for the staging VPC

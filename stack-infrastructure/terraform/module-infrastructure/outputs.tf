@@ -15,7 +15,7 @@ output "iam_ses_smtp_user_key" {
 }
 
 output "iam_ses_smtp_user_secret" {
-  value = aws_iam_access_key.ses_smtp_user.ses_smtp_password
+  value = aws_iam_access_key.ses_smtp_user.ses_smtp_password_v4
 }
 
 output "deployment_bucket_name" {
