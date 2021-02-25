@@ -191,3 +191,27 @@
         enabled: yes
       tags:
        - notforbuild
+
+    # If cleaner is enabled make sure it will be run at next startup
+    - name: configure worker cleaner service | concourse
+      service:
+        name: concourse-worker-cleaner
+        enabled: "{{ concourse_service_worker_cleaner_enabled }}"
+      tags:
+       - notforbuild
+
+    # If watchdog is enabled, configure and start it
+    - name: configure worker watchdog service | concourse
+      service:
+        name: concourse-worker-watchdog
+        enabled: "{{ concourse_service_watchdog_enabled }}"
+      tags:
+       - notforbuild
+    - name: start concourse worker-watchdog
+      service:
+        name: concourse-worker-watchdog
+        state: started
+        enabled: yes
+      tags:
+       - notforbuild
+      when: concourse_service_watchdog_enabled
