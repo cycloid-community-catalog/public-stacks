@@ -23,29 +23,40 @@
                overwrite: True
       when: ansible_system_vendor == "Amazon EC2" and (var_lib_device != "nodevice")
 
-    - name: Ensure admin user is present
-      user:
-        name: admin
-        state: present
-        create_home: true
-      when: ansible_version.major != 2 or ansible_version.minor > 4
-    - name: Ensure admin user is present (2.4 compact)
-      user:
-        name: admin
-        state: present
-        createhome: true
-      when: ansible_version.major == 2 and ansible_version.minor < 5
+    - block:
+      - name: Ensure install user is present
+        user:
+          name: "{{ install_user }}"
+          state: present
+          create_home: true
+        when: ansible_version.major != 2 or ansible_version.minor > 4
+      - name: Ensure install user is present (2.4 compact)
+        user:
+          name: "{{ install_user }}"
+          state: present
+          createhome: true
+        when: ansible_version.major == 2 and ansible_version.minor < 5
+      when: install_user != "root"
 
     - template:
         src: first-boot.yml.tpl
-        dest: /home/admin/first-boot.yml
-        owner: admin
-        group: admin
-    - template:
-        src: user-data.sh.tpl
-        dest: /home/admin/user-data.sh
-        owner: admin
-        group: admin
+        dest: "{{ install_user_home }}/first-boot.yml"
+        owner: "{{ install_user }}"
+        group: "{{ install_user_group }}"
+    
+    - block:
+      - template:
+          src: user-data.sh.scw.tpl
+          dest: "{{ install_user_home }}/user-data.sh"
+          owner: "{{ install_user }}"
+          group: "{{ install_user_group }}"
+        when: ansible_system_vendor == "Scaleway"
+      - template:
+          src: user-data.sh.tpl
+          dest: "{{ install_user_home }}/user-data.sh"
+          owner: "{{ install_user }}"
+          group: "{{ install_user_group }}"
+        when: ansible_system_vendor != "Scaleway"
 
     # Generate the ansible hosts file like https://www.packer.io/docs/provisioners/ansible-local.html#inventory_groups do.
     # We do that because we need this inventory file for post ansible run to deploy the code when the AWS instance boot

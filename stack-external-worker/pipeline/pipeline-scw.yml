@@ -1,0 +1,386 @@
+# YAML anchors
+shared:
+  # Task : connect on vault API with approle and generate a token from it.
+  # Also provide some extra vars like external_worker_image for terraform
+  - &extract-vars
+    task: extract-vars
+    config:
+      platform: linux
+      image_resource:
+        type: docker-image
+        source:
+          repository: cycloid/cycloid-toolkit
+          tag: latest
+      run:
+        path: /usr/bin/vault-approle-login
+      outputs:
+      - name: extracted-vars
+        path: extracted-vars
+    params:
+      VAULT_ROLEID: ((vault.role_id))
+      VAULT_SECRETID: ((vault.secret_id))
+      VARS_TF_PATH: extracted-vars/terraform.tfvars
+      SCHEDULER_API_ADDRESS: ((scheduler_api_address))
+
+  # Task : sync and merge with rsync 2 rep. Used to merge stack and config
+  - &merge-stack-and-config
+    platform: linux
+    image_resource:
+      type: docker-image
+      source:
+        repository: cycloid/cycloid-toolkit
+        tag: latest
+    run:
+      path: /bin/sh
+      args:
+      - -ec
+      - |
+        /usr/bin/merge-stack-and-config
+        # external_worker_image
+        VERSION=$(curl -s "${SCHEDULER_API_ADDRESS}/api/v1/info" | jq -r '.version')
+        mkdir -p merged-stack/group_vars
+        echo "concourse_version: \"${VERSION}\"" | tee -a merged-stack/group_vars/all
+        if [ -d "./instance_image" ]; then
+          cat >> ${VARS_TF_PATH}<<EOF
+        worker_image_id = "$(cat ./instance_image/version)"
+        EOF
+        fi
+    outputs:
+    - name: merged-stack
+      path: "merged-stack"
+
+
+groups:
+- name: all
+  jobs:
+  - terraform-plan
+  - terraform-apply
+  - build-worker-instance-image
+  - deploy
+
+- name: terraform
+  jobs:
+  - terraform-plan
+  - terraform-apply
+
+- name: worker
+  jobs:
+  - build-worker-instance-image
+  - deploy
+
+- name: destroy
+  jobs:
+  - terraform-destroy
+
+
+resource_types:
+- name: terraform
+  type: docker-image
+  source:
+    repository: ljfranklin/terraform-resource
+    tag: ((terraform_version))
+
+- name: packer
+  type: docker-image
+  source:
+    repository: snapkitchen/concourse-packer-resource
+    tag: ((packer_version))
+
+
+resources:
+# Terraform by itself
+- name: tfstate
+  type: terraform
+  icon: terraform
+  source:
+    env_name: ((env))
+    backend_type: s3
+    backend_config:
+      bucket: ((terraform_storage_bucket_name))
+      key: ((project))-((env)).tfstate
+      workspace_key_prefix: ((project))
+      region: ((scw_default_region))
+      access_key: ((scw_access_key))
+      secret_key: ((scw_secret_key))
+      endpoint: 'https://s3.((scw_default_region)).scw.cloud'
+      skip_credentials_validation: true
+      skip_region_validation: true
+    vars:
+      scw_organization_id: ((scw_organization_id))
+      scw_access_key: ((scw_access_key))
+      scw_secret_key: ((scw_secret_key))
+      scw_region: ((scw_default_region))
+      env: ((env))
+      customer: ((customer))
+      project: ((project))
+    env:
+      SCW_ACCESS_KEY: ((scw_access_key))
+      SCW_DEFAULT_REGION: ((scw_default_region))
+      SCW_SECRET_KEY: ((scw_secret_key))
+
+# The Terraform stack (will be merged with the config)
+- name: git_stack-terraform
+  type: git
+  icon: git
+  source:
+    uri: https://github.com/cycloid-community-catalog/stack-external-worker
+    branch: ((stack_git_branch))
+    paths:
+      - terraform/scw/*
+
+# The Terraform config (will be merged with the stack)
+- name: git_config-terraform
+  type: git
+  icon: git
+  source:
+    uri: ((config_git_repository))
+    branch: ((config_git_branch))
+    private_key: ((config_git_private_key))
+    paths:
+      - ((config_terraform_path))/*
+
+# The Ansible stack (will be merged with the config)
+- name: git_stack-ansible
+  type: git
+  icon: git
+  source:
+    uri: https://github.com/cycloid-community-catalog/stack-external-worker
+    branch: ((stack_git_branch))
+    paths:
+      - ansible/*
+
+# The Ansible config (will be merged with the stack)
+- name: git_config-ansible
+  type: git
+  icon: git
+  source:
+    uri: ((config_git_repository))
+    branch: ((config_git_branch))
+    private_key: ((config_git_private_key))
+    paths:
+      - ((config_ansible_path))/*
+
+# The instance-image builder for the worker server
+- name: instance_image_worker
+  type: packer
+  icon: packer
+
+jobs:
+# Build a new instance-image whenever there is a change in Ansible
+- name: build-worker-instance-image
+  max_in_flight: 1
+  build_logs_to_retain: 10
+  plan:
+  - do:
+
+    - get: git_stack-ansible
+      trigger: true
+    - get: git_config-ansible
+      trigger: true
+
+    - task: merge-stack-and-config
+      config:
+        <<: *merge-stack-and-config
+        inputs:
+        - name: git_config-ansible
+          path: "config"
+        - name: git_stack-ansible
+          path: "stack"
+      params:
+        SCHEDULER_API_ADDRESS: ((scheduler_api_address))
+        CONFIG_PATH: ((config_ansible_path))
+        STACK_PATH: ansible
+        EXTRA_ANSIBLE_VARS:
+          concourse_tsa_port: ((scheduler_port))
+          concourse_tsa_host: ((scheduler_host))
+          concourse_tsa_public_key: ((((external_worker_key)).ssh_pub))
+          concourse_tsa_worker_key: ((((external_worker_key)).ssh_prv))
+
+    - put: instance_image_worker
+      params:
+        template: merged-stack/packer/scw.json
+        vars:
+          scw_region: ((packer_scw_region))
+          scw_organization: ((scw_organization_id))
+          scw_api_token: ((scw_secret_key))
+          env: ((env))
+          project: ((project))
+          customer: ((customer))
+          role: worker
+          ansible_version: ((packer_ansible_version))
+          skip_tags: deploy,notforbuild
+          public_key: ((debug_public_key))
+
+# Merge and trigger a plan whenever there is a commit in Terraform stack or config
+- name: terraform-plan
+  max_in_flight: 1
+  build_logs_to_retain: 10
+  plan:
+    - do:
+      - get: instance_image_worker
+        passed:
+          - build-worker-instance-image
+      - get: git_stack-terraform
+        trigger: true
+      - get: git_config-terraform
+        trigger: true
+
+      - task: merge-stack-and-config
+        config:
+          <<: *merge-stack-and-config
+          inputs:
+          - name: git_config-terraform
+            path: "config"
+          - name: git_stack-terraform
+            path: "stack"
+          - name: instance_image_worker
+            path: "instance_image"
+        params:
+          CONFIG_PATH: ((config_terraform_path))
+          STACK_PATH: terraform/scw
+          VARS_TF_PATH: merged-stack/terraform.tfvars
+
+      - *extract-vars
+
+      - put: tfstate
+        params:
+          plan_only: true
+          terraform_source: merged-stack/
+          var_files:
+              - extracted-vars/terraform.tfvars
+
+# Merge and trigger an apply manually (no autostart of this job)
+- name: terraform-apply
+  build_logs_to_retain: 10
+  plan:
+    - do:
+      - get: instance_image_worker
+        trigger: false
+        passed:
+          - terraform-plan
+
+      - get: git_stack-terraform
+        trigger: false
+        passed:
+          - terraform-plan
+      - get: git_config-terraform
+        trigger: false
+        passed:
+          - terraform-plan
+      - get: tfstate
+        trigger: false
+        passed:
+          - terraform-plan
+
+      - task: merge-stack-and-config
+        config:
+          <<: *merge-stack-and-config
+          inputs:
+          - name: git_config-terraform
+            path: "config"
+          - name: git_stack-terraform
+            path: "stack"
+          - name: instance_image_worker
+            path: "instance_image"
+        params:
+          CONFIG_PATH: ((config_terraform_path))
+          STACK_PATH: terraform/scw
+          VARS_TF_PATH: merged-stack/terraform.tfvars
+
+      - *extract-vars
+
+      - put: tfstate
+        params:
+          plan_run: true
+          terraform_source: merged-stack/
+          var_files:
+              - extracted-vars/terraform.tfvars
+
+# Merge and trigger an apply manually (no autostart of this job)
+- name: deploy
+  build_logs_to_retain: 10
+  plan:
+    - do:
+      - get: instance_image_worker
+        passed:
+          - build-worker-instance-image
+        trigger: false
+
+      - get: git_stack-terraform
+        trigger: false
+        passed:
+          - terraform-apply
+
+      - get: git_config-terraform
+        trigger: false
+        passed:
+          - terraform-apply
+
+      - get: tfstate
+        trigger: false
+        passed:
+          - terraform-apply
+
+      - task: merge-stack-and-config
+        config:
+          <<: *merge-stack-and-config
+          inputs:
+          - name: git_config-terraform
+            path: "config"
+          - name: git_stack-terraform
+            path: "stack"
+          - name: instance_image_worker
+            path: "instance_image"
+        params:
+          CONFIG_PATH: ((config_terraform_path))
+          STACK_PATH: terraform/scw
+          VARS_TF_PATH: merged-stack/terraform.tfvars
+
+      - *extract-vars
+
+      - put: tfstate
+        params:
+          terraform_source: merged-stack/
+          var_files:
+              - extracted-vars/terraform.tfvars
+
+- name: terraform-destroy
+  serial: True
+  build_logs_to_retain: 10
+  plan:
+    - do:
+      - get: git_stack-terraform
+        trigger: false
+        passed:
+          - terraform-apply
+      - get: git_config-terraform
+        trigger: false
+        passed:
+          - terraform-apply
+      - get: tfstate
+        trigger: false
+        passed:
+          - terraform-apply
+
+      - task: merge-stack-and-config
+        config:
+          <<: *merge-stack-and-config
+          inputs:
+          - name: git_config-terraform
+            path: "config"
+          - name: git_stack-terraform
+            path: "stack"
+        params:
+          CONFIG_PATH: ((config_terraform_path))
+          STACK_PATH: terraform/scw
+
+      - *extract-vars
+
+      - put: tfstate
+        params:
+          action: destroy
+          terraform_source: merged-stack/
+          var_files:
+              - extracted-vars/terraform.tfvars
+        get_params:
+          action: destroy

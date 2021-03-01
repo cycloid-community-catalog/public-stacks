@@ -1,0 +1,87 @@
+{
+  "variables": {
+    "scw_region": "{{env `SCW_REGION`}}",
+    "scw_organization": "{{env `SCALEWAY_ORGANIZATION`}}",
+    "scw_api_token": "{{env `SCALEWAY_API_TOKEN`}}",
+    "exposed_team": "{{env `BUILD_TEAM_NAME`}}",
+    "customer": "{{env `CUSTOMER`}}",
+    "project": "{{env `PROJECT`}}",
+    "env": "{{env `ENV`}}",
+    "role": "{{env `ROLE`}}",
+    "ansible_version": "{{env `ANSIBLE_VERSION`}}",
+    "inventory_groups": "{{env `ANSIBLE_INVENTORY_GROUPS`}}",
+    "skip_tags": "{{env `ANSIBLE_SKIP_TAGS`}}",
+    "public_key": "{{env `PUBLIC_KEY`}}",
+    "install_user": "root",
+    "install_user_home": "/root"
+  },
+  "sensitive-variables": [
+    "scw_api_token"
+  ],
+  "builders": [
+    {
+      "type": "scaleway",
+      "region": "{{user `scw_region`}}",
+      "organization_id": "{{user `scw_organization`}}",
+      "api_token": "{{user `scw_api_token`}}",
+      "image": "cc9188b3-3938-47d7-b091-c9ecad1fe507",
+      "image_name": "{{user `project`}}_{{user `role`}}_{{user `env`}}_{{timestamp}}",
+      "snapshot_name": "{{user `project`}}_{{user `role`}}_{{user `env`}}_{{timestamp}}",
+      "remove_volume": true,
+      "commercial_type": "START1-S",
+      "ssh_username": "{{user `install_user`}}"
+    }
+  ],
+  "provisioners": [
+    {
+      "type": "shell",
+      "inline": [
+        "echo 'Waiting for cloudinit to be done... Can take up to 300 sec'",
+        "# Due to https://github.com/mitchellh/packer/issues/41 wait cloud init",
+        "for i in $(seq 1 300); do [ -f /var/lib/cloud/instance/boot-finished ] && break || sleep 1; done",
+        "echo '{{user `public_key`}}' > {{user `install_user_home`}}/.ssh/instance_keys",
+        "scw-fetch-ssh-keys --upgrade",
+        "sudo apt-get update -qq > /dev/null",
+        "sudo apt-get install -yqq build-essential libssl-dev libffi-dev python-dev python-setuptools python-pip git curl > /dev/null",
+        "sudo pip install -U cryptography",
+        "sudo pip -q install ansible=={{user `ansible_version`}}",
+        "echo 'Host *' >> {{user `install_user_home`}}/.ssh/config",
+        "echo 'StrictHostKeyChecking no' >> {{user `install_user_home`}}/.ssh/config",
+        "# wait aws role attach to the instance",
+        "sleep 60"
+      ]
+    },
+    {
+      "type": "ansible-local",
+      "command": "ANSIBLE_STDOUT_CALLBACK=actionable ANSIBLE_FORCE_COLOR=1 PYTHONUNBUFFERED=1 ansible-playbook",
+      "playbook_file": "merged-stack/packer.yml",
+      "playbook_dir": "merged-stack/",
+      "extra_arguments": [
+        "--diff",
+        "-e 'customer={{user `customer`}}'",
+        "-e 'project={{user `project`}}'",
+        "-e 'env={{user `env`}}'",
+        "-e 'role={{user `role`}}'"
+      ],
+      "inventory_groups": "{{user `inventory_groups`}}"
+    },
+    {
+      "type": "ansible-local",
+      "command": "ANSIBLE_STDOUT_CALLBACK=actionable ANSIBLE_FORCE_COLOR=1 PYTHONUNBUFFERED=1 ansible-playbook",
+      "galaxy_file": "merged-stack/requirements.yml",
+      "playbook_file": "merged-stack/external-worker.yml",
+      "playbook_dir": "merged-stack/",
+      "staging_directory": "{{user `install_user_home`}}/{{user `project`}}",
+      "extra_arguments": [
+        "--diff",
+        "-e 'customer={{user `customer`}}'",
+        "-e 'project={{user `project`}}'",
+        "-e 'env={{user `env`}}'",
+        "-e 'role={{user `role`}}'",
+        "-e 'concourse_exposed_team={{user `exposed_team`}}'",
+        "--skip-tags='{{user `skip_tags`}}'"
+      ],
+      "inventory_groups": "{{user `inventory_groups`}}"
+    }
+  ]
+}

@@ -1,8 +1,8 @@
 #. use_local_device (optional): false
-#+ Use local storage drive from the instance. Default use EBS volume /dev/xvdg or /dev/local0. If not found keep the var_lib_device
+#+ Use local storage drive from the instance. Default use AWS EBS volume /dev/xvdg or /dev/local0, or SCW splitted local storage /dev/vdb. If not found keep the var_lib_device
 
 #. var_lib_device (optional): "nodevice"
-#+ Volume device name to use for worker datas. If "nodevice" and use_local_device=false no dedicated volume will be used.
+#+ Volume device name to use for worker datas (eg. "/dev/xvdf" for AWS, "/dev/sda" for SCW). If "nodevice" and use_local_device=false no dedicated volume will be used.
 
 #. fs_volume_type (optional): btrfs
 #+ Filesystem used to store concourse datas. Possible values "btrfs|ext4"

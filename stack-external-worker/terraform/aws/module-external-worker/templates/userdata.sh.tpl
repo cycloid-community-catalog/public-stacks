@@ -21,8 +21,9 @@ function finish {
 
 trap 'rc=$?; set +e; finish' EXIT
 
-export ENV=${env}
+export CUSTOMER=${customer}
 export PROJECT=${project}
+export ENV=${env}
 export ROLE=${role}
 
 LOG_FILE="/var/log/user-data.log"

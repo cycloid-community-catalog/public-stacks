@@ -25,6 +25,9 @@ _() {
     ROLE="${ROLE:-"workers"}"
     ENV="${ENV:-"prod"}"
 
+    # Install user
+    INSTALL_USER=${INSTALL_USER:-""}
+
     # Dedicated device used by the concourse worker for storage.
     # This device will be formatted to btrfs.
     VAR_LIB_DEVICE=${VAR_LIB_DEVICE:-""}
@@ -141,6 +144,14 @@ _() {
             [[ -z "${RUNTIMECONFIG_NAME}" ]] && echo "error: RUNTIMECONFIG_NAME envvar must be set." >&2
         fi
 
+        if [[ -z "${INSTALL_USER}" ]]; then
+            if [[ "${CLOUD_PROVIDER}" == "scaleway" ]]; then
+                INSTALL_USER="root"
+            else
+                INSTALL_USER="admin"
+            fi
+        fi
+
         # Define device to use depending on the CloudProvider
         if [[ -z "${VAR_LIB_DEVICE}" ]]; then
             if [[ "${CLOUD_PROVIDER}" == "gcp" ]]; then
@@ -225,7 +236,11 @@ use_endpoint_heuristics = True' > /etc/boto.cfg
     git clone -b ${STACK_BRANCH} https://github.com/cycloid-community-catalog/stack-external-worker
     cd stack-external-worker/ansible
 
-    export HOME=/root
+    if [[ "${INSTALL_USER}" == "root" ]]; then
+        export HOME="/root"
+    else
+        export HOME="/home/${INSTALL_USER}"
+    fi
     # Remove spaces because some CloudProvider don't support empty parametter so their default value contain one space as empty
     export VERSION=${VERSION// /}
     export VERSION=${VERSION:-$(curl -skL "${SCHEDULER_API_ADDRESS}/api/v1/info" | jq -r '.version')}
@@ -239,6 +254,7 @@ concourse_tsa_worker_key_base64: "${WORKER_KEY}"
 concourse_tsa_worker_key: "{{ concourse_tsa_worker_key_base64 | b64decode}}"
 concourse_worker_team: "${TEAM_ID}"
 nvme_mapping_run: true
+install_user: ${INSTALL_USER}
 var_lib_device: ${VAR_LIB_DEVICE}
 cloud_provider: ${CLOUD_PROVIDER}
 EOF
@@ -252,8 +268,8 @@ EOF
     echo "Run external-worker.yml build steps"
     ANSIBLE_FORCE_COLOR=1 PYTHONUNBUFFERED=1 ansible-playbook -e role=${ROLE} -e env=${ENV} -e project=${PROJECT} --connection local external-worker.yml --diff --skip-tags deploy,notforbuild
 
-    echo "Run /home/admin/first-boot.yml"
-    ANSIBLE_FORCE_COLOR=1 PYTHONUNBUFFERED=1 ansible-playbook -e role=${ROLE} -e env=${ENV} -e project=${PROJECT} --connection local /home/admin/first-boot.yml --diff
+    echo "Run ${HOME}/first-boot.yml"
+    ANSIBLE_FORCE_COLOR=1 PYTHONUNBUFFERED=1 ansible-playbook -e role=${ROLE} -e env=${ENV} -e project=${PROJECT} --connection local "${HOME}/first-boot.yml" --diff
 
     echo "Run external-worker.yml boot steps"
     ANSIBLE_FORCE_COLOR=1 PYTHONUNBUFFERED=1 ansible-playbook -e role=${ROLE} -e env=${ENV} -e project=${PROJECT} --connection local external-worker.yml --diff --tags runatboot,notforbuild

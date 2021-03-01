@@ -26,10 +26,17 @@ set -x
 
 LOG_FILE="/var/log/user-data.log"
 
-###  ansible issue when run at boot : https://github.com/ansible/ansible/issues/21562
+### ansible issue when run at boot : https://github.com/ansible/ansible/issues/21562
 export HOME="{{ install_user_home }}"
 export ANSIBLE_LOCAL_TEMP="${HOME}/.ansible/tmp"
 export ANSIBLE_REMOTE_TEMP="${HOME}/.ansible/tmp"
+###
+
+### Scaleway: get user-datas
+export CUSTOMER=$(scw-userdata customer)
+export PROJECT=$(scw-userdata project)
+export ENV=$(scw-userdata env)
+export ROLE=$(scw-userdata role)
 ###
 
 ANSIBLE_PLAYBOOK="${HOME}/first-boot.yml"
@@ -81,10 +88,6 @@ ANSIBLE_FORCE_COLOR=1 PYTHONUNBUFFERED=1 ansible-playbook ${ANSIBLE_DEPLOYMENT_P
             -e "project=${PROJECT}" \
             -e "env=${ENV}" \
             -e "role=${ROLE}" \
-            -e "ec2_tag_customer=${CUSTOMER}" \
-            -e "ec2_tag_project=${PROJECT}" \
-            -e "ec2_tag_env=${ENV}" \
-            -e "ec2_tag_role=${ROLE}" \
             --tags="runatboot,notforbuild" \
             --connection=local
 DEPLOY_STATUS=${?}

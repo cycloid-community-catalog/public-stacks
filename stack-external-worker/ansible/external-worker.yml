@@ -41,7 +41,7 @@
       find:
         paths: /dev
         file_type: any
-        patterns: "local0,xvdg"
+        patterns: "local0,xvdg,vdb"
       register: dev_files
       when: use_local_device|bool == true
       tags:

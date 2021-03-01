@@ -1,14 +1,16 @@
 {
   "variables": {
     "exposed_team": "{{env `BUILD_TEAM_NAME`}}",
-    "env": "{{env `env`}}",
     "customer": "{{env `customer`}}",
-    "inventory_groups": "{{env `inventory_groups`}}",
-    "public_key": "{{env `public_key`}}",
-    "role": "{{env `role`}}",
     "project": "{{env `project`}}",
+    "env": "{{env `env`}}",
+    "role": "{{env `role`}}",
+    "ansible_version": "{{env `ansible_version`}}",
+    "inventory_groups": "{{env `inventory_groups`}}",
     "skip_tags": "{{env `skip_tags`}}",
-    "ansible_version": "{{env `ansible_version`}}"
+    "public_key": "{{env `public_key`}}",
+    "install_user": "admin",
+    "install_user_home": "/home/admin"
   },
   "builders": [
     {
@@ -28,11 +30,11 @@
       },
       "instance_type": "t2.nano",
       "ami_name": "{{user `project`}}_{{user `role`}}_{{user `env`}}_{{timestamp}}",
-      "ssh_username": "admin",
+      "ssh_username": "{{user `install_user`}}",
       "run_tags": {
-        "env": "{{user `env`}}",
-        "project": "{{user `project`}}",
         "customer": "{{user `customer`}}",
+        "project": "{{user `project`}}",
+        "env": "{{user `env`}}",
         "role": "{{user `role`}}",
         "cycloid.io": "true",
         "packer_build": "true",
@@ -40,9 +42,9 @@
       },
       "tags": {
         "Name": "{{user `project`}}_{{user `role`}}_{{user `env`}}-{{timestamp}}",
-        "env": "{{user `env`}}",
-        "project": "{{user `project`}}",
         "customer": "{{user `customer`}}",
+        "project": "{{user `project`}}",
+        "env": "{{user `env`}}",
         "role": "{{user `role`}}",
         "cycloid.io": "true",
         "monitoring-discovery": "false"
@@ -56,14 +58,14 @@
         "echo 'Waiting for cloudinit to be done... Can take up to 300 sec'",
         "# Due to https://github.com/mitchellh/packer/issues/41 wait cloud init",
         "for i in $(seq 1 300); do [ -f /var/lib/cloud/instance/boot-finished ] && break || sleep 1; done",
-        "echo '{{user `public_key`}}' > /home/admin/.ssh/authorized_keys",
+        "echo '{{user `public_key`}}' > {{user `install_user_home`}}/.ssh/authorized_keys",
         "sudo apt-get update -qq > /dev/null",
         "sudo apt-get install -yqq build-essential libssl-dev libffi-dev python-dev python-setuptools git curl > /dev/null",
         "if command -v easy_install >/dev/null 2>&1; then sudo easy_install --quiet pip==20.3.4; else sudo apt-get install -yqq --no-install-recommends python-pip; fi",
         "sudo pip install -U cryptography",
         "sudo pip -q install ansible=={{user `ansible_version`}}",
-        "echo 'Host *' >> /home/admin/.ssh/config",
-        "echo 'StrictHostKeyChecking no' >> /home/admin/.ssh/config",
+        "echo 'Host *' >> {{user `install_user_home`}}/.ssh/config",
+        "echo 'StrictHostKeyChecking no' >> {{user `install_user_home`}}/.ssh/config",
         "# wait aws role attach to the instance",
         "sleep 60"
       ]
@@ -71,12 +73,13 @@
     {
       "type": "ansible-local",
       "command": "ANSIBLE_STDOUT_CALLBACK=actionable ANSIBLE_FORCE_COLOR=1 PYTHONUNBUFFERED=1 ansible-playbook",
-      "playbook_file": "packer.yml",
-      "playbook_dir": "./",
+      "playbook_file": "../packer.yml",
+      "playbook_dir": "../",
       "extra_arguments": [
         "--diff",
-        "-e 'env={{user `env`}}'",
+        "-e 'customer={{user `customer`}}'",
         "-e 'project={{user `project`}}'",
+        "-e 'env={{user `env`}}'",
         "-e 'role={{user `role`}}'"
       ],
       "inventory_groups": "{{user `inventory_groups`}}"
@@ -84,19 +87,21 @@
     {
       "type": "ansible-local",
       "command": "ANSIBLE_STDOUT_CALLBACK=actionable ANSIBLE_FORCE_COLOR=1 PYTHONUNBUFFERED=1 ansible-playbook",
-      "galaxy_file": "./requirements.yml",
-      "playbook_file": "./external-worker.yml",
-      "playbook_dir": "./",
-      "staging_directory": "/home/admin/{{user `project`}}",
+      "galaxy_file": "../requirements.yml",
+      "playbook_file": "../external-worker.yml",
+      "playbook_dir": "../",
+      "staging_directory": "{{user `install_user_home`}}/{{user `project`}}",
       "extra_arguments": [
         "--diff",
-        "-e 'env={{user `env`}}'",
-        "-e 'concourse_exposed_team={{user `exposed_team`}}'",
-        "-e 'ec2_tag_env={{user `env`}}'",
-        "-e 'ec2_tag_project={{user `project`}}'",
-        "-e 'ec2_tag_role={{user `role`}}'",
-        "-e 'role={{user `role`}}'",
+        "-e 'customer={{user `customer`}}'",
         "-e 'project={{user `project`}}'",
+        "-e 'env={{user `env`}}'",
+        "-e 'role={{user `role`}}'",
+        "-e 'concourse_exposed_team={{user `exposed_team`}}'",
+        "-e 'ec2_tag_customer={{user `customer`}}'",
+        "-e 'ec2_tag_project={{user `project`}}'",
+        "-e 'ec2_tag_env={{user `env`}}'",
+        "-e 'ec2_tag_role={{user `role`}}'",
         "--skip-tags='{{user `skip_tags`}}'"
       ],
       "inventory_groups": "{{user `inventory_groups`}}"

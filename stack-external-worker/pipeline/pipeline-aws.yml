@@ -136,7 +136,7 @@ resources:
     uri: https://github.com/cycloid-community-catalog/stack-external-worker
     branch: ((stack_git_branch))
     paths:
-      - terraform/*
+      - terraform/aws/*
 
 # The Terraform config (will be merged with the stack)
 - name: git_config-terraform
@@ -209,7 +209,7 @@ jobs:
 
     - put: ami_worker
       params:
-        template: merged-stack/packer_template.json
+        template: merged-stack/packer/aws.json
         env: ((env))
         project: ((project))
         customer: ((customer))
@@ -243,7 +243,7 @@ jobs:
             path: "stack"
         params:
           CONFIG_PATH: ((config_terraform_path))
-          STACK_PATH: terraform
+          STACK_PATH: terraform/aws
 
       - *extract-vars
 
@@ -282,7 +282,7 @@ jobs:
             path: "stack"
         params:
           CONFIG_PATH: ((config_terraform_path))
-          STACK_PATH: terraform
+          STACK_PATH: terraform/aws
 
       - *extract-vars
 
@@ -328,7 +328,7 @@ jobs:
             path: "stack"
         params:
           CONFIG_PATH: ((config_terraform_path))
-          STACK_PATH: terraform
+          STACK_PATH: terraform/aws
 
       - *extract-vars
 
@@ -376,7 +376,7 @@ jobs:
             path: "stack"
         params:
           CONFIG_PATH: ((config_terraform_path))
-          STACK_PATH: terraform
+          STACK_PATH: terraform/aws
 
       - *extract-vars
 

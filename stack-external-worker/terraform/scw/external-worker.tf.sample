@@ -1,0 +1,69 @@
+# See the variables.tf file in module-infrastructure for a complete description
+# of the options
+
+module "external-worker" {
+  #####################################
+  # Do not modify the following lines #
+  source = "./module-external-worker"
+
+  project  = var.project
+  env      = var.env
+  customer = var.customer
+
+  #####################################
+
+  #. ssh_allowed_ips (optional): []
+  #+ Allow following IPs to connect on port 22 (ssh).
+
+  #. metrics_allowed_ips (optional): []
+  #+ Allow following IPs to connect on port 9100 (prometheus endpoint).
+
+  #. extra_tags (optional): []
+  #+ Dict of extra tags to add on resources. format [ "foo", "bar" ].
+
+  #. worker_count (required):
+  #+ Number of worker to create.
+  worker_count = 1
+
+  #. worker_type (optional): GP1-XS
+  #+ Instance type of the worker servers.
+  worker_type = "GP1-XS"
+
+  #. worker_volume_disk_type (optional): l_ssd
+  #+ Volume disk type for the worker, l_ssd for local storage splitted with the root device, b_ssd for block storage.
+
+  #. worker_volume_disk_size (optional): 0
+  #+ Additional block storage volume disk size in Go for the worker (0 = disabled). Make sure to provide enough disk space for the concourse worker depending on the instance type.
+
+  #. worker_image_id (optional, string): IMAGE_ID_FROM_PIPELINE
+  #+ If you don't want to use the builded instance image but a specific image (mainly used for debug).
+  worker_image_id = var.worker_image_id
+
+  #. scw_region (optional): var.scw_region
+  #+ Scaleway region to use, provided by the pipeline.
+  scw_region = var.scw_region
+}
+
+#
+# Auto Start / Stop
+#
+# Example to stop/start workers every night and weekend (UTC time)
+#/!\ Be carefull when the worker is stopped, pipelines can't execute jobs
+
+#resource "aws_autoscaling_schedule" "auto-stop" {
+#  scheduled_action_name = "${var.customer}-${var.project}-${var.env} stop"
+#  min_size = 0
+#  max_size = -1
+#  desired_capacity = 0
+#  recurrence = "0 21 * * 1-5"
+#  autoscaling_group_name = module.external-worker.asg_worker_name
+#}
+
+#resource "aws_autoscaling_schedule" "auto-start" {
+#  scheduled_action_name = "${var.customer}-${var.project}-${var.env} start"
+#  min_size = 1
+#  max_size = -1
+#  desired_capacity = 1
+#  recurrence = "0 7 * * 1-5"
+#  autoscaling_group_name = module.external-worker.asg_worker_name
+#}

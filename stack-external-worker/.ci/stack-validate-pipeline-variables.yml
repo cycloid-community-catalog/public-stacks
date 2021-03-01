@@ -42,8 +42,8 @@ terraform_env_vars:
 pipeline_env_vars:
   USERNAME: ((cycloid_bot_account.login))
   PASSWORD: ((cycloid_bot_account.password))
-  PIPELINE_TEMPLATE: pipeline.yml
-  PIPELINE_VARIABLES: variables.sample.yml
+  PIPELINE_TEMPLATE: pipeline-aws.yml
+  PIPELINE_VARIABLES: variables-aws.sample.yml
   ORGANIZATION: cycloid-owl
   # Which project to use for pipeline
   PROJECT: ci-stack-external-worker
@@ -59,7 +59,7 @@ stack_ansible_path: ansible
 #. config_terraform_path (required): .ci/terraform
 #+ Path of Terraform files in the config git repository
 config_terraform_path: .ci/terraform
-stack_terraform_path: terraform
+stack_terraform_path: terraform/aws
 
 #. config_pipeline_path (required): .ci/pipeline
 #+ Path of pipeline variables files in the config git repository

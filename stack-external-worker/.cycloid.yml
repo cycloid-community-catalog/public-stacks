@@ -1,4 +1,5 @@
 ---
+version: '2'
 # Configuration of the Cycloid stack
 name: 'External worker'
 canonical: 'stack-external-worker'
@@ -12,6 +13,7 @@ keywords:
   - 'external'
   - 'cycloid'
   - 'provider:aws'
+  - 'provider:scw'
 author: 'Cycloid'
 image: |
   https://raw.githubusercontent.com/cycloid-community-catalog/stack-external-worker/master/icon.png
@@ -22,22 +24,40 @@ technologies:
     version: n/a
 
 config:
-  # Configuration of the CI pipeline
-  pipeline:
+  aws:
+    name: 'AWS'
+    description: 'Deployment on Amazon Web Services.'
+    # Configuration of the CI pipeline
     pipeline:
-      path: 'pipeline/pipeline.yml'
-    variables:
-      path: 'pipeline/variables.sample.yml'
-      destination: '($ project $)/pipeline/variables-($ environment $).yml'
+      pipeline:
+        path: 'pipeline/pipeline-aws.yml'
+      variables:
+        path: 'pipeline/variables-aws.sample.yml'
+        destination: '($ project $)/pipeline/variables-($ environment $).yml'
+    # Configuration of ansible for provisionning
+    ansible:
+      external-worker:
+        path: 'ansible/variables.yml.sample'
+        destination: '($ project $)/ansible/($ environment $)-worker.yml'
+    # Configuration of terraform to setup the infrastructure
+    terraform:
+      external-worker:
+        path: 'terraform/aws/external-worker.tf.sample'
+        destination: '($ project $)/terraform/($ environment $)/external-worker.tf'
 
-  # Configuration of ansible for provisionning
-  ansible:
-    external-worker:
-      path: 'ansible/variables.yml.sample'
-      destination: '($ project $)/ansible/($ environment $)-worker.yml'
-
-  # Configuration of terraform to setup the infrastructure
-  terraform:
-    external-worker:
-      path: 'terraform/external-worker.tf.sample'
-      destination: '($ project $)/terraform/($ environment $)/external-worker.tf'
+  scw:
+    name: 'Scaleway'
+    description: 'Deployment on Scaleway Elements.'
+    pipeline:
+      pipeline:
+        path: 'pipeline/pipeline-scw.yml'
+      variables:
+        path: 'pipeline/variables-scw.yml'
+    ansible:
+      external-worker:
+        path: 'ansible/variables.yml.sample'
+        destination: '($ project $)/ansible/($ environment $)-worker.yml'
+    terraform:
+      external-worker:
+        path: 'terraform/scw/external-worker.tf.sample'
+        destination: '($ project $)/terraform/($ environment $)/external-worker.tf'
