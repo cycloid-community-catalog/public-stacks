@@ -52,7 +52,8 @@ config:
       pipeline:
         path: 'pipeline/pipeline-scw.yml'
       variables:
-        path: 'pipeline/variables-scw.yml'
+        path: 'pipeline/variables-scw.sample.yml'
+        destination: '($ project $)/pipeline/variables-($ environment $).yml'
     ansible:
       external-worker:
         path: 'ansible/variables.yml.sample'
