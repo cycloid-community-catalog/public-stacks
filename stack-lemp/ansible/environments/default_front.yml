@@ -212,7 +212,6 @@ php_debian_pkg_managed: true
 php_debian_pkg_name:
   - deb https://packages.sury.org/php/ stretch main
 php_debian_pkg_key: https://packages.sury.org/php/apt.gpg
-php_aws_elasticache: true
 
 php_packages:
   - "php{{ php_version_to_install }}"
