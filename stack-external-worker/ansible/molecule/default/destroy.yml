@@ -6,21 +6,21 @@
   gather_facts: False
   no_log: "{{ not lookup('env', 'MOLECULE_DEBUG') | bool }}"
   vars:
-    molecule_file: "{{ lookup('env', 'MOLECULE_FILE') }}"
+    molecule_file: "{{ lookup('env', 'MOLECULE_FILE') | default(playbook_dir + '/molecule/default/molecule.yml') }}"
     molecule_yml: "{{ lookup('file', molecule_file) | from_yaml }}"
   tasks:
+    - name: Destroy Concourse keys generate containers
+      docker_container:
+        name: "{{ item }}"
+        state: absent
+      with_items:
+        - concourse-signing-key-generate
+        - concourse-tsa-key-generate
+        - concourse-worker-key-generate
+
     - name: Destroy molecule instance(s)
       docker_container:
         name: "{{ item.name }}"
         state: absent
         force_kill: "{{ item.force_kill | default(True) }}"
       with_items: "{{ molecule_yml.platforms }}"
-
-    - name: Check if loop0 is attached
-      stat:
-        path: /dev/loop0
-      register: stat_result
-
-    - name: Loopback dettach
-      command: losetup --detach /dev/loop0
-      when: stat_result.stat.exists == True

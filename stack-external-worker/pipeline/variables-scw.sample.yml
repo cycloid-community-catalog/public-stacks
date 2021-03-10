@@ -59,9 +59,9 @@ external_worker_key: cycloid-worker-keys
 #+ Public ssh key injected by Packer during the build of the AMI for debug purpose
 debug_public_key: "ssh-rsa ..."
 
-#. packer_ansible_version: "2.7"
+#. packer_ansible_version: "2.9.*"
 #+ Version of ansible used during Packer build to run Ansible playbook
-packer_ansible_version: "2.7"
+packer_ansible_version: "2.9.*"
 
 #. packer_scw_region: "par1"
 #+ Packer specific naming for the Scaleway region to use. The image built will only be usable in this region, so make sure it matches the one in `scw_default_region`. 
@@ -116,6 +116,6 @@ config_terraform_path: ($ project $)/terraform/($ environment $)
 #+ terraform version used to execute your code.
 terraform_version: '0.13.5'
 
-#. packer_version (required): '1.6.2'
+#. packer_version (required): '1.6.4'
 #+ packer version used to build the instance image.
-packer_version: '1.6.2'
+packer_version: '1.6.4'

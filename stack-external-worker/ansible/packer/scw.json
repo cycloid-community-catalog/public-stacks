@@ -34,6 +34,11 @@
   ],
   "provisioners": [
     {
+      "type": "file",
+      "source": "merged-stack/requirements.txt",
+      "destination": "/tmp/requirements.txt"
+    },
+    {
       "type": "shell",
       "inline": [
         "echo 'Waiting for cloudinit to be done... Can take up to 300 sec'",
@@ -42,9 +47,10 @@
         "echo '{{user `public_key`}}' > {{user `install_user_home`}}/.ssh/instance_keys",
         "scw-fetch-ssh-keys --upgrade",
         "sudo apt-get update -qq > /dev/null",
-        "sudo apt-get install -yqq build-essential libssl-dev libffi-dev python-dev python-setuptools python-pip git curl > /dev/null",
-        "sudo pip install -U cryptography",
-        "sudo pip -q install ansible=={{user `ansible_version`}}",
+        "sudo apt-get install -yqq --no-install-recommends libssl-dev libffi-dev python3-dev python3-setuptools python3-pip git curl jq cargo > /dev/null",
+        "sudo python3 -m pip install -U pip",
+        "sudo python3 -m pip install -r /tmp/requirements.txt",
+        "sudo python3 -m pip -q install ansible=={{user `ansible_version`}}",
         "echo 'Host *' >> {{user `install_user_home`}}/.ssh/config",
         "echo 'StrictHostKeyChecking no' >> {{user `install_user_home`}}/.ssh/config",
         "# wait aws role attach to the instance",

@@ -30,6 +30,7 @@ _() {
 
     # Dedicated device used by the concourse worker for storage.
     # This device will be formatted to btrfs.
+    USE_LOCAL_DEVICE=${USE_LOCAL_DEVICE:-0}
     VAR_LIB_DEVICE=${VAR_LIB_DEVICE:-""}
 
     # Informations needed to connect to Concourse. Defaults to the Cycloid SaaS.
@@ -163,7 +164,11 @@ _() {
             elif [[ "${CLOUD_PROVIDER}" == "flexible-engine" ]]; then
                 VAR_LIB_DEVICE="/dev/vdb"
             elif [[ "${CLOUD_PROVIDER}" == "scaleway" ]]; then
-                VAR_LIB_DEVICE="/dev/sda"
+                if [[ ${USE_LOCAL_DEVICE} -eq 1 ]]; then
+                    VAR_LIB_DEVICE="/dev/vdb"
+                else
+                    VAR_LIB_DEVICE="/dev/sda"
+                fi
             else
                 VAR_LIB_DEVICE="nodevice"
             fi
@@ -186,23 +191,15 @@ _() {
     timeout 300 bash -c "while pgrep apt > /dev/null; do sleep 1; done"
 
     apt-get update
-    apt-get install -y --no-install-recommends git python-setuptools curl jq
+    apt-get install -yqq --no-install-recommends libssl-dev libffi-dev python3-dev python3-setuptools python3-pip git curl jq cargo
 
-    if command -v easy_install >/dev/null 2>&1; then
-        easy_install pip==20.3.4
-    else
-        apt-get install -y --no-install-recommends python-pip
-    fi
+    cd /opt/
+    git clone -b ${STACK_BRANCH} https://github.com/cycloid-community-catalog/stack-external-worker
+    cd stack-external-worker/ansible
 
-    # Hotfix for customer using debian 9 having an issue with AttributeError: 'module' object has no attribute 'Cryptography_HAS_TLSEXT_HOSTNAME'
-    if [[ "$(cat /etc/issue.net)" == "Debian GNU/Linux 9" ]]; then
-        dpkg --purge python-openssl
-    fi
-
-    pip install wheel
-    pip install -U cryptography
-    pip install ansible==2.7
-
+    python3 -m pip install -U pip
+    python3 -m pip install -r requirements.txt
+    python3 -m pip install ansible==2.9.*
 
     # Get WORKER_KEY from Vault
     if [[ -z "${WORKER_KEY}" ]] && [[ -n "${VAULT_SECRET_ID}" && -n "${VAULT_ROLE_ID}" ]] ; then
@@ -214,27 +211,19 @@ _() {
     TMP_WORKER_KEY=$(mktemp)
     echo $WORKER_KEY | base64 -d > $TMP_WORKER_KEY
     chmod 400 $TMP_WORKER_KEY
-
-    ssh-keygen -l -f $TMP_WORKER_KEY > /dev/null 2>&1
-    if [ $? -ne 0 ]; then
-        echo "error: WORKER_KEY Does not seems to be an SSH PRIVATE KEY." >&2 && exit 2
-    fi
+    ssh-keygen -l -f $TMP_WORKER_KEY > /dev/null 2>&1 || echo "error: WORKER_KEY Does not seems to be an SSH PRIVATE KEY." >&2 && exit 2
 
     if [[ "${CLOUD_PROVIDER}" == "aws" ]]; then
-        pip install awscli
+        python3 -m pip install awscli
 
         # Be able to use paris region (https://github.com/boto/boto/issues/3783)
-        pip install --upgrade boto
+        python3 -m pip install --upgrade boto
         echo '[Boto]
 use_endpoint_heuristics = True' > /etc/boto.cfg
 
         export AWS_DEFAULT_REGION=$(curl -sL http://169.254.169.254/latest/dynamic/instance-identity/document | jq -r .region)
         export AWS_UNIQUE_ID=$(curl -L http://169.254.169.254/latest/meta-data/instance-id)
     fi
-
-    cd /opt/
-    git clone -b ${STACK_BRANCH} https://github.com/cycloid-community-catalog/stack-external-worker
-    cd stack-external-worker/ansible
 
     if [[ "${INSTALL_USER}" == "root" ]]; then
         export HOME="/root"
@@ -255,6 +244,7 @@ concourse_tsa_worker_key: "{{ concourse_tsa_worker_key_base64 | b64decode}}"
 concourse_worker_team: "${TEAM_ID}"
 nvme_mapping_run: true
 install_user: ${INSTALL_USER}
+use_local_device: ${USE_LOCAL_DEVICE}
 var_lib_device: ${VAR_LIB_DEVICE}
 cloud_provider: ${CLOUD_PROVIDER}
 EOF

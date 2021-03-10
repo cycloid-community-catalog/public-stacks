@@ -1,15 +1,50 @@
 ---
 # Cycloid : create test key for Concourse
-- name: Generate local ssh key
+- name: Prepare Concourse requirements
   hosts: localhost
   connection: local
   gather_facts: no
   tasks:
-    - file:
+    - name: Create molecule test directory
+      file:
         path: /tmp/molecule_test
         state: directory
-    - name: Generate local ssh key
-      shell: "ssh-keygen -b 4096 -t rsa -N '' -f /tmp/molecule_test/id_rsa creates=/tmp/molecule_test/id_rsa"
+        mode: 0755
+    - name: Generate Concourse worker key
+      docker_container:
+        name: "concourse-worker-key-generate"
+        image: "concourse/concourse:6.7.1"
+        state: started
+        command: ["generate-key", "-t", "ssh", "-f", "/keys/worker_key"]
+        volumes:
+          - "/tmp/molecule_test:/keys"
+    - name: Generate Concourse session signing key
+      docker_container:
+        name: "concourse-signing-key-generate"
+        image: "concourse/concourse:6.7.1"
+        state: started
+        command: ["generate-key", "-t", "rsa", "-f", "/keys/session_signing_key"]
+        volumes:
+          - "/tmp/molecule_test:/keys"
+    - name: Generate Concourse tsa host key
+      docker_container:
+        name: "concourse-tsa-key-generate"
+        image: "concourse/concourse:6.7.1"
+        state: started
+        command: ["generate-key", "-t", "ssh", "-f", "/keys/tsa_host_key"]
+        volumes:
+          - "/tmp/molecule_test:/keys"
+
+    - name: Give some time for key generation to finish
+      wait_for:
+        timeout: 3
+      delegate_to: localhost
+
+    - name: Set up authorized worker keys file
+      copy:
+        src: /tmp/molecule_test/worker_key.pub
+        dest: /tmp/molecule_test/authorized_worker_keys
+        mode: 0644
 
 - name: Create
   hosts: localhost
@@ -17,7 +52,7 @@
   gather_facts: False
   no_log: "{{ not lookup('env', 'MOLECULE_DEBUG') | bool }}"
   vars:
-    molecule_file: "{{ lookup('env', 'MOLECULE_FILE') }}"
+    molecule_file: "{{ lookup('env', 'MOLECULE_FILE') | default(playbook_dir + '/molecule/default/molecule.yml') }}"
     molecule_ephemeral_directory: "{{ lookup('env', 'MOLECULE_EPHEMERAL_DIRECTORY') }}"
     molecule_scenario_directory: "{{ lookup('env', 'MOLECULE_SCENARIO_DIRECTORY') }}"
     molecule_yml: "{{ lookup('file', molecule_file) | from_yaml }}"
@@ -26,21 +61,25 @@
       template:
         src: "{{ molecule_scenario_directory }}/Dockerfile.j2"
         dest: "{{ molecule_ephemeral_directory }}/Dockerfile_{{ item.image | regex_replace('[^a-zA-Z0-9_]', '_') }}"
+        mode: 0644
       with_items: "{{ molecule_yml.platforms }}"
       register: platforms
 
     - name: Discover local Docker images
-      docker_image_facts:
+      docker_image_info:
         name: "molecule_local/{{ item.item.name }}"
       with_items: "{{ platforms.results }}"
       register: docker_images
 
     - name: Build an Ansible compatible image
       docker_image:
-        path: "{{ molecule_ephemeral_directory }}"
+        source: build
         name: "molecule_local/{{ item.item.image }}"
-        dockerfile: "{{ item.item.dockerfile | default(item.invocation.module_args.dest) }}"
-        force: "{{ item.item.force | default(True) }}"
+        build:
+          path: "{{ molecule_ephemeral_directory }}"
+          dockerfile: "{{ item.item.dockerfile | default(item.invocation.module_args.dest) }}"
+          pull: yes
+        force_source: "{{ item.item.force | default(True) }}"
       with_items: "{{ platforms.results }}"
       when: platforms.changed or docker_images.results | map(attribute='images') | select('equalto', []) | list | count >= 0
 

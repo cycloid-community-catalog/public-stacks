@@ -8,9 +8,8 @@
   hosts: instance
   gather_facts: no
   tasks:
-
-    # Used by molecule in order to create a localhost group to match "hosts: localhost" instead of the real localhost
-    - add_host:
+    - name: "Create a localhost group to match 'hosts: localhost' instead of the real localhost"
+      add_host:
         name: "{{ inventory_hostname }}"
         ansible_host: "instance"
         groups:
@@ -36,6 +35,11 @@
     - [ "{{ env }}-worker.yml", "empty.yml" ]
 
   pre_tasks:
+    - name: Install package dependencies
+      package:
+        name:
+          - gnupg
+        state: present
 
     - name: Found local disk
       find:
@@ -43,47 +47,47 @@
         file_type: any
         patterns: "local0,xvdg,vdb"
       register: dev_files
-      when: use_local_device|bool == true
+      when: use_local_device|bool
       tags:
-       - notforbuild
+        - notforbuild
 
     - name: Set local device name
       set_fact:
         var_lib_device: "{{ dev_files.files[0].path }}"
       no_log: True
-      when: use_local_device|bool == true and dev_files.files
+      when: use_local_device|bool and dev_files.files
       tags:
-       - notforbuild
+        - notforbuild
 
     - name: If no dedicated device (nodevice) specified, use ext4 (overlay) options for concourse worker
       set_fact:
         fs_volume_type: "ext4"
       when: var_lib_device == "nodevice"
       tags:
-       - notforbuild
+        - notforbuild
 
     - name: Get information about dedicated device
       when: var_lib_device != "nodevice"
       block:
         # Symlink are defined for nvme and systemd mount doesnt accept it
         - name: Get the real name of device, not symlink
-          shell: "readlink -f {{ var_lib_device }}"
+          command: "readlink -f {{ var_lib_device }}"
           register: real_device
           tags:
-           - notforbuild
+            - notforbuild
 
         - name: Set real name of device
           set_fact:
             var_lib_device: "{{ real_device.stdout }}"
           tags:
-           - notforbuild
+            - notforbuild
 
         - name: Get systemd mount name
           command: "systemd-escape -p --suffix=mount '{{ concourse_work_dir }}'"
           register: systemd_mount_name
           check_mode: no
           tags:
-           - notforbuild
+            - notforbuild
 
   roles:
     - role: cycloid.telegraf
@@ -104,7 +108,7 @@
       systemd_mount_options: "{{ fs_volume_options[fs_volume_type]['fs_mount_options'] }}"
       when: var_lib_device != "nodevice"
       tags:
-       - notforbuild
+        - notforbuild
 
     - role: cycloid.systemd
       systemd_type: dropin
@@ -117,7 +121,7 @@
         - "Requires={{ systemd_mount_name.stdout }}"
       when: var_lib_device != "nodevice" and concourse_service_worker_cleaner_enabled is defined and concourse_service_worker_cleaner_enabled
       tags:
-       - notforbuild
+        - notforbuild
 
     - role: cycloid.systemd
       systemd_type: dropin
@@ -130,7 +134,7 @@
         - "Requires={{ systemd_mount_name.stdout }}"
       when: var_lib_device != "nodevice"
       tags:
-       - notforbuild
+        - notforbuild
 
     - role: cycloid.systemd
       systemd_type: dropin
@@ -160,9 +164,9 @@
         name: jq
         state: present
 
-    - name: Install btrfs-tools
+    - name: Install btrfs tools
       apt:
-        name: btrfs-tools
+        name: btrfs-progs
         state: present
       when: fs_volume_type == "btrfs"
 
@@ -183,14 +187,14 @@
         name: concourse-worker
         enabled: yes
       tags:
-       - notforbuild
+        - notforbuild
     - name: restart concourse worker
       service:
         name: concourse-worker
         state: restarted
         enabled: yes
       tags:
-       - notforbuild
+        - notforbuild
 
     # If cleaner is enabled make sure it will be run at next startup
     - name: configure worker cleaner service | concourse
@@ -198,7 +202,7 @@
         name: concourse-worker-cleaner
         enabled: "{{ concourse_service_worker_cleaner_enabled }}"
       tags:
-       - notforbuild
+        - notforbuild
 
     # If watchdog is enabled, configure and start it
     - name: configure worker watchdog service | concourse
@@ -206,12 +210,12 @@
         name: concourse-worker-watchdog
         enabled: "{{ concourse_service_watchdog_enabled }}"
       tags:
-       - notforbuild
+        - notforbuild
     - name: start concourse worker-watchdog
       service:
         name: concourse-worker-watchdog
         state: started
         enabled: yes
       tags:
-       - notforbuild
+        - notforbuild
       when: concourse_service_watchdog_enabled

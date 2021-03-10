@@ -122,23 +122,30 @@ https://eu-central-1.console.aws.amazon.com/cloudformation/home?region=eu-west-1
 
 ## Test ansible role with molecule
 
-Requires a bucket which contains a build of magento sources and AWS accesskey
-
-virtualenv if needed
-```
-virtualenv    .env  --clear
-source .env/bin/activate
-
-pip install ansible==2.7
-pip install molecule
-pip install docker-py
+It is recommended to use `virtualenv`:
+```bash
+sudo apt install python3-virtualenv
+or
+python3 -m pip install --upgrade --user setuptools
 ```
 
-Run the test
-```
+Dependencies:
+```bash
 cd ansible
 
-# Run molecule
+virtualenv .env --clear
+source .env/bin/activate
+
+python3 -m pip install ansible==2.9.* molecule molecule-docker yamllint ansible-lint flake8 pytest-testinfra
+```
+
+Run the tests:
+```
+molecule test
+
+# or
+
+molecule lint
 molecule destroy
 molecule converge
 molecule verify

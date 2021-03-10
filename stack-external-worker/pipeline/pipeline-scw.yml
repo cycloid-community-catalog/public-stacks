@@ -83,7 +83,8 @@ resource_types:
 - name: packer
   type: docker-image
   source:
-    repository: snapkitchen/concourse-packer-resource
+    # repository: snapkitchen/concourse-packer-resource
+    repository: cycloid/concourse-packer-resource
     tag: ((packer_version))
 
 

@@ -65,7 +65,6 @@ shared:
 
 
 groups:
-
 - name: all
   jobs:
   - terraform-plan
@@ -88,25 +87,27 @@ groups:
   jobs:
   - terraform-destroy
 
-resource_types:
 
+resource_types:
 - name: terraform
   type: docker-image
   source:
     repository: ljfranklin/terraform-resource
-    tag: '0.12.6'
+    tag: ((terraform_version))
 
 - name: packer
   type: docker-image
   source:
-    repository: jdub/packer-resource
+    # repository: snapkitchen/concourse-packer-resource
+    repository: cycloid/concourse-packer-resource
+    tag: ((packer_version))
 
 
 resources:
-
 # Terraform by itself
 - name: tfstate
   type: terraform
+  icon: terraform
   source:
     env_name: ((env))
     backend_type: s3
@@ -132,6 +133,7 @@ resources:
 # The Terraform stack (will be merged with the config)
 - name: git_stack-terraform
   type: git
+  icon: git
   source:
     uri: https://github.com/cycloid-community-catalog/stack-external-worker
     branch: ((stack_git_branch))
@@ -141,6 +143,7 @@ resources:
 # The Terraform config (will be merged with the stack)
 - name: git_config-terraform
   type: git
+  icon: git
   source:
     uri: ((config_git_repository))
     branch: ((config_git_branch))
@@ -151,6 +154,7 @@ resources:
 # The Ansible stack (will be merged with the config)
 - name: git_stack-ansible
   type: git
+  icon: git
   source:
     uri: https://github.com/cycloid-community-catalog/stack-external-worker
     branch: ((stack_git_branch))
@@ -160,6 +164,7 @@ resources:
 # The Ansible config (will be merged with the stack)
 - name: git_config-ansible
   type: git
+  icon: git
   source:
     uri: ((config_git_repository))
     branch: ((config_git_branch))
@@ -170,6 +175,7 @@ resources:
 # The AMI builder for the worker servers (for ASG scale-up)
 - name: ami_worker
   type: packer
+  icon: packer
   source:
     aws_access_key_id: ((aws_access_key))
     aws_secret_access_key: ((aws_secret_key))
@@ -210,14 +216,19 @@ jobs:
     - put: ami_worker
       params:
         template: merged-stack/packer/aws.json
-        env: ((env))
-        project: ((project))
-        customer: ((customer))
-        role: worker
-        public_key: ((debug_public_key))
-        skip_tags: deploy,notforbuild
-        aws_region: ((aws_default_region))
-        ansible_version: ((packer_ansible_version))
+        env_vars:
+          AWS_ACCESS_KEY_ID: ((aws_access_key))
+          AWS_SECRET_ACCESS_KEY: ((aws_secret_key))
+          AWS_DEFAULT_REGION: ((aws_default_region))
+        vars:
+          aws_region: ((aws_default_region))
+          env: ((env))
+          project: ((project))
+          customer: ((customer))
+          role: worker
+          ansible_version: ((packer_ansible_version))
+          skip_tags: deploy,notforbuild
+          public_key: ((debug_public_key))
 
 # Merge and trigger a plan whenever there is a commit in Terraform stack or config
 - name: terraform-plan

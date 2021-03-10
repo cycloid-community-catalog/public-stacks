@@ -24,45 +24,58 @@
       when: ansible_system_vendor == "Amazon EC2" and (var_lib_device != "nodevice")
 
     - block:
-      - name: Ensure install user is present
-        user:
-          name: "{{ install_user }}"
-          state: present
-          create_home: true
-        when: ansible_version.major != 2 or ansible_version.minor > 4
-      - name: Ensure install user is present (2.4 compact)
-        user:
-          name: "{{ install_user }}"
-          state: present
-          createhome: true
-        when: ansible_version.major == 2 and ansible_version.minor < 5
+        - name: Ensure install user is present
+          user:
+            name: "{{ install_user }}"
+            state: present
+            create_home: true
+          when: ansible_version.major != 2 or ansible_version.minor > 4
+        - name: Ensure install user is present (2.4 compact)
+          user:
+            name: "{{ install_user }}"
+            state: present
+            createhome: true
+          when: ansible_version.major == 2 and ansible_version.minor < 5
       when: install_user != "root"
 
-    - template:
+    - name: Install first-boot.yml playbook
+      template:
         src: first-boot.yml.tpl
         dest: "{{ install_user_home }}/first-boot.yml"
         owner: "{{ install_user }}"
         group: "{{ install_user_group }}"
-    
+        mode: 0644
+
     - block:
-      - template:
-          src: user-data.sh.scw.tpl
-          dest: "{{ install_user_home }}/user-data.sh"
-          owner: "{{ install_user }}"
-          group: "{{ install_user_group }}"
-        when: ansible_system_vendor == "Scaleway"
-      - template:
-          src: user-data.sh.tpl
-          dest: "{{ install_user_home }}/user-data.sh"
-          owner: "{{ install_user }}"
-          group: "{{ install_user_group }}"
-        when: ansible_system_vendor != "Scaleway"
+        - name: Install user-data.sh script for Scaleway
+          template:
+            src: user-data.sh.scw.tpl
+            dest: "{{ install_user_home }}/user-data.sh"
+            owner: "{{ install_user }}"
+            group: "{{ install_user_group }}"
+            mode: 0755
+          when: ansible_system_vendor == "Scaleway"
+        - name: Install user-data.sh for non-Scaleway
+          template:
+            src: user-data.sh.tpl
+            dest: "{{ install_user_home }}/user-data.sh"
+            owner: "{{ install_user }}"
+            group: "{{ install_user_group }}"
+            mode: 0755
+          when: ansible_system_vendor != "Scaleway"
 
     # Generate the ansible hosts file like https://www.packer.io/docs/provisioners/ansible-local.html#inventory_groups do.
     # We do that because we need this inventory file for post ansible run to deploy the code when the AWS instance boot
     - name: Ensure /etc/ansible/hosts is flushed
-      file: state=absent path=/etc/ansible/hosts
+      file:
+        path: /etc/ansible/hosts
+        state: absent
 
     - name: Generate /etc/ansible/hosts
-      lineinfile: dest=/etc/ansible/hosts regexp="^\[{{ item }}\]" line='[{{ item }}]\n127.0.0.1\n' create=true
+      lineinfile:
+        dest: /etc/ansible/hosts
+        regexp: '^\[{{ item }}\]'
+        line: '[{{ item }}]\n127.0.0.1\n'
+        create: true
+        mode: 0644
       with_items: "{{ groups }}"
