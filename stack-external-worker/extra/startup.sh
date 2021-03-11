@@ -213,7 +213,7 @@ _() {
     TMP_WORKER_KEY=$(mktemp)
     echo $WORKER_KEY | base64 -d > $TMP_WORKER_KEY
     chmod 400 $TMP_WORKER_KEY
-    ssh-keygen -l -f $TMP_WORKER_KEY > /dev/null 2>&1 || echo "error: WORKER_KEY Does not seems to be an SSH PRIVATE KEY." >&2 && exit 2
+    ssh-keygen -l -f $TMP_WORKER_KEY > /dev/null 2>&1 || (echo "error: WORKER_KEY Does not seems to be an SSH PRIVATE KEY." >&2 && exit 2)
 
     if [[ "${CLOUD_PROVIDER}" == "aws" ]]; then
         python3 -m pip install awscli
