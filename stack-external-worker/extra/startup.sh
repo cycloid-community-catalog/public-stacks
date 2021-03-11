@@ -5,6 +5,8 @@ if test -z "$BASH_VERSION"; then
   exit 1
 fi
 
+set -x
+
 # We wrap the entire script in a big function which we only call at the very end, in order to
 # protect against the possibility of the connection dying mid-script. This protects us against
 # the problem described in this blog post:
