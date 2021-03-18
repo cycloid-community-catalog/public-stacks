@@ -1,0 +1,26 @@
+---
+version: '2'
+# Configuration of the Cycloid stack
+name: 'Github Packages'
+canonical: 'stack-github-package'
+status: 'public'
+description: |
+  Deploy packages to Github
+keywords:
+  - 'docker'
+  - 'registry'
+  - 'npm'
+  - 'maven'
+author: 'Cycloid'
+image: |
+  https://raw.githubusercontent.com/cycloid-community-catalog/stack-github-packages/master/icon.png
+config:
+  default:
+    name: 'Maven'
+    description: 'Used to build and deploy a Maven package'
+    pipeline:
+      pipeline:
+        path: 'pipeline/pipeline.yml'
+      variables:
+        path: 'pipeline/variables.sample.yml'
+        destination: '($ project $)/pipeline/variables-($ environment $).yml'

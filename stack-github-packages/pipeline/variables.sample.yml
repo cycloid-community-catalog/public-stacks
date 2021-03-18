@@ -1,0 +1,31 @@
+#. stack_git_branch(required): master
+#+ Branch to use on the public stack git repository
+stack_git_branch: master
+
+#. code_git_repository(required): git@github.com
+#+ URI of the git repository where the code is located
+code_git_repository: git@github.com:my/repository.git
+
+#. code_git_branch(required): master
+#+ the git branch where the code to build is located
+code_git_branch: master
+
+#. code_git_private_key(required):
+#+ the private key use to clone the git repository
+code_git_private_key: ((ssh_code.ssh_key))
+
+#. code_build_context(required): ./
+#+ the path to the pom.xml
+code_build_context: ./
+
+#. github_registry(required):
+#+ the URL of the github registry to push the package
+github_registry: https://maven.pkg.github.com/...
+
+#. github_username(required):
+#+ the username to use to push the package
+github_username: ((github_registry.username))
+
+#. github_password(required):
+#+ the password / token to push the package
+github_password: ((github_registry.password))
