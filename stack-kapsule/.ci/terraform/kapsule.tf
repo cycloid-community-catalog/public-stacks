@@ -1,3 +1,7 @@
+#
+# Create a Kapsule cluster + node pools
+#
+
 # Put here a custom name for the Kapsule Cluster
 # Otherwise `${var.project}-${var.env}` will be used
 locals {
@@ -34,7 +38,7 @@ module "kapsule" {
   #+ The Container Network Interface (CNI) for the Kubernetes cluster (either `cilium`, `calico`, `weave` or `flannel`).
 
   #. ingress (optional): nginx
-  #+ The ingress controller to be deployed on the Kubernetes cluster (either `nginx`, `traefik` or `traefik2`).
+  #+ The ingress controller to be deployed on the Kubernetes cluster (either `nginx`, `traefik`, `traefik2` or `none`).
 
   #. enable_dashboard (optional): true
   #+ Enables the Kubernetes dashboard for the Kubernetes cluster.
@@ -48,9 +52,6 @@ module "kapsule" {
   #. auto_upgrade (optional): true
   #+ Set to `true` to enable Kubernetes patch version auto upgrades. Important: When enabling auto upgrades, the `cluster_version` variable take a minor version like x.y (ie 1.18).
 
-  #. autoscaling (optional): false
-  #+ Set to `true` to enable the Kubernetes cluster autoscaler.
-
   ###
   # Required (should probably not be touched)
   ###
@@ -61,8 +62,8 @@ module "kapsule" {
 }
 
 # You can duplicate this module to create mutiple Kapsule node pools.
-# Make sure to change the `node_pool_name` field accordingly.
-module "node-pool" {
+# Make sure to change the module name and the `node_pool_name` field accordingly.
+module "node_pool" {
   #####################################
   # Do not modify the following lines #
   source = "./module-node-pool"
@@ -114,7 +115,7 @@ module "node-pool" {
   #. placement_group_id (optional): ""
   #+ The placement group the nodes of the pool will be attached to. Important: Updates to this field will recreate a new resource.
 
-  #. wait_for_pool_ready (optional): false
+  #. wait_for_pool_ready (optional): true
   #+ Whether to wait for the pool to be ready.
 
   ###

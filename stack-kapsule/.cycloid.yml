@@ -3,7 +3,7 @@ version: '2'
 # Configuration of the Cycloid stack
 name: 'Scaleway Kapsule'
 canonical: 'stack-kapsule'
-status: 'private'
+status: 'public'
 description: |
   Used to deploy a Scaleway Kubernetes Kapsule cluster with one or more node pools.
 keywords:
