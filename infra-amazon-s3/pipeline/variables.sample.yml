@@ -64,3 +64,7 @@ config_ansible_path: ($ project $)/ansible
 #. config_terraform_path (required): ($ project $)/terraform/($ environment $)
 #+ Path of Terraform files in the config git repository
 config_terraform_path: ($ project $)/terraform/($ environment $)
+
+#. terraform_version (required): '0.12.28'
+#+ terraform version used to execute your code.
+terraform_version: '0.12.28'

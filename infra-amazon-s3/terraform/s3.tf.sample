@@ -18,10 +18,13 @@ module "s3" {
 
   #. bucket_acl (optional): private
   #+ S3 canned ACL: https://docs.aws.amazon.com/AmazonS3/latest/dev/acl-overview.html#canned-acl
+  bucket_acl = "private"
 
   #. versioning_enabled (optional, bool): false
   #+ Enable S3 bucket versionning.
+  versioning_enabled = false
 
   #. extra_tags(optional, dict): {}
   #+ Dict of extra tags to add on aws resources..
+  extra_tags = {}
 }
