@@ -1,0 +1,122 @@
+---
+default:
+  pipeline:
+    Terraform:
+      - name: "AWS access key"
+        description: "Amazon AWS access key for Terraform."
+        key: aws_access_key
+        widget: cy_cred
+        type: string
+        default: "((aws.access_key))"
+      - name: "AWS secret key"
+        description: "Amazon AWS secret key for Terraform."
+        key: aws_secret_key
+        widget: cy_cred
+        type: string
+        default: "((aws.secret_key))"
+      - name: "Amazon AWS region"
+        description: "Amazon AWS region to use for Terraform."
+        key: aws_default_region
+        widget: auto_complete
+        type: string
+        values: ["eu-north-1","ap-south-1","eu-west-3","eu-west-2","eu-west-1","ap-northeast-2","ap-northeast-1","sa-east-1","ca-central-1","ap-southeast-1","ap-southeast-2","eu-central-1","us-east-1","us-east-2","us-west-1","us-west-2"]
+        default: eu-west-1
+      - name: "Terraform storage bucket"
+        description: "AWS S3 bucket name to store terraform remote state file."
+        key: terraform_storage_bucket_name
+        widget: simple_text
+        type: string
+        default: ($ organization_canonical $)-terraform-remote-state
+    Website:
+      - name: "Website Git repository URL"
+        key: website_git_repository
+        type: string
+        widget: simple_text
+        description: "Git repository URL containing the website code"
+        default: "git@github.com:MyUser/website.git"
+        required: true
+      - name: "Website Git branch"
+        description: "Branch of the website git repository."
+        key: website_git_branch
+        widget: auto_complete
+        type: string
+        values: ["master","develop","staging","production", "config","cycloid"]
+        default: master
+      - name: "Website Git key"
+        description: "SSH key pair to fetch the website git repository."
+        key: website_git_private_key
+        type: string
+        widget: cy_cred
+        default: "((ssh_config.ssh_key))"
+        required: true
+    Config:
+      - name: "Config repository"
+        key: config_git_repository
+        type: string
+        widget: cy_crs
+        description: "Git repository URL containing the config of the stack."
+        default: "git@github.com:MyUser/config.git"
+        required: true
+      - name: "Config git key"
+        description: "SSH key pair to fetch the config Git repository."
+        key: config_git_private_key
+        type: string
+        widget: cy_cred
+        default: "((ssh_config.ssh_key))"
+        required: true
+      - name: "Config branch"
+        description: "Branch of the config Git repository."
+        key: config_git_branch
+        widget: cy_branch
+        type: string
+        description: "The branch used by the config repository"
+        source: config_git_repository
+        default: "config"
+        required: true
+  terraform:
+    Config:
+      - name: "CloudFront Alternate Domain Names"
+        description: "List of FQDN's - Used to set the Alternate Domain Names (CNAMEs) setting on Cloudfront."
+        key: cloudfront_aliases
+        widget: text_area
+        type: array
+        required: true
+        default:
+            - "mydomain.com"
+      - name: "ACM Certificates ARN"
+        description: "ARN of Certificates Managed by ACM for ssl purpose."
+        key: cloudfront_certificate_arn
+        widget: simple_text
+        type: string
+        default: ""
+      - name: "CloudFront Price class"
+        description: "Price class for this distribution."
+        key: cloudfront_price_class
+        widget: radios
+        type: string
+        default: "PriceClass_200"
+        values:
+             - "PriceClass_100"
+             - "PriceClass_200"
+             - "PriceClass_All"
+      - name: "CloudFront default TTL"
+        description: "Default amount of time (in seconds) that an object is in a CloudFront cache."
+        key: cloudfront_default_ttl
+        widget: number
+        type: integer
+        unit: seconds
+        default: 300
+      - name: "CloudFront min TTL"
+        description: "Minimum amount of time that you want objects to stay in CloudFront caches."
+        key: cloudfront_min_ttl
+        widget: number
+        type: integer
+        unit: seconds
+        default: 0
+      - name: "CloudFront max TTL"
+        description: "Maximum amount of time (in seconds) that an object is in a CloudFront cache."
+        key: cloudfront_max_ttl
+        widget: number
+        type: integer
+        unit: seconds
+        default: 604800

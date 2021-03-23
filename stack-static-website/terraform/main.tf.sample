@@ -1,0 +1,115 @@
+# See the variables.tf file in module- for a complete description
+# of the options
+
+module "website" {
+
+  #####################################
+  # Do not modify the following lines #
+  source = "./module-website"
+
+  project  = var.project
+  env      = var.env
+  customer = var.customer
+  #####################################
+
+  #. s3_bucket_name (optional):
+  #+ Name of the S3 bucket to create. Only lowercase alphanumeric characters and hyphens allowed.
+  s3_bucket_name              = ""
+
+  #. extra_tags(optional, dict): {}
+  #+ Dict of extra tags to add on aws resources.
+  extra_tags = {}
+
+  # CORS
+
+  #. cors_allowed_headers(optional, list): ["*"]
+  #+ List of allowed headers for S3 bucket.
+  cors_allowed_headers = ["*"]
+
+  #. cors_allowed_methods(optional, list): ["GET"]
+  #+ List of allowed methods (e.g. GET, PUT, POST, DELETE, HEAD) for S3 bucket.
+  cors_allowed_methods = ["GET"]
+
+  #. cors_allowed_origins(optional, list): []
+  #+ List of allowed origins (e.g. example.com, test.com) for S3 bucket.
+  cors_allowed_origins = []
+
+  #. cors_expose_headers(optional, list): ["ETag"]
+  #+ List of expose header in the response for S3 bucket.
+  cors_expose_headers = ["ETag"]
+
+  #. cors_max_age_seconds(optional, number): 3600
+  #+ Time in seconds that browser can cache the response for S3 bucket.
+  cors_max_age_seconds = 3600
+
+  #. cloudfront_aliases(required, list): []
+  #+ List of FQDN's - Used to set the Alternate Domain Names (CNAMEs) setting on Cloudfront.
+  cloudfront_aliases = [""]
+
+  #. cloudfront_certificate_arn(optional, string): ""
+  #+ ARN of Certificates Managed by ACM for ssl purpose.
+  cloudfront_certificate_arn = ""
+
+  #. cloudfront_price_class(optional, string): ""
+  #+ Price class for this distribution: `PriceClass_All`, `PriceClass_200`, `PriceClass_100`.
+  cloudfront_price_class = "PriceClass_200"
+
+  #. cloudfront_default_ttl(optional, number): 300
+  #+ Default amount of time (in seconds) that an object is in a CloudFront cache.
+  cloudfront_default_ttl = 300
+
+  #. cloudfront_min_ttl(optional, number): 0
+  #+ Minimum amount of time that you want objects to stay in CloudFront caches.
+  cloudfront_min_ttl = 0
+
+  #. cloudfront_max_ttl(optional, number): 604800
+  #+ Maximum amount of time (in seconds) that an object is in a CloudFront cache.
+  cloudfront_max_ttl = 604800
+
+
+  # Extra params
+
+  #. cloudfront_default_root_object(optional, string): "index.html"
+  #+ Cloudfront default root object.
+  # cloudfront_default_root_object = "index.html"
+
+  #. cloudfront_minimum_protocol_version(optional, string): "TLSv1"
+  #+ Minimum TLS protocol version to use in a CloudFront.
+  # cloudfront_minimum_protocol_version = "TLSv1"
+
+  #. cloudfront_cache_allowed_methods(optional, list): ["GET", "HEAD"]
+  #+ List of allowed methods (e.g. GET, PUT, POST, DELETE, HEAD) for AWS CloudFront.
+  # cloudfront_cache_allowed_methods = ["GET", "HEAD"]
+
+  #. cloudfront_cache_cached_methods(optional, list): ["GET", "HEAD"]
+  #+ List of cached methods (e.g. GET, PUT, POST, DELETE, HEAD).
+  # cloudfront_cache_cached_methods = ["GET", "HEAD"]
+
+  #. cloudfront_forward_query_string(optional, bool): true
+  #+ Forward query strings to the origin that is associated with this cache behavior.
+  # cloudfront_forward_query_string = true
+
+  #. cloudfront_forward_headers(optional, list): ["Access-Control-Request-Headers", "Access-Control-Request-Method", "Origin"]
+  #+ A list of whitelisted header values to forward to the origin.
+  # cloudfront_forward_headers = ["Access-Control-Request-Headers", "Access-Control-Request-Method", "Origin"]
+
+  #. cloudfront_forward_cookies(optional, string): "none"
+  #+ Specifies whether you want CloudFront to forward all or no cookies to the origin. Can be 'all' or 'none'.
+  # cloudfront_forward_cookies = "none"
+
+  #. cloudfront_viewer_protocol_policy(optional, string): "redirect-to-https"
+  #+ CloudFront viewer protocol policy: allow-all, redirect-to-https.
+  # cloudfront_viewer_protocol_policy = "redirect-to-https"
+
+  #. cloudfront_ordered_cache(optional, map): {}
+  #+ CloudFront An ordered list of cache behaviors resource for this distribution.
+  # cloudfront_ordered_cache = {}
+
+  #. cloudfront_geo_restriction_type(optional, string): "none"
+  #+ CloudFront Method that use to restrict distribution of your content by country: `none`, `whitelist`, or `blacklist`.
+  # cloudfront_geo_restriction_type = "none"
+
+  #. cloudfront_geo_restriction_locations(optional, list): ["US", "CA", "GB", "DE"]
+  #+ List of country codes for which CloudFront either to distribute content (whitelist) or not distribute your content (blacklist).
+  # cloudfront_geo_restriction_locations = ["US", "CA", "GB", "DE"]
+}

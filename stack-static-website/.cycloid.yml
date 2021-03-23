@@ -1,0 +1,39 @@
+---
+# Configuration of the Cycloid stack
+name: 'Static website'
+canonical: 'static-website'
+status: 'public'
+description: |
+  Create static website using Aws Cloudfront and S3 bucket.
+keywords:
+  - 's3'
+  - 'cloudfront'
+  - 'terraform'
+  - 'website'
+  - 'static'
+  - 'provider:aws'
+author: 'Cycloid'
+image: |
+  https://raw.githubusercontent.com/cycloid-community-catalog/stack-static-website/master/icon.png
+technologies:
+  - technology: Amazon S3
+    version: n/a
+  - technology: Amazon CloudFront
+    version: n/a
+  - technology: Terraform
+    version: n/a
+
+config:
+  # Configuration of the CI pipeline
+  pipeline:
+    pipeline:
+      path: 'pipeline/pipeline.yml'
+    variables:
+      path: 'pipeline/variables.sample.yml'
+      destination: '($ project $)/pipeline/variables-($ environment $).yml'
+
+  # Configuration of terraform to setup the infrastructure
+  terraform:
+    main:
+      path: 'terraform/main.tf.sample'
+      destination: '($ project $)/terraform/($ environment $)/main.tf'
