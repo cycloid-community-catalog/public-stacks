@@ -95,37 +95,36 @@ module "gke" {
 
   #. cluster_version (optional): latest
   #+ GKE Cluster version to use.
-  cluster_version = "latest"
 
   #. cluster_release_channel (optional): UNSPECIFIED
   #+ GKE Cluster release channel to use. Accepted values are UNSPECIFIED, RAPID, REGULAR and STABLE.
-  cluster_release_channel = "UNSPECIFIED"
 
   #. cluster_regional (optional): false
   #+ If the GKE Cluster must be regional or zonal. Be careful, this setting is destructive.
-  cluster_regional = false
 
   #. enable_only_private_endpoint (optional): false
   #+ If true, only enable the private endpoint which disable the Public endpoint entirely. If false, private endpoint will be enabled, and the public endpoint will be only accessible by master authorized networks.
 
   #. master_authorized_networks (optional): []
   #+ List of master authorized networks.
-  master_authorized_networks = []
+  # master_authorized_networks = [
+  #   {
+  #     name: "my-ip",
+  #     cidr: "x.x.x.x/32"
+  #   }
+  # ]
 
   #. enable_network_policy (optional): true
   #+ Enable GKE Cluster network policies addon.
-  enable_network_policy = true
 
   #. enable_horizontal_pod_autoscaling (optional): true
   #+ Enable GKE Cluster horizontal pod autoscaling addon.
-  enable_horizontal_pod_autoscaling = true
 
   #. enable_vertical_pod_autoscaling (optional): false
   #+ Enable GKE Cluster vertical pod autoscaling addon. Vertical Pod Autoscaling automatically adjusts the resources of pods controlled by it.
 
   #. enable_http_load_balancing (optional): false
   #+ Enable GKE Cluster HTTP load balancing addon.
-  enable_http_load_balancing = true
 
   #. enable_binary_authorization (optional): false
   #+ Enable GKE Cluster BinAuthZ Admission controller.
@@ -194,4 +193,3 @@ module "gke" {
   pods_ip_range     = module.vpc.pods_ip_range
   services_ip_range = module.vpc.services_ip_range
 }
-

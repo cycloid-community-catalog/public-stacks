@@ -62,6 +62,6 @@ stack_git_branch: master
 #+ Path of Terraform files in the config git repository
 config_terraform_path: ($ project $)/terraform/($ environment $)
 
-#. terraform_version (required): '0.12.17'
+#. terraform_version (required): '0.12.29'
 #+ terraform version used to execute your code.
-terraform_version: '0.12.17'
+terraform_version: '0.12.29'
