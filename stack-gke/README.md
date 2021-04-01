@@ -20,8 +20,8 @@ This stack will create a Google Kubernetes Engine cluster with it's own dedicate
 
 In order to run this task, couple elements are required within the infrastructure:
 
-  * Having an Google Cloud Storage bucket to store Terraform remote states [Here](https://cloud.google.com/storage/docs/creating-buckets)
-
+  * Having an Google Cloud Storage bucket to store Terraform remote states [Here](https://cloud.google.com/storage/docs/creating-buckets).
+  * Having the `Compute Engine API` and `Kubernetes Engine API` Services APIs enabled for your Google Cloud project ([documentation](https://cloud.google.com/endpoints/docs/openapi/enable-api#console)).
 
 # Details
 
