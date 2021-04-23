@@ -23,8 +23,8 @@ module "kapsule" {
   # General
   ###
 
-  #. extra_tags (optional): {}
-  #+ Dict of extra tags to add on aws resources. format { "foo" = "bar" }.
+  #. extra_tags (optional): []
+  #+ Dict of extra tags to add on aws resources. format [ "foo=bar" ].
 
   ###
   # Control plane
@@ -78,8 +78,8 @@ module "node_pool" {
   # General
   ###
 
-  #. extra_tags (optional): {}
-  #+ Dict of extra tags to add on aws resources. format { "foo" = "bar" }.
+  #. extra_tags (optional): []
+  #+ Dict of extra tags to add on aws resources. format [ "foo=bar" ].
 
   ###
   # Nodes
