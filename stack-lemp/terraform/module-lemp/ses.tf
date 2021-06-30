@@ -16,7 +16,7 @@ data "aws_iam_policy_document" "ses" {
     effect = "Allow"
 
     resources = [
-      "${var.ses_resource_arn}",
+      var.ses_resource_arn,
     ]
   }
 }

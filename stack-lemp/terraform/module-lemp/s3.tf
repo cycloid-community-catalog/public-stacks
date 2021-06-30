@@ -32,7 +32,7 @@ resource "aws_s3_bucket" "medias" {
   policy = var.s3_medias_policy_json != "" ? var.s3_medias_policy_json : data.aws_iam_policy_document.public_s3_bucket_medias[0].json
   acl    = var.s3_medias_acl
 
-  tags = merge(local.merged_tags, {
+  tags = merge(var.extra_tags, {
     Name = "${var.customer}-${var.project}-medias-${var.env}"
     role = "medias"
   })

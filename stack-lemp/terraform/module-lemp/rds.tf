@@ -18,7 +18,7 @@ resource "aws_security_group" "rds" {
     security_groups = [aws_security_group.front.id]
   }
 
-  tags = merge(local.merged_tags, {
+  tags = merge(var.extra_tags, {
     Name = "${var.project}-rds-${var.env}"
     role = "rds"
   })
@@ -51,7 +51,7 @@ resource "aws_db_instance" "application" {
 
   vpc_security_group_ids = compact([var.rds_extra_sg_allow, aws_security_group.rds[0].id])
 
-  tags = merge(local.merged_tags, {
+  tags = merge(var.extra_tags, {
     Name = "${var.customer}-${var.project}-rds-${var.env}"
     type = "master"
     role = "rds"

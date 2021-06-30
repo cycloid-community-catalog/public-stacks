@@ -24,7 +24,7 @@ resource "aws_security_group" "front" {
     cidr_blocks = ["0.0.0.0/0"]
   }
 
-  tags = merge(local.merged_tags, {
+  tags = merge(var.extra_tags, {
     Name = "${var.project}-front-${var.env}"
     role = "front"
   })
@@ -72,7 +72,7 @@ resource "aws_launch_template" "front" {
   iam_instance_profile {
     name = aws_iam_instance_profile.front_profile.name
   }
-  tags = merge(local.merged_tags, {
+  tags = merge(var.extra_tags, {
     Name = "${var.project}-fronttemplate-${var.env}"
     role = "fronttemplate"
   })
@@ -80,7 +80,7 @@ resource "aws_launch_template" "front" {
   tag_specifications {
     resource_type = "instance"
 
-    tags = merge(local.merged_tags, {
+    tags = merge(var.extra_tags, {
       Name = "${var.project}-front-${var.env}"
       role = "front"
     })
@@ -88,7 +88,7 @@ resource "aws_launch_template" "front" {
   tag_specifications {
     resource_type = "volume"
 
-    tags = merge(local.merged_tags, {
+    tags = merge(var.extra_tags, {
       Name = "${var.project}-front-${var.env}"
       role = "front"
     })
@@ -113,8 +113,8 @@ resource "aws_launch_template" "front" {
 
 locals {
   front_tags = concat([
-    for tag in keys(local.merged_tags) :
-    { "Key" = tag, "Value" = local.merged_tags[tag], "PropagateAtLaunch" = "true" }
+    for tag in keys(var.extra_tags) :
+    { "Key" = tag, "Value" = var.extra_tags[tag], "PropagateAtLaunch" = "true" }
     ],
     [
       { "Key" = "Name", "Value" = "${var.project}-front-${var.env}", "PropagateAtLaunch" = "true" },
@@ -124,7 +124,7 @@ locals {
 
 
 resource "aws_cloudformation_stack" "front" {
-  depends_on        = [aws_iam_instance_profile.front_profile]
+  depends_on = [aws_iam_instance_profile.front_profile]
 
   name = replace("${var.project}-front-${var.env}", var.nameregex, "")
 
@@ -204,7 +204,7 @@ resource "aws_security_group" "alb-front" {
     cidr_blocks = ["0.0.0.0/0"]
   }
 
-  tags = merge(local.merged_tags, {
+  tags = merge(var.extra_tags, {
     Name = "${var.project}-albfront-${var.env}"
     role = "front"
   })
@@ -242,7 +242,7 @@ resource "aws_alb" "front" {
   enable_cross_zone_load_balancing = true
   idle_timeout                     = 600
 
-  tags = merge(local.merged_tags, {
+  tags = merge(var.extra_tags, {
     Name = "${var.customer}-${var.project}-front-${var.env}"
     role = "front"
   })
@@ -294,7 +294,7 @@ locals {
     AsgName = ""
   }
 
-  tmp_list       = coalescelist(aws_cloudformation_stack.front.*.outputs, list(local.empty_map))
+  tmp_list           = coalescelist(aws_cloudformation_stack.front.*.outputs, tolist([local.empty_map]))
   cf_outputs_AsgName = lookup(local.tmp_list[0], "AsgName", "")
 }
 

@@ -125,6 +125,6 @@ ansible_version: "2.9"
 #+ SSH pubkey injected by packer during the ec2 ami build. Used only to debug failure.
 debug_public_key: ""
 
-#. terraform_version (required): '0.12.28'
+#. terraform_version (required): '1.0.1'
 #+ terraform version used to execute your code.
-terraform_version: '0.12.28'
+terraform_version: '1.0.1'

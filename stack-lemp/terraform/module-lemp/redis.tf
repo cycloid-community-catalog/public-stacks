@@ -14,7 +14,7 @@ resource "aws_security_group" "redis" {
     ]
   }
 
-  tags = merge(local.merged_tags, {
+  tags = merge(var.extra_tags, {
     Name = "${var.customer}-${var.project}-${var.elasticache_engine}-${var.env}"
     role = "redis"
   })
@@ -34,7 +34,7 @@ resource "aws_elasticache_cluster" "redis" {
   apply_immediately    = true
   maintenance_window   = "tue:06:00-tue:07:00"
 
-  tags = merge(local.merged_tags, {
+  tags = merge(var.extra_tags, {
     Name = "${var.customer}-${var.project}-${var.elasticache_engine}-${var.env}"
     role = "redis"
   })

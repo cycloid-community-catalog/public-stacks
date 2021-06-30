@@ -70,7 +70,7 @@ resource "aws_cloudfront_distribution" "cdn" {
   }
 
 
-  tags = merge(local.merged_tags, {
+  tags = merge(var.extra_tags, {
     Name = "${var.project}-cloudfront-${var.env}"
     role = "cdn"
   })
