@@ -65,5 +65,5 @@ output "iam_ses_smtp_user_key" {
 }
 
 output "iam_ses_smtp_user_secret" {
-  value = join("", aws_iam_access_key.ses.*.ses_smtp_password)
+  value = join("", aws_iam_access_key.ses.*.ses_smtp_password_v4)
 }
