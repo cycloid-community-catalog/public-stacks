@@ -1,0 +1,138 @@
+# YAML anchors
+shared:
+  - &task-merge-stack-and-config
+    task: merge-stack-and-config
+    config:
+      platform: linux
+      image_resource:
+        type: docker-image
+        source:
+          repository: cycloid/cycloid-toolkit
+          tag: latest
+      run:
+        path: /usr/bin/merge-stack-and-config
+      inputs:
+        - name: git_config
+          path: "config"
+        - name: git_stack
+          path: "stack"
+      outputs:
+        - name: merged-stack
+          path: "merged-stack"
+    params:
+      CONFIG_PATH: ((project))/terraform/((env))
+      STACK_PATH: terraform/azure
+
+groups:
+- name: overview
+  jobs:
+  - terraform-plan
+  - terraform-apply
+- name: destroy
+  jobs:
+  - terraform-destroy
+
+resource_types:
+- name: terraform
+  type: docker-image
+  source:
+    repository: ljfranklin/terraform-resource
+    tag: '0.12.24'
+
+resources:
+- name: tfstate
+  type: terraform
+  icon: terraform
+  source:
+    env_name: ((env))
+    backend_type: azurerm
+    backend_config:
+      container_name: ((terraform_storage_container_name))
+      key: ((terraform_storage_container_path))/((project))-((env)).tfstate
+      resource_group_name: ((azure_resource_group_name))
+      storage_account_name: ((terraform_storage_account_name))
+      access_key: ((terraform_storage_access_key))
+    vars:
+      azure_resource_group_name: ((azure_resource_group_name))
+      azure_location: ((azure_location))
+      azure_env: ((azure_env))
+      azure_client_id: ((azure_client_id))
+      azure_client_secret: ((azure_client_secret))
+      azure_subscription_id: ((azure_subscription_id))
+      azure_tenant_id: ((azure_tenant_id))
+      env: ((env))
+      project: ((project))
+      customer: ((customer))
+
+
+# The Terraform stack (will be merged with the config)
+- name: git_stack
+  type: git
+  source:
+    uri: https://github.com/cycloid-community-catalog/stack-getting-started.git
+    branch: ((stack_git_branch))
+
+# The Terraform config (will be merged with the stack)
+- name: git_config
+  type: git
+  source:
+    uri: ((git_repository))
+    branch: ((config_git_branch))
+    private_key: ((git_ssh_key))
+    paths:
+      - ((project))/terraform/((env))/*
+
+jobs:
+  - name: terraform-plan
+    max_in_flight: 1
+    build_logs_to_retain: 10
+    plan:
+      - do:
+        - get: git_stack
+          trigger: true
+        - get: git_config
+          trigger: true
+        - *task-merge-stack-and-config
+        - put: tfstate
+          params:
+            plan_only: true
+            terraform_source: merged-stack/
+
+  - name: terraform-apply
+    build_logs_to_retain: 10
+    plan:
+      - do:
+        - get: git_stack
+          trigger: false
+          passed:
+            - terraform-plan
+        - get: git_config
+          trigger: false
+          passed:
+            - terraform-plan
+        - get: tfstate
+          trigger: false
+          passed:
+            - terraform-plan
+        - *task-merge-stack-and-config
+        - put: tfstate
+          params:
+            plan_run: true
+            terraform_source: merged-stack/
+
+  - name: terraform-destroy
+    max_in_flight: 1
+    build_logs_to_retain: 10
+    plan:
+      - do:
+          - get: git_stack
+            trigger: false
+          - get: git_config
+            trigger: false
+          - *task-merge-stack-and-config
+          - put: tfstate
+            params:
+              action: destroy
+              terraform_source: merged-stack/
+            get_params:
+              action: destroy

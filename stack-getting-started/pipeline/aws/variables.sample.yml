@@ -1,0 +1,18 @@
+env: ($ environment $)
+project: ($ project $)
+customer: ($ organization_canonical $)
+
+git_ssh_key: ((ssh_key.ssh_key))
+
+# Branch used to store the config of the stack
+git_repository: git@github.com:cycloid-community-catalog/docs-step-by-step-stack.git
+config_git_branch: config
+stack_git_branch: master
+
+# Aws access to use inside the pipeline
+aws_access_key: ((aws_step-by-step.access_key))
+aws_secret_key: ((aws_step-by-step.secret_key))
+aws_default_region: eu-west-1
+
+# Terraform tfstate storage Configuration
+terraform_storage_bucket_name: ($ organization_canonical $)-terraform-remote-state

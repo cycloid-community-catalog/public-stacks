@@ -1,0 +1,11 @@
+module "instance" {
+  source   = "./module-gcp"
+  env      = "${var.env}"
+  customer = "${var.customer}"
+  project  = "${var.project}"
+
+  // Gcp
+  gcp_zone      = "${var.gcp_zone}"
+  gcp_project   = "${var.gcp_project}"
+  instance_type = "n1-standard-1"
+}

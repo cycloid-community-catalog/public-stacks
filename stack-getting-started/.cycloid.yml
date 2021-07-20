@@ -1,0 +1,75 @@
+---
+# Configuration of the Cycloid stack
+version: '2'
+name: 'getting-started'
+canonical: 'stack-getting-started'
+keywords:
+  - 'aws'
+  - 'azure'
+  - 'gcp'
+  - 'instance'
+  - 'compute'
+  - 'easy'
+  - 'onboarding'
+  - 'provider:aws'
+  - 'provider:azure'
+  - 'provider:gcp'
+status: 'private'
+description: |
+  Getting started stack purpose is to ovver a easy to use Cycloid stack during onboarding process.
+  This stack offer on multi cloud provider to create a default compute instance.
+author: 'Cycloid'
+image: 'https://raw.githubusercontent.com/cycloid-community-catalog/stack-getting-started/master/icon.png'
+technologies:
+  - technology: AWS
+    version: n/a
+  - technology: Azure
+    version: n/a
+  - technology: GCP
+    version: n/a
+
+config:
+  aws:
+    name: 'AWS'
+    description: 'Create an Elastic Compute Cloud (EC2)'
+    cloud_provider: aws
+    pipeline:
+      pipeline:
+        path: pipeline/aws/pipeline.yml
+      variables:
+        path: pipeline/aws/variables.sample.yml
+        destination: ($ project $)/pipeline/($ environment $)/variables.yml
+    terraform:
+      config:
+        destination: ($ project $)/terraform/($ environment $)/main.tf
+        path: terraform/aws/main.tf.sample
+
+  azure:
+    name: 'Azure'
+    description: 'Create a Virtual Machines'
+    cloud_provider: azurerm
+    pipeline:
+      pipeline:
+        path: pipeline/azure/pipeline.yml
+      variables:
+        path: pipeline/azure/variables.sample.yml
+        destination: ($ project $)/pipeline/($ environment $)/variables.yml
+    terraform:
+      config:
+        destination: ($ project $)/terraform/($ environment $)/main.tf
+        path: terraform/azure/main.tf.sample
+
+  gcp:
+    name: 'GCP'
+    description: 'Create a Compute Engine'
+    cloud_provider: google
+    pipeline:
+      pipeline:
+        path: pipeline/gcp/pipeline.yml
+      variables:
+        path: pipeline/gcp/variables.sample.yml
+        destination: ($ project $)/pipeline/($ environment $)/variables.yml
+    terraform:
+      config:
+        destination: ($ project $)/terraform/($ environment $)/main.tf
+        path: terraform/gcp/main.tf.sample

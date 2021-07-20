@@ -1,0 +1,253 @@
+---
+aws:
+  pipeline:
+    Cloud-provider:
+      - name: "Aws region"
+        key: aws_default_region
+        widget: auto_complete
+        type: string
+        values: ["eu-north-1","ap-south-1","eu-west-3","eu-west-2","eu-west-1","ap-northeast-2","ap-northeast-1","sa-east-1","ca-central-1","ap-southeast-1","ap-southeast-2","eu-central-1","us-east-1","us-east-2","us-west-1","us-west-2"]
+        default: eu-west-1
+      - name: "AWS access key id"
+        description: "AWS access key id which should be used"
+        key: aws_access_key
+        widget: cy_cred
+        type: string
+        default: "((aws_step-by-step.access_key))"
+      - name: "AWS secret key"
+        description: "AWS secret key which should be used"
+        key: aws_secret_key
+        widget: cy_cred
+        type: string
+        default: "((aws_step-by-step.secret_key))"
+    Stack-configuration:
+      - name: "Config repository"
+        description: "Service catalog repository containing your private stack"
+        key: git_repository
+        widget: cy_crs
+        type: string
+        required: true
+      - name: "Config repository branch"
+        description: "Branch to use which will contain the Configuration of your environment"
+        key: config_git_branch
+        widget: cy_branch
+        type: string
+        source: git_repository
+        default: config
+      - name: "Config repository credential (SSH key)"
+        description: "Credential (SSH key) used to fetch the config repository"
+        key: git_ssh_key
+        widget: cy_cred
+        type: string
+        default: "((ssh_step-by-step.ssh_key))"
+    Terraform:
+      - name: "AWS S3 bucket name"
+        description: "Name of the AWS S3 bucket used to store Terraform tfstate file"
+        key: terraform_storage_bucket_name
+        widget: simple_text
+        type: string
+        default: "($ organization_canonical $)-terraform-remote-state"
+      - name: "AWS S3 bucket path"
+        description: "The path in the AWS S3 bucket used to store Terraform tfstate file"
+        key: terraform_storage_bucket_path
+        widget: simple_text
+        type: string
+        default: "($ project $)"
+
+  terraform:
+    configuration:
+      - name: "AWS instance type"
+        description: "The type of instance you want to create"
+        key: instance_type
+        widget: slider_list
+        type: string
+        values:
+        - t3.nano
+        - t3.micro
+        - t3.small
+        - t3.medium
+        - t3.large
+        default: t3.small
+azure:
+  pipeline:
+    Cloud-provider:
+      - name: "Azure resource group name"
+        description: "The name of the resource group in which create the resources"
+        key: azure_resource_group_name
+        widget: simple_text
+        type: string
+        default: "cycloid-demo"
+      - name: "Azure environment"
+        description: "The Cloud Environment which should be used"
+        key: azure_env
+        widget: radios
+        type: string
+        values:
+        - public
+        - china
+        - german
+        - stack
+        - usgovernment
+        default: public
+      - name: "Azure location"
+        key: azure_location
+        widget: auto_complete
+        type: string
+        values: [eastasia,southeastasia,centralus,eastus,eastus2,westus,northcentralus,southcentralus,northeurope,westeurope,japanwest,japaneast,brazilsouth,australiaeast,australiasoutheast,southindia,centralindia,westindia,canadacentral,canadaeast,uksouth,ukwest,westcentralus,westus2,koreacentral,koreasouth,francecentral,francesouth,australiacentral,australiacentral2,uaecentral,uaenorth,southafricanorth,southafricawest,switzerlandnorth,switzerlandwest,germanynorth,germanywestcentral,norwaywest,norwayeast]
+        default: francecentral
+      - name: "Azure subscription id"
+        description: "The Subscription ID which should be used"
+        key: azure_subscription_id
+        widget: cy_cred
+        type: string
+        default: "((azure_step-by-step.subscription_id))"
+      - name: "Azure tenant id"
+        description: "The Tenant ID which should be used"
+        key: azure_tenant_id
+        widget: cy_cred
+        type: string
+        default: "((azure_step-by-step.tenant_id))"
+      - name: "Azure client id"
+        description: "The Client ID which should be used"
+        key: azure_client_id
+        widget: cy_cred
+        type: string
+        default: "((azure_step-by-step.client_id))"
+      - name: "Azure client secret"
+        description: "The Client Secret which should be used"
+        key: azure_client_secret
+        widget: cy_cred
+        type: string
+        default: "((azure_step-by-step.client_secret))"
+    Stack-configuration:
+      - name: "Config repository"
+        description: "Service catalog repository containing your private stack"
+        key: git_repository
+        widget: cy_crs
+        type: string
+        required: true
+      - name: "Config repository branch"
+        description: "Branch to use which will contain the Configuration of your environment"
+        key: config_git_branch
+        widget: cy_branch
+        type: string
+        source: git_repository
+        default: config
+      - name: "Config repository credential (SSH key)"
+        description: "Credential (SSH key) used to fetch the config repository"
+        key: git_ssh_key
+        widget: cy_cred
+        type: string
+        default: "((ssh_step-by-step.ssh_key))"
+    Terraform:
+      - name: "Terraform Azure storage account name"
+        description: "Azure account storage used to store Terraform tfstate file"
+        key: terraform_storage_account_name
+        widget: cy_cred
+        type: string
+        default: "((azure_storage_step-by-step.account_name))"
+      - name: "Terraform Azure storage access key"
+        description: "Azure storage access key used to store Terraform tfstate file"
+        key: terraform_storage_access_key
+        widget: cy_cred
+        type: string
+        default: "((azure_storage_step-by-step.access_key))"
+      - name: "Azure storage container name"
+        description: "Azure storage container name used to store Terraform tfstate file"
+        key: terraform_storage_container_name
+        widget: simple_text
+        type: string
+        default: "cycloid-demo"
+      - name: "Azure storage container path"
+        description: "Azure storage container path used to store Terraform tfstate file"
+        key: terraform_storage_container_path
+        widget: simple_text
+        type: string
+        default: "($ project $)/($ environment $)"
+  terraform:
+    configuration:
+      - name: "Azure subnet id"
+        description: "Subnet on which you want to create the instance"
+        key: subnet_id
+        description: "it should looks like: /subscriptions/.../Microsoft.Network/virtualNetworks/default/subnets/default"
+        widget: simple_text
+        type: string
+        required: true
+      - name: "Azure instance type"
+        description: "The type of instance you want to create"
+        key: instance_type
+        widget: slider_list
+        type: string
+        values:
+        - Standard_DS1_v2
+        - Standard_DS2_v2
+        - Standard_DS3_v2
+        default: Standard_DS1_v2
+gcp:
+  pipeline:
+    Cloud-provider:
+      - name: "GCP project name"
+        description: "The GCP project name to use"
+        key: gcp_project
+        widget: simple_text
+        type: string
+        default: cycloid-demo
+      - name: "GCP zone"
+        key: gcp_zone
+        widget: auto_complete
+        type: string
+        values: [asia-east1-a,asia-east1-b,asia-east1-c,asia-east2-a,asia-east2-b,asia-east2-c,asia-northeast1-a,asia-northeast1-b,asia-northeast1-c,asia-northeast2-a,asia-northeast2-b,asia-northeast2-c,asia-northeast3-a,asia-northeast3-b,asia-northeast3-c,asia-south1-a,asia-south1-b,asia-south1-c,asia-southeast1-a,asia-southeast1-b,asia-southeast1-c,australia-southeast1-a,australia-southeast1-b,australia-southeast1-c,europe-north1-a,europe-north1-b,europe-north1-c,europe-west1-b,europe-west1-c,europe-west1-d,europe-west2-a,europe-west2-b,europe-west2-c,europe-west3-a,europe-west3-b,europe-west3-c,europe-west4-a,europe-west4-b,europe-west4-c,europe-west6-a,europe-west6-b,europe-west6-c,northamerica-northeast1-a,northamerica-northeast1-b,northamerica-northeast1-c,southamerica-east1-a,southamerica-east1-b,southamerica-east1-c,us-central1-a,us-central1-b,us-central1-c,us-central1-f,us-east1-b,us-east1-c,us-east1-d,us-east4-a,us-east4-b,us-east4-c,us-west1-a,us-west1-b,us-west1-c,us-west2-a,us-west2-b,us-west2-c,us-west3-a,us-west3-b,us-west3-c,us-west4-a,us-west4-b,us-west4-c]
+        default: "europe-west1-b"
+      - name: "GCP json credentials"
+        description: "GCP credentials in json format which should be used"
+        key: gcp_credentials_json
+        widget: cy_cred
+        type: string
+        default: "((gcp_step-by-step.json_key))"
+    Stack-configuration:
+      - name: "Config repository"
+        description: "Service catalog repository containing your private stack"
+        key: git_repository
+        widget: cy_crs
+        type: string
+        required: true
+      - name: "Config repository branch"
+        description: "Branch to use which will contain the Configuration of your environment"
+        key: config_git_branch
+        widget: cy_branch
+        type: string
+        source: git_repository
+        default: config
+      - name: "Config repository credential (SSH key)"
+        description: "Credential (SSH key) used to fetch the config repository"
+        key: git_ssh_key
+        widget: cy_cred
+        type: string
+        default: "((ssh_step-by-step.ssh_key))"
+    Terraform:
+      - name: "GCP object storage bucket name"
+        description: "Name of the GCP object storage bucket used to store Terraform tfstate file"
+        key: terraform_storage_bucket_name
+        widget: simple_text
+        type: string
+        default: "($ organization_canonical $)-terraform-remote-state"
+      - name: "GCP object storage bucket path"
+        description: "The path in the GCP object storage bucket path used to store Terraform tfstate file"
+        key: terraform_storage_bucket_path
+        widget: simple_text
+        type: string
+        default: "($ project $)"
+
+  terraform:
+    configuration:
+      - name: "AWS instance type"
+        description: "The type of instance you want to create"
+        key: instance_type
+        widget: slider_list
+        type: string
+        values:
+        - n1-standard-1
+        - n1-standard-2
+        - n1-standard-4
+        - n1-standard-8
+        default: n1-standard-1

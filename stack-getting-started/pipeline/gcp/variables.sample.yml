@@ -1,0 +1,17 @@
+env: ($ environment $)
+project: ($ project $)
+customer: ($ organization_canonical $)
+
+git_ssh_key: ((ssh_key.ssh_key))
+
+# Branch used to store the config of the stack
+git_repository: git@github.com:cycloid-community-catalog/docs-step-by-step-stack.git
+config_git_branch: config
+stack_git_branch: master
+
+# Terraform tfstate storage Configuration
+terraform_storage_bucket_name: ($ organization_canonical $)-terraform-remote-state
+
+gcp_project: cycloid-demo
+gcp_zone: "europe-west1-b"
+gcp_credentials_json: ((gcp_step-by-step.json_key))

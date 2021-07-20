@@ -1,0 +1,25 @@
+env: ($ environment $)
+project: ($ project $)
+customer: ($ organization_canonical $)
+
+git_ssh_key: ((ssh_key.ssh_key))
+
+# Branch used to store the config of the stack
+git_repository: git@github.com:cycloid-community-catalog/docs-step-by-step-stack.git
+config_git_branch: config
+stack_git_branch: master
+
+# Terraform tfstate storage Configuration
+terraform_storage_container_path: ($ project $)/($ environment $)
+terraform_storage_container_name: cycloid-demo
+terraform_storage_access_key: ((azure_storage_step-by-step.access_key))
+terraform_storage_account_name: ((azure_storage_step-by-step.account_name))
+
+azure_resource_group_name: cycloid-demo
+azure_location: francecentral
+azure_env: public
+
+azure_subscription_id: ((azure_step-by-step.subscription_id))
+azure_tenant_id: ((azure_step-by-step.tenant_id))
+azure_client_id: ((azure_step-by-step.client_id))
+azure_client_secret: ((azure_step-by-step.client_secret))
