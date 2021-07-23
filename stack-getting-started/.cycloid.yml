@@ -15,7 +15,6 @@ keywords:
   - 'provider:aws'
   - 'provider:azure'
   - 'provider:gcp'
-status: 'private'
 description: |
   Getting started stack purpose is to ovver a easy to use Cycloid stack during onboarding process.
   This stack offer on multi cloud provider to create a default compute instance.
