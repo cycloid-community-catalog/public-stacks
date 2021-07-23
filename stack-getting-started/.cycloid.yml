@@ -3,6 +3,7 @@
 version: '2'
 name: 'getting-started'
 canonical: 'stack-getting-started'
+status: 'public'
 keywords:
   - 'aws'
   - 'azure'
