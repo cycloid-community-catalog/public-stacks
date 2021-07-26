@@ -136,9 +136,9 @@ default:
       - name: "Front count"
         description: "Number of Aws EC2 frontend server to create."
         key: front_count
-        widget: simple_text
-        type: string
-        default: "1"
+        widget: number
+        type: integer
+        default: 1
       - name: "Front type"
         description: "Type of Aws EC2 frontend servers."
         key: front_type
