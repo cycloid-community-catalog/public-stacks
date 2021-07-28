@@ -51,7 +51,7 @@ resource "google_compute_instance" "main" {
   }
 
   metadata = {
-      "cycloid.io" = "true"
+      cycloidio    = "true"
       env          = var.env
       project      = var.project
       customer     = var.customer
@@ -59,7 +59,7 @@ resource "google_compute_instance" "main" {
   }
 
   labels = {
-      "cycloid.io" = "true"
+      cycloidio    = "true"
       env          = var.env
       project      = var.project
       customer     = var.customer
