@@ -51,9 +51,21 @@ resource "google_compute_instance" "main" {
   }
 
   metadata = {
-    environment = var.env
-    project     = var.project
+      "cycloid.io" = "true"
+      env          = var.env
+      project      = var.project
+      customer     = var.customer
+      organization = var.customer
   }
+
+  labels = {
+      "cycloid.io" = "true"
+      env          = var.env
+      project      = var.project
+      customer     = var.customer
+      organization = var.customer
+  }
+
 
   metadata_startup_script = data.template_file.user_data.rendered
 }

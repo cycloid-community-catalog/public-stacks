@@ -57,5 +57,6 @@ resource "aws_instance" "front" {
     env          = var.env
     project      = var.project
     customer     = var.customer
+    organization = var.customer
   }
 }

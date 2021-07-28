@@ -26,6 +26,10 @@ resource "azurerm_network_interface" "main" {
   tags = {
     environment  = var.env
     "cycloid.io" = "true"
+    env          = var.env
+    project      = var.project
+    customer     = var.customer
+    organization = var.customer
 
   }
 
@@ -85,5 +89,9 @@ resource "azurerm_virtual_machine" "main" {
   tags = {
     environment  = var.env
     "cycloid.io" = "true"
+    env          = var.env
+    project      = var.project
+    customer     = var.customer
+    organization = var.customer
   }
 }
