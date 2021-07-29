@@ -2,10 +2,16 @@ variable "customer" {}
 variable "project" {}
 variable "env" {}
 
+terraform {
+  required_providers {
+    azurerm = {
+      source  = "azurerm"
+      version = "~> 1.42.0"
+    }
+  }
+}
 # Azure
 provider "azurerm" {
-  version = "~> 1.42.0"
-
   environment     = var.azure_env
   client_id       = var.azure_client_id
   client_secret   = var.azure_client_secret

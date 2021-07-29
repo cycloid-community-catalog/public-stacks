@@ -1,11 +1,11 @@
 module "instance" {
   source   = "./module-azure"
-  env      = "${var.env}"
-  customer = "${var.customer}"
-  project  = "${var.project}"
+  env      = var.env
+  customer = var.customer
+  project  = var.project
 
-  resource_group_name = "${var.azure_resource_group_name}"
+  resource_group_name = var.azure_resource_group_name
   subnet_id           = "/subscriptions/.../providers/Microsoft.Network/virtualNetworks/default/subnets/default"
-  azure_location      = "${var.azure_location}"
+  azure_location      = var.azure_location
   instance_type       = "Standard_DS1_v2"
 }

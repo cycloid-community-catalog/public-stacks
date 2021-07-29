@@ -12,9 +12,9 @@ data "template_file" "user_data" {
   template = file("${path.module}/userdata.sh.tpl")
 
   vars = {
-    password        = random_string.password.result
-    env             = var.env
-    project         = var.project
+    password = random_string.password.result
+    env      = var.env
+    project  = var.project
   }
 }
 
@@ -51,19 +51,19 @@ resource "google_compute_instance" "main" {
   }
 
   metadata = {
-      cycloidio    = "true"
-      env          = var.env
-      project      = var.project
-      customer     = var.customer
-      organization = var.customer
+    cycloidio    = "true"
+    env          = var.env
+    project      = var.project
+    customer     = var.customer
+    organization = var.customer
   }
 
   labels = {
-      cycloidio    = "true"
-      env          = var.env
-      project      = var.project
-      customer     = var.customer
-      organization = var.customer
+    cycloidio    = "true"
+    env          = var.env
+    project      = var.project
+    customer     = var.customer
+    organization = var.customer
   }
 
 

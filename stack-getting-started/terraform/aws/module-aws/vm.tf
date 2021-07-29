@@ -16,20 +16,14 @@ resource "aws_security_group" "front" {
     cidr_blocks = ["0.0.0.0/0"]
   }
 
-  tags = {
-    "cycloid.io" = "true"
-    env          = var.env
-    project      = var.project
-    customer     = var.customer
-  }
 }
 
 resource "random_string" "password" {
   length           = 16
-  min_upper        = 1 
-  min_lower        = 1 
-  min_numeric      = 1 
-  min_special      = 1 
+  min_upper        = 1
+  min_lower        = 1
+  min_numeric      = 1
+  min_special      = 1
   special          = true
   override_special = "_%@"
 }
@@ -38,9 +32,9 @@ data "template_file" "user_data" {
   template = file("${path.module}/userdata.sh.tpl")
 
   vars = {
-    password        = random_string.password.result
-    env             = var.env
-    project         = var.project
+    password = random_string.password.result
+    env      = var.env
+    project  = var.project
   }
 }
 
@@ -54,9 +48,5 @@ resource "aws_instance" "front" {
   tags = {
     Name         = "${var.customer}-${var.project}-front-${var.env}"
     "cycloid.io" = "true"
-    env          = var.env
-    project      = var.project
-    customer     = var.customer
-    organization = var.customer
   }
 }
