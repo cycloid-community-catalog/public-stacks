@@ -111,7 +111,7 @@ jobs:
           passed:
             - terraform-plan
         - get: tfstate
-          trigger: false
+          trigger: true
           passed:
             - terraform-plan
         - *task-merge-stack-and-config
