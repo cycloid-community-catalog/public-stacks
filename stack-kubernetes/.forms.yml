@@ -704,3 +704,136 @@ scaleway-kapsule:
         widget: text_area
         type: map
 
+scaleway-nodes:
+  pipeline:
+    Terraform:
+      - name: "Scaleway access key"
+        description: "Scaleway access key for Terraform."
+        key: scw_access_key
+        widget: cy_cred
+        type: string
+        default: "((scaleway.access_key))"
+      - name: "Scaleway secret key"
+        description: "Scaleway access key for Terraform."
+        key: scw_secret_key
+        widget: cy_cred
+        type: string
+        default: "((scaleway.secret_key))"
+      - name: "Scaleway organization ID"
+        description: "Scaleway organization ID for Terraform."
+        key: scw_organization_id
+        widget: cy_cred
+        type: string
+        default: "((scaleway.organization_id))"
+      - name: "Scaleway region"
+        description: Scaleway region to use for Terraform."
+        key: scw_default_region
+        widget: auto_complete
+        type: string
+        values: ["fr-par","nl-ams","pl-waw"]
+        default: fr-par        
+      - name: "Terraform storage bucket"
+        description: "AWS S3 Bucket name to store terraform remote state file."
+        key: terraform_storage_bucket_name
+        widget: simple_text
+        type: string
+        default: ($ organization_canonical $)-terraform-remote-state
+
+    Repos:
+      - name: "Config repository"
+        key: config_git_repository
+        type: string
+        widget: cy_crs
+        description: "Git repository URL containing the config of the stack."
+        default: "git@github.com:MyUser/config-kapsule.git"
+        required: true
+      - name: "Config git key"
+        description: "SSH key pair to fetch the config Git repository."
+        key: config_git_private_key
+        type: string
+        widget: cy_cred
+        default: "((ssh_config.ssh_key))"
+        required: true
+      - name: "Config branch"
+        description: "Branch of the config Git repository."
+        key: config_git_branch
+        widget: cy_branch
+        type: string
+        description: "The branch used by the config repository"
+        source: config_git_repository
+        default: "master"
+        required: true
+
+  terraform:
+    config:
+      - name: "Cluster name"
+        description: "Kapsule Cluster Name."
+        key: module.config.cluster_name
+        widget: simple_text
+        type: string
+        default: "($ project $)-($ environment $)"
+      - name: "Placement group name"
+        description: "Groups nodes of the pool will be attached to."
+        key: module.config.placement_group_name
+        widget: simple_text
+        type: string
+        default: "($ project $)-($ environment $)"
+
+    node-pool:
+      - name: "Node pool name"
+        description: "Kapsule node group given name."
+        key: node_pool_name
+        widget: simple_text
+        type: string
+        default: "standard"
+      - name: "Node type"
+        description: "Type of instance to use for node servers."
+        key: node_type
+        widget: auto_complete
+        type: string
+        default: "GP1-XS"
+        required: true
+        values:
+            - "GP1-XS"
+            - "GP1-S"
+            - "GP1-M"
+            - "GP1-L"
+            - "GP1-XL"
+      - name: "Node desired number"
+        description: "Desired number of node servers."
+        key: node_count
+        widget: integer
+        type: number
+        default: 1
+        required: true
+      - name: "Enable auto scaling"
+        description: "Enables the autoscaling feature for this pool."
+        key: enable_autoscaling
+        widget: switch
+        type: boolean
+        default: false
+      - name: "Minimum pool size"
+        description: "The minimum size of the pool, used by the autoscaling feature."
+        key: node_autoscaling_min_size
+        widget: integer
+        type: number
+        default: 1
+      - name: "Maximum pool sizer"
+        description: " The maximum size of the pool, used by the autoscaling feature."
+        key: node_autoscaling_max_size
+        widget: integer
+        type: number
+        default: 10
+      - name: "Enable auto healing"
+        description: "Enables the autohealing feature for this pool."
+        key: enable_autohealing
+        widget: switch
+        type: boolean
+        default: true
+      - name: "Extra tags"
+        description: "Dict of extra tags to add on aws resources. format [ "foo=bar" ]"
+        key: extra_tags
+        widget: text_area
+        type: map
+
+
