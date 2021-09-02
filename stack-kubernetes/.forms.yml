@@ -641,7 +641,7 @@ scaleway-kapsule:
         description: "The start hour (UTC) of the 2-hour auto upgrade maintenance window (`0` to `23`)."
         key: maintenance_window_day
         widget: slider_range
-        type: number
+        type: integer
         default: 5
         values:
             - 0
@@ -670,8 +670,8 @@ scaleway-kapsule:
       - name: "Node desired number"
         description: "Desired number of node servers."
         key: node_count
-        widget: integer
-        type: number
+        widget: number
+        type: integer
         default: 1
         required: true
       - name: "Enable auto scaling"
@@ -683,14 +683,14 @@ scaleway-kapsule:
       - name: "Minimum pool size"
         description: "The minimum size of the pool, used by the autoscaling feature."
         key: node_autoscaling_min_size
-        widget: integer
-        type: number
+        widget: number
+        type: integer
         default: 1
       - name: "Maximum pool sizer"
         description: " The maximum size of the pool, used by the autoscaling feature."
         key: node_autoscaling_max_size
-        widget: integer
-        type: number
+        widget: number
+        type: integer
         default: 10
       - name: "Enable auto healing"
         description: "Enables the autohealing feature for this pool."
@@ -803,8 +803,8 @@ scaleway-nodes:
       - name: "Node desired number"
         description: "Desired number of node servers."
         key: node_count
-        widget: integer
-        type: number
+        widget: number
+        type: integer
         default: 1
         required: true
       - name: "Enable auto scaling"
@@ -816,14 +816,14 @@ scaleway-nodes:
       - name: "Minimum pool size"
         description: "The minimum size of the pool, used by the autoscaling feature."
         key: node_autoscaling_min_size
-        widget: integer
-        type: number
+        widget: number
+        type: integer
         default: 1
       - name: "Maximum pool sizer"
         description: " The maximum size of the pool, used by the autoscaling feature."
         key: node_autoscaling_max_size
-        widget: integer
-        type: number
+        widget: number
+        type: integer
         default: 10
       - name: "Enable auto healing"
         description: "Enables the autohealing feature for this pool."
