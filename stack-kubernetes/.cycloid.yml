@@ -101,3 +101,21 @@ config:
       kapsule:
         path: 'terraform/scaleway-kapsule/kapsule.tf.sample'
         destination: '($ project $)/terraform/($ environment $)/kapsule.tf'
+
+  scaleway-nodes:
+    name: 'Node pool'
+    cloud_provider: scaleway
+    description: 'Adds Kapsule node pools deployment to an existing cluster.'
+    # Configuration of the CI pipeline
+    pipeline:
+      pipeline:
+        path: 'pipeline/scaleway-kapsule.yml'
+      variables:
+        path: 'pipeline/variables.scaleway-kapsule.sample.yml'
+        destination: '($ project $)/pipeline/($ environment $)/variables.yml'
+    # Configuration of terraform to setup the infrastructure
+    terraform:
+      kapsule:
+        path: 'terraform/scaleway-kapsule/node_pool.tf.sample'
+        destination: '($ project $)/terraform/($ environment $)/node_pool.tf'
+

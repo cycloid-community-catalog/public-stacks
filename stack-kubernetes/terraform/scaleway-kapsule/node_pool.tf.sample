@@ -1,8 +1,6 @@
-
 #
-# Create a Kapsule cluster + node pools
+# Create additionnal Kapsule node pools to an existing  cluster.
 #
-
 # Config module is used to generate special datas shared with other modules like cluster_name
 module "config" {
   #####################################
@@ -19,70 +17,20 @@ module "config" {
   placement_group_name = var.placement_group_name
 }
 
-module "kapsule" {
-  #####################################
-  # Do not modify the following lines #
-  source = "./module-kapsule"
+# Update this external terraform remote state reference to the one declaring the Kapsule cluster.
+data "terraform_remote_state" "kubernetes-infra" {
+  backend = "s3"
+  config  = {
+    bucket   = "($ organization_canonical $)-terraform-remote-state"
+    key      = "($ project $)/infra/($ project $)-infra.tfstate"
+    region   = var.scw_default_region
+    endpoint = "https://s3.${var.scw_default_region}.scw.cloud"
 
-  project  = var.project
-  env      = var.env
-  customer = var.customer
-
-  #####################################
-
-  ###
-  # General
-  ###
-
-  #. extra_tags (optional): []
-  #+ Dict of extra tags to add on aws resources. format [ "foo=bar" ].
-
-  ###
-  # Control plane
-  ###
-
-  #. cluster_version (optional): 1.19
-  #+ Kapsule cluster version.
-  cluster_version = "1.19"
-
-  #. cni (optional): cilium
-  #+ The Container Network Interface (CNI) for the Kubernetes cluster (either `cilium`, `calico`, `weave` or `flannel`).
-  cni = "cilium"
-
-  #. ingress (optional): nginx
-  #+ The ingress controller to be deployed on the Kubernetes cluster (either `nginx`, `traefik`, `traefik2` or `none`).
-  ingress = "nginx"
-
-  #. enable_dashboard (optional): true
-  #+ Enables the Kubernetes dashboard for the Kubernetes cluster.
-  enable_dashboard = true
-
-  #. feature_gates (optional): []
-  #+ The list of feature gates to enable on the cluster.
-
-  #. admission_plugins (optional): []
-  #+ The list of admission plugins to enable on the cluster.
-
-  #. auto_upgrade (optional): true
-  #+ Set to `true` to enable Kubernetes patch version auto upgrades. Important: When enabling auto upgrades, the `cluster_version` variable take a minor version like x.y (ie 1.18).  
-  auto_upgrade = true
-
-  #. maintenance_window_day (optional): "tuesday"
-  #+ The day of the auto upgrade maintenance window (`monday` to `sunday`, or `any`).
-  maintenance_window_day =  "tuesday"
-
-  #. maintenance_window_start_hour (optional): 5
-  #+ "The start hour (UTC) of the 2-hour auto upgrade maintenance window (`0` to `23`)."
-  maintenance_window_start_hour = 5
-
-  ###
-  # Required (should probably not be touched)
-  ###
-
-  cluster_name = module.config.cluster_name
-  scw_region   = module.config.scw_region
-  scw_zone     = module.config.scw_zone
+    skip_credentials_validation = true
+    skip_region_validation      = true
+  }
 }
+
 
 # You can duplicate this module to create mutiple Kapsule node pools.
 # Make sure to change the module name and the `node_pool_name` field accordingly.
@@ -104,7 +52,6 @@ module "node_pool" {
   #. extra_tags (optional): []
   #+ Dict of extra tags to add on aws resources. format [ "foo=bar" ].
   extra_tags = []
-
   ###
   # Nodes
   ###
@@ -151,8 +98,8 @@ module "node_pool" {
   # Required (should probably not be touched)
   ###
 
-  cluster_id   = module.kapsule.cluster_id
-  cluster_name = module.config.cluster_name
-  scw_region   = module.config.scw_region
+  cluster_id   = data.terraform_remote_state.kubernetes-infra.outputs.cluster_id
+  cluster_name = data.terraform_remote_state.kubernetes-infra.outputs.cluster_name
+  scw_region   = data.terraform_remote_state.kubernetes-infra.outputs.scw_region
   scw_zone     = module.config.scw_zone
 }

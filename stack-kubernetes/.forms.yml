@@ -574,7 +574,13 @@ scaleway-kapsule:
         widget: simple_text
         type: string
         default: "($ project $)-($ environment $)"
-
+      - name: "Placement group name"
+        description: "Groups nodes of the pool will be attached to."
+        key: module.config.placement_group_name
+        widget: simple_text
+        type: string
+        default: "($ project $)-($ environment $)"
+} 
     kapsule:
       - name: "Cluster version"
         description: "Kapsule cluster version."
@@ -582,6 +588,64 @@ scaleway-kapsule:
         widget: simple_text
         type: string
         default: "1.19"
+      - name: "Container Network Interface"
+        description: "The Container Network Interface (CNI) for the Kubernetes cluster"
+        key: cni
+        widget: auto_complete
+        type: string
+        default: "cilium"
+        values:
+            - "cilium"
+            - "calico"
+            - "weave"
+            - "flannel"
+      - name: "Ingress controller"
+        description: "The ingress controller to be deployed on the Kubernetes cluster"
+        key: ingress
+        widget: auto_complete
+        type: string
+        default: "cilium"
+        values:
+            - "nginx"
+            - "traefik"
+            - "traefik2"
+            - "none"
+      - name: "Enable Kubernetes Dashboard"
+        description: "Enables the Kubernetes dashboard for the Kubernetes cluster."
+        key: enable_dashboard
+        widget: switch
+        type: boolean
+        default: true
+      - name: "Kubernetes auto upgrade"
+        description: "Set to `true` to enable Kubernetes patch version auto upgrades."
+        key: auto_upgrade
+        widget: switch
+        type: boolean
+        default: true
+      - name: "Maintenance window day"
+        description: "The day of the auto upgrade maintenance window"
+        key: maintenance_window_day
+        widget: auto_complete
+        type: string
+        default: "tuesday"
+        values:
+            - "any"
+            - "monday"
+            - "tuesday"
+            - "wednesday"
+            - "thursday" 
+            - "friday"
+            - "saturday"
+            - "sunday"
+      - name: "Maintenance window start hour"
+        description: "The start hour (UTC) of the 2-hour auto upgrade maintenance window (`0` to `23`)."
+        key: maintenance_window_day
+        widget: slider_range
+        type: number
+        default: 5
+        values:
+            - 0
+            - 23
 
     node-pool:
       - name: "Node pool name"
@@ -606,9 +670,37 @@ scaleway-kapsule:
       - name: "Node desired number"
         description: "Desired number of node servers."
         key: node_count
-        widget: simple_text
-        type: string
-        default: "1"
+        widget: integer
+        type: number
+        default: 1
         required: true
- 
+      - name: "Enable auto scaling"
+        description: "Enables the autoscaling feature for this pool."
+        key: enable_autoscaling
+        widget: switch
+        type: boolean
+        default: false
+      - name: "Minimum pool size"
+        description: "The minimum size of the pool, used by the autoscaling feature."
+        key: node_autoscaling_min_size
+        widget: integer
+        type: number
+        default: 1
+      - name: "Maximum pool sizer"
+        description: " The maximum size of the pool, used by the autoscaling feature."
+        key: node_autoscaling_max_size
+        widget: integer
+        type: number
+        default: 10
+      - name: "Enable auto healing"
+        description: "Enables the autohealing feature for this pool."
+        key: enable_autohealing
+        widget: switch
+        type: boolean
+        default: true
+      - name: "Extra tags"
+        description: "Dict of extra tags to add on aws resources. format [ "foo=bar" ]"
+        key: extra_tags
+        widget: text_area
+        type: map
 
