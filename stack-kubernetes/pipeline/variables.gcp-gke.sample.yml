@@ -1,0 +1,68 @@
+#
+# Terraform
+#
+
+# Google access to use to run terraform. Usually admin service account to be able to create Google services.
+
+#. gcp_credentials_json (required): ((gcp.json_key))
+#+ Google Cloud Platform credentials JSON for Terraform. See value format [here](https://docs.cycloid.io/advanced-guide/integrate-and-use-cycloid-credentials-manager.html#vault-in-the-pipeline)
+gcp_credentials_json: ((gcp.json_key))
+
+#. gcp_project (required): ($ project $)
+#+ Google Cloud Platform project to use for Terraform.
+gcp_project: ($ project $)
+
+#. gcp_region (required): europe-west1
+#+ Google Cloud Platform region to use for Terraform.
+gcp_region: europe-west1
+
+#. terraform_storage_bucket_name (required): ($ organization_canonical $)-terraform-remote-state
+#+ Google Cloud Storage bucket name to store terraform remote state file.
+terraform_storage_bucket_name: ($ organization_canonical $)-terraform-remote-state
+
+
+#
+# Repos
+#
+
+#. config_git_repository (required): git@github.com:MyUser/config-gke.git
+#+ Git repository URL containing the config of the stack.
+config_git_repository: git@github.com:MyUser/config-gke.git
+
+#. config_git_branch (required): master
+#+ Branch of the config Git repository.
+config_git_branch: master
+
+#. config_git_private_key (required): ((ssh_config.ssh_key))
+#+ SSH key pair to fetch the config Git repository.
+config_git_private_key: ((ssh_config.ssh_key))
+
+
+#
+# Default variables that shouldn't be changed except if needed
+#
+
+#. env (required): ($ environment $)
+#+ Name of the project's environment.
+env: ($ environment $)
+
+#. project (required): ($ project $)
+#+ Name of the project.
+project: ($ project $)
+
+#. customer (required): ($ organization_canonical $)
+#+ Name of the Cycloid Organization, used as customer variable name.
+customer: ($ organization_canonical $)
+organization: ($ organization_canonical $)
+
+#. stack_git_branch (required): master
+#+ Branch to use on the public stack Git repository
+stack_git_branch: master
+
+#. config_terraform_path (required): ($ project $)/terraform/($ environment $)
+#+ Path of Terraform files in the config git repository
+config_terraform_path: ($ project $)/terraform/($ environment $)
+
+#. terraform_version (required): '1.0.4'
+#+ terraform version used to execute your code.
+terraform_version: '1.0.4'

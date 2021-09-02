@@ -1,0 +1,176 @@
+# YAML anchors
+shared:
+
+  # Task : sync and merge with rsync 2 rep. Used to merge stack and config
+  - &merge-stack-and-config
+    platform: linux
+    image_resource:
+      type: docker-image
+      source:
+        repository: cycloid/cycloid-toolkit
+        tag: latest
+    run:
+      path: /usr/bin/merge-stack-and-config
+    outputs:
+    - name: merged-stack
+      path: "merged-stack"
+
+groups:
+
+- name: overview
+  jobs:
+  - terraform-plan
+  - terraform-apply
+
+- name: destroy
+  jobs:
+  - terraform-destroy
+
+resource_types:
+
+- name: terraform
+  type: docker-image
+  source:
+    repository: ljfranklin/terraform-resource
+    tag: ((terraform_version))
+
+resources:
+
+- name: tfstate
+  type: terraform
+  icon: terraform
+  source:
+    env_name: ((env))
+    backend_type: gcs
+    backend_config:
+      bucket: ((terraform_storage_bucket_name))
+      prefix: ((project))/((env))
+      credentials: ((gcp_credentials_json))
+    vars:
+      gcp_project: ((gcp_project))
+      gcp_region: ((gcp_region))
+      env: ((env))
+      project: ((project))
+      customer: ((customer))
+    env:
+      GOOGLE_PROJECT: ((gcp_project))
+      GOOGLE_REGION: ((gcp_region))
+      # GOOGLE_ZONE: ((gcp_zone))
+      GOOGLE_CREDENTIALS: ((gcp_credentials_json))
+
+# The Terraform stack (will be merged with the config)
+- name: git_stack-terraform
+  type: git
+  icon: git
+  source:
+    uri: https://github.com/cycloid-community-catalog/stack-kubernetes.git
+    branch: ((stack_git_branch))
+    paths:
+      - terraform/gcp-gke/*
+
+# The Terraform config (will be merged with the stack)
+- name: git_config-terraform
+  type: git
+  icon: git
+  source:
+    uri: ((config_git_repository))
+    branch: ((config_git_branch))
+    private_key: ((config_git_private_key))
+    paths:
+      - ((config_terraform_path))/*
+
+jobs:
+
+# Merge and trigger a plan whenever there is a commit in Terraform stack or config
+- name: terraform-plan
+  serial: True
+  max_in_flight: 1
+  build_logs_to_retain: 10
+  plan:
+    - do:
+      - get: git_stack-terraform
+        trigger: true
+      - get: git_config-terraform
+        trigger: true
+
+      - task: merge-stack-and-config
+        config:
+          <<: *merge-stack-and-config
+          inputs:
+          - name: git_config-terraform
+            path: "config"
+          - name: git_stack-terraform
+            path: "stack"
+        params:
+          CONFIG_PATH: ((config_terraform_path))
+          STACK_PATH: terraform/gcp-gke
+
+      - put: tfstate
+        params:
+          plan_only: true
+          terraform_source: merged-stack/
+
+# Merge and trigger an apply manually (no autostart of this job)
+- name: terraform-apply
+  serial: True
+  max_in_flight: 1
+  build_logs_to_retain: 10
+  plan:
+    - do:
+      - get: git_stack-terraform
+        trigger: false
+        passed:
+          - terraform-plan
+      - get: git_config-terraform
+        trigger: false
+        passed:
+          - terraform-plan
+      - get: tfstate
+        trigger: false
+        passed:
+          - terraform-plan
+
+      - task: merge-stack-and-config
+        config:
+          <<: *merge-stack-and-config
+          inputs:
+          - name: git_config-terraform
+            path: "config"
+          - name: git_stack-terraform
+            path: "stack"
+        params:
+          CONFIG_PATH: ((config_terraform_path))
+          STACK_PATH: terraform/gcp-gke
+
+      - put: tfstate
+        params:
+          plan_run: true
+          terraform_source: merged-stack/
+
+- name: terraform-destroy
+  max_in_flight: 1
+  build_logs_to_retain: 10
+  plan:
+    - do:
+        - get: git_stack-terraform
+          trigger: false
+        - get: git_config-terraform
+          trigger: false
+        - task: merge-stack-and-config
+          config:
+            <<: *merge-stack-and-config
+            inputs:
+            - name: git_config-terraform
+              path: "config"
+            - name: git_stack-terraform
+              path: "stack"
+          params:
+            CONFIG_PATH: ((config_terraform_path))
+            STACK_PATH: terraform/gcp-gke
+
+        - put: tfstate
+          params:
+            action: destroy
+            terraform_source: merged-stack/
+          get_params:
+            action: destroy
