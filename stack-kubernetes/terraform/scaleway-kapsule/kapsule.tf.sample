@@ -80,7 +80,7 @@ module "kapsule" {
   ###
 
   cluster_name = module.config.cluster_name
-  scw_region   = module.config.scw_region
+  scw_region   = var.scw_region
   scw_zone     = module.config.scw_zone
 }
 
@@ -153,6 +153,6 @@ module "node_pool" {
 
   cluster_id   = module.kapsule.cluster_id
   cluster_name = module.config.cluster_name
-  scw_region   = module.config.scw_region
-  scw_zone     = module.config.scw_zone
+  scw_region   = var.scw_region
+  scw_zone     = local.scw_zone
 }

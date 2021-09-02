@@ -3,7 +3,7 @@ output "cluster_name" {
   value       = local.scaleway_cluster_name
 }
 
-output "local.scw_zone" {
+output "scw_zone" {
   description = "Scaleway zone made of region and the zone id."
   value       = local.scw_zone
 }
