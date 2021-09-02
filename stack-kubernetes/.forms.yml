@@ -699,7 +699,7 @@ scaleway-kapsule:
         type: boolean
         default: true
       - name: "Extra tags"
-        description: "Dict of extra tags to add on aws resources. format [ "foo=bar" ]"
+        description: "Dict of extra tags to add on aws resources"
         key: extra_tags
         widget: text_area
         type: raw
@@ -832,7 +832,7 @@ scaleway-nodes:
         type: boolean
         default: true
       - name: "Extra tags"
-        description: "Dict of extra tags to add on aws resources. format [ "foo=bar" ]"
+        description: "Dict of extra tags to add on aws resources"
         key: extra_tags
         widget: text_area
         type: raw
