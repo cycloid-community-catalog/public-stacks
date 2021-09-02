@@ -702,7 +702,8 @@ scaleway-kapsule:
         description: "Dict of extra tags to add on aws resources. format [ "foo=bar" ]"
         key: extra_tags
         widget: text_area
-        type: map
+        type: raw
+        default: "[]"
 
 scaleway-nodes:
   pipeline:
@@ -834,6 +835,7 @@ scaleway-nodes:
         description: "Dict of extra tags to add on aws resources. format [ "foo=bar" ]"
         key: extra_tags
         widget: text_area
-        type: map
+        type: raw
+        default: "[]"
 
 
