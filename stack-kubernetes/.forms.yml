@@ -692,6 +692,12 @@ scaleway-kapsule:
         widget: switch
         type: boolean
         default: true
+      - name: "Placement group ID"
+        description: "The placement group the nodes of the pool will be attached to."
+        key: module.node_pool.placement_group_id
+        widget: simple_text
+        type: string
+        default: ""
       - name: "Extra tags"
         description: "Dict of extra tags to add on aws resources"
         key: module.node-pool.extra_tags
@@ -819,6 +825,12 @@ scaleway-nodes:
         widget: switch
         type: boolean
         default: true
+      - name: "Placement group ID"
+        description: "The placement group the nodes of the pool will be attached to."
+        key: module.node_pool_extra.placement_group_id
+        widget: simple_text
+        type: string
+        default: ""
       - name: "Extra tags"
         description: "Dict of extra tags to add on aws resources"
         key: module.node_pool_extra.extra_tags

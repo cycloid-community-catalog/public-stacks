@@ -142,9 +142,10 @@ module "node_pool" {
 
   #. placement_group_id (optional): ""
   #+ The placement group the nodes of the pool will be attached to. Important: Updates to this field will recreate a new resource.
-  placement_group_id = "${scaleway_instance_placement_group.($ environment $).placement_group_id}"
+  placement_group_id = ""
 
-  ## To add in a separate file in /config for the stack
+  ## To add placement group, create a separate file in the /config branch for the stack
+  ## Containing the following resource
   # resource "scaleway_instance_placement_group" "($ environment $)" {
   #  name        = var.placement_group_name
   #  policy_type = "max_availability"
