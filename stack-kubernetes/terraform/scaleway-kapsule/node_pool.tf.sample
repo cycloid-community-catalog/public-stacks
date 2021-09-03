@@ -18,7 +18,7 @@ module "config" {
 
 # You can duplicate this module to create mutiple Kapsule node pools.
 # Make sure to change the module name and the `node_pool_name` field accordingly.
-module "node_pool_extra" {
+module "node_pool" {
   #####################################
   # Do not modify the following lines #
   source = "./module-node-pool"
