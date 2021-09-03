@@ -16,21 +16,6 @@ module "config" {
   cluster_name = var.cluster_name
 }
 
-# Update this external terraform remote state reference to the one declaring the Kapsule cluster.
-data "terraform_remote_state" "kubernetes-infra" {
-  backend = "s3"
-  config  = {
-    bucket   = "($ organization_canonical $)-terraform-remote-state"
-    key      = "($ project $)/infra/($ project $)-infra.tfstate"
-    region   = var.scw_region
-    endpoint = "https://s3.${var.scw_region}.scw.cloud"
-
-    skip_credentials_validation = true
-    skip_region_validation      = true
-  }
-}
-
-
 # You can duplicate this module to create mutiple Kapsule node pools.
 # Make sure to change the module name and the `node_pool_name` field accordingly.
 module "node_pool_extra" {
@@ -103,11 +88,25 @@ module "node_pool_extra" {
   #+ Whether to wait for the pool to be ready.
 
   ###
-  # Required (should probably not be touched)
+  # Required 
   ###
 
   cluster_id   = data.terraform_remote_state.kubernetes-infra.outputs.cluster_id
-  cluster_name = data.terraform_remote_state.kubernetes-infra.outputs.cluster_name
-  scw_region   = data.terraform_remote_state.kubernetes-infra.outputs.scw_region
+  cluster_name = module.config.cluster_name
+  scw_region   = var.scw_region
   scw_zone     = local.scw_zone
 }
+
+# Update this external terraform remote state reference to the one declaring the Kapsule cluster.
+#data "terraform_remote_state" "kubernetes-infra" {
+#  backend = "s3"
+#  config  = {
+#    bucket   = "($ organization_canonical $)-terraform-remote-state"
+#    key      = "($ project $)/infra/($ project $)-infra.tfstate"
+#    region   = var.scw_region
+#    endpoint = "https://s3.${var.scw_region}.scw.cloud"
+#
+#    skip_credentials_validation = true
+#    skip_region_validation      = true
+#  }
+#}

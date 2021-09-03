@@ -775,6 +775,12 @@ scaleway-nodes:
         default: "($ project $)-($ environment $)"
 
     node-pool:
+      - name: "Kubernetes cluster id"
+        description: "The Kubernetes id the nodes of the pool will be attached to."
+        key: module.node_pool_extra.cluster_id
+        widget: simple_text
+        type: string
+        default: "data.terraform_remote_state.kubernetes-infra.outputs.cluster_id"
       - name: "Node pool name"
         description: "Kapsule node group given name."
         key: module.node_pool_extra.node_pool_name
@@ -830,7 +836,7 @@ scaleway-nodes:
         key: module.node_pool_extra.placement_group_id
         widget: simple_text
         type: string
-        default: ""
+        default: ""      
       - name: "Extra tags"
         description: "Dict of extra tags to add on aws resources"
         key: module.node_pool_extra.extra_tags
