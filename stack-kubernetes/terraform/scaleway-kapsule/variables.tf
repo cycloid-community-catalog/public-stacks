@@ -59,8 +59,3 @@ variable "cluster_name" {
   description = "Kapsule Cluster given name."
   default     = ""
 }
-
-variable "placement_group_name"{
-  description = "The placement group name. It groups nodes of the pool will be attached to. Important: Updates to this field will recreate a new resource."
-  default = ""
-} 

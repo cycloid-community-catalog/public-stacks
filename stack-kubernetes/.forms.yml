@@ -574,12 +574,6 @@ scaleway-kapsule:
         widget: simple_text
         type: string
         default: "($ project $)-($ environment $)"
-      - name: "Placement group name"
-        description: "Groups nodes of the pool will be attached to."
-        key: module.config.placement_group_name
-        widget: simple_text
-        type: string
-        default: "($ project $)-($ environment $)"
  
     kapsule:
       - name: "Cluster version"
@@ -773,12 +767,6 @@ scaleway-nodes:
         widget: simple_text
         type: string
         default: "($ project $)-($ environment $)"
-      - name: "Placement group name"
-        description: "Groups nodes of the pool will be attached to."
-        key: module.config.placement_group_name
-        widget: simple_text
-        type: string
-        default: ""
 
     node-pool:
       - name: "Node pool name"
