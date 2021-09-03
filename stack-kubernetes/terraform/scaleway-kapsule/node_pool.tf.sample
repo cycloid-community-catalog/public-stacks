@@ -88,7 +88,7 @@ module "node_pool" {
 
   #. placement_group_id (optional): ""
   #+ The placement group the nodes of the pool will be attached to. Important: Updates to this field will recreate a new resource.
-  placement_group_id = scaleway_instance_placement_group.($ environment $).placement_group_id
+  placement_group_id = \"scaleway_instance_placement_group.($ environment $).placement_group_id\"
 
   ## To add in a separate file in /config for the stack
   # resource "scaleway_instance_placement_group" "($ environment $)" {
