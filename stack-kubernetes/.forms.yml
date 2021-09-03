@@ -65,14 +65,14 @@ aws-eks:
     vpc:
       - name: "VPC CIDR"
         description: "The CIDR to use to create the VPC."
-        key: vpc_cidr
+        key: module.vpc.vpc_cidr
         widget: simple_text
         type: string
         default: "10.8.0.0/16"
         required: true
       - name: "Private subnets"
         description: "The private subnets cidr for the VPC."
-        key: private_subnets
+        key: module.vpc.private_subnets
         widget: text_area
         type: array
         default:
@@ -82,7 +82,7 @@ aws-eks:
         required: true
       - name: "Public subnets"
         description: "The public subnets cidr for the VPC."
-        key: public_subnets
+        key: module.vpc.public_subnets
         widget: text_area
         type: array
         default:
@@ -94,14 +94,14 @@ aws-eks:
     eks:
       - name: "Cluster version"
         description: "The kubernetes cluster version."
-        key: cluster_version
+        key: module.eks.cluster_version
         widget: simple_text
         type: string
         default: "1.16"
         required: true
       - name: "Kubernetes control plane allowed ips"
         description: "Allow Inbound IP CIDRs to access the Kubernetes API."
-        key: control_plane_allowed_ips
+        key: module.eks.control_plane_allowed_ips
         widget: text_area
         type: array
         default:
@@ -110,31 +110,31 @@ aws-eks:
     eks-node:
       - name: "SSH keypair"
         description: "Name of an existing AWS SSH keypair to use to deploy EC2 instances."
-        key: keypair_name
+        key: module.eks-node.keypair_name
         widget: simple_text
         type: string
         default: "cycloid"
       - name: "Bastion security group"
         description: "Additionnal security group ID to assign to servers. Goal is to allow bastion server to connect on nodes port 22 (SSH). Make sure the bastion VPC is peered."
-        key: bastion_sg_allow
+        key: module.eks-node.bastion_sg_allow
         widget: simple_text
         type: string
         default: ""
       - name: "Metrics security group"
         description: "Additionnal security group ID to assign to servers. Goal is to allow monitoring server to query metrics. Make sure the prometheus VPC is peered."
-        key: metrics_sg_allow
+        key: module.eks-node.metrics_sg_allow
         widget: simple_text
         type: string
         default: ""
       - name: "Node group given name"
         description: "Node group given name."
-        key: node_group_name
+        key: module.eks-node.node_group_name
         widget: simple_text
         type: string
         default: "standard"
       - name: "Node type"
         description: "Type of instance to use for node servers."
-        key: node_type
+        key: module.eks-node.node_type
         widget: auto_complete
         type: string
         default: "c5.xlarge"
@@ -162,33 +162,33 @@ aws-eks:
             - "c5.12xlarge"
       - name: "Node EBS optimized"
         description: "Whether the Instance is EBS optimized or not, related to the instance type you choose."
-        key: node_ebs_optimized
+        key: module.eks-node.node_ebs_optimized
         widget: switch
         type: boolean
         default: true
       - name: "Node desired number"
         description: "Desired number of node servers."
-        key: node_count
+        key: module.eks-node.node_count
         widget: simple_text
         type: string
         default: "1"
         required: true
       - name: "Min nodes (ASG)"
         description: "Minimum number of node servers allowed in the Auto Scaling Group."
-        key: node_asg_min_size
+        key: module.eks-node.node_asg_min_size
         widget: number
         type: integer
         default: 1
       - name: "Max nodes (ASG)"
         description: "Maximum number of node servers allowed in the Auto Scaling Group."
-        key: node_asg_max_size
+        key: module.eks-node.node_asg_max_size
         widget: number
         type: integer
         default: 10
       - name: "Nodes disk size"
         unit: Go
         description: "EKS nodes root disk size."
-        key: node_disk_size
+        key: module.eks-node.node_disk_size
         widget: slider_range
         type: integer
         default: 60
@@ -197,7 +197,7 @@ aws-eks:
             - 500
       - name: "Node profile"
         description: "EKS nodes profile, can be either `ondemand` or `spot`."
-        key: node_launch_template_profile
+        key: module.eks-node.node_launch_template_profile
         widget: radios
         type: string
         default: "ondemand"
@@ -206,13 +206,13 @@ aws-eks:
              - "spot"
       - name: "Spot price"
         description: "EKS nodes spot price when `node_market_type = spot`."
-        key: node_spot_price
+        key: module.eks-node.node_spot_price
         widget: simple_text
         type: string
         default: "0.3"
       - name: "Enable Cluster Autoscaler"
         description: "Should be true to add Cluster Autoscaler ASG tags."
-        key: node_enable_cluster_autoscaler_tags
+        key: module.eks-node.node_enable_cluster_autoscaler_tags
         widget: switch
         type: boolean
         default: false
@@ -339,13 +339,13 @@ azure-aks:
     vpc:
       - name: "Address Space"
         description: "The virtual network address space."
-        key: address_space
+        key: module.vpc.address_space
         widget: simple_text
         type: string
         default: "10.8.0.0/14"
       - name: "Private subnets"
         description: "The private subnets cidr for the VPC."
-        key: subnets
+        key: module.vpc.subnets
         widget: text_area
         type: map
         default:
@@ -359,7 +359,7 @@ azure-aks:
     aks:
       - name: "AKS cluster network plugin"
         description: "AKS cluster network plugin to use, can be either `azure` or `kubenet`."
-        key: network_plugin
+        key: module.aks.network_plugin
         widget: auto_complete
         type: string
         default: "azure"
@@ -368,31 +368,31 @@ azure-aks:
             - "kubenet"
       - name: "AKS cluster pod CIDR to use"
         description: "AKS cluster pod CIDR to use, required if `network_plugin = kubenet`."
-        key: network_pod_cidr
+        key: module.aks.network_pod_cidr
         widget: text_area
         type: string
         default: "10.9.0.0/16"
       - name: "AKS cluster pod CIDR to use"
         description: "AKS cluster service CIDR to use, required if `network_plugin = azure`."
-        key: network_service_cidr
+        key: module.aks.network_service_cidr
         widget: text_area
         type: string
         default: "10.10.0.0/16"
       - name: "AKS node name"
         description: "AKS default nodes pool given name."
-        key: node_pool_name
+        key: module.aks.node_pool_name
         widget: simple_text
         type: string
         default: "default"
       - name: "Node size"
         description: "AKS default nodes virtualmachine size."
-        key: node_size
+        key: module.aks.node_size
         widget: simple_text
         type: string
         default: "Standard_DS2_v2"
       - name: "Node desired number"
         description: "AKS default nodes desired count."
-        key: node_count
+        key: module.aks.node_count
         widget: simple_text
         type: string
         default: "1"
@@ -464,19 +464,19 @@ gcp-gke:
     vpc:
       - name: "VPC subnet CIDR"
         description: "The CIDR of the VPC subnet."
-        key: subnet_cidr
+        key: module.vpc.subnet_cidr
         widget: simple_text
         type: string
         default: "10.8.0.0/16"
       - name: "Pods secondary range CIDR"
         description: "The CIDR of the pods secondary range."
-        key: pods_cidr
+        key: module.vpc.pods_cidr
         widget: simple_text
         type: string
         default: "10.9.0.0/16"
       - name: "Services secondary range CIDR"
         description: "The CIDR of the services secondary range."
-        key: services_cidr
+        key: module.vpc.services_cidr
         widget: simple_text
         type: string
         default: "10.10.0.0/16"
@@ -484,7 +484,7 @@ gcp-gke:
     gke:
       - name: "Node Pools"
         description: "GKE Cluster list of maps containing node pools to create."
-        key: node_pools
+        key: module.gke.node_pools
         widget: text_area
         type: raw
         default: |+
@@ -584,13 +584,13 @@ scaleway-kapsule:
     kapsule:
       - name: "Cluster version"
         description: "Kapsule cluster version."
-        key: cluster_version
+        key: module.kapsule.cluster_version
         widget: simple_text
         type: string
         default: "1.19"
       - name: "Container Network Interface"
         description: "The Container Network Interface (CNI) for the Kubernetes cluster"
-        key: cni
+        key: module.kapsule.cni
         widget: auto_complete
         type: string
         default: "cilium"
@@ -601,10 +601,10 @@ scaleway-kapsule:
             - "flannel"
       - name: "Ingress controller"
         description: "The ingress controller to be deployed on the Kubernetes cluster"
-        key: ingress
+        key: module.kapsule.ingress
         widget: auto_complete
         type: string
-        default: "cilium"
+        default: "nginx"
         values:
             - "nginx"
             - "traefik"
@@ -612,19 +612,19 @@ scaleway-kapsule:
             - "none"
       - name: "Enable Kubernetes Dashboard"
         description: "Enables the Kubernetes dashboard for the Kubernetes cluster."
-        key: enable_dashboard
+        key: module.kapsule.enable_dashboard
         widget: switch
         type: boolean
         default: true
       - name: "Kubernetes auto upgrade"
         description: "Set to `true` to enable Kubernetes patch version auto upgrades."
-        key: auto_upgrade
+        key: module.kapsule.auto_upgrade
         widget: switch
         type: boolean
         default: true
       - name: "Maintenance window day"
         description: "The day of the auto upgrade maintenance window"
-        key: maintenance_window_day
+        key: module.kapsule.maintenance_window_day
         widget: auto_complete
         type: string
         default: "tuesday"
@@ -639,7 +639,7 @@ scaleway-kapsule:
             - "sunday"
       - name: "Maintenance window start hour"
         description: "The start hour (UTC) of the 2-hour auto upgrade maintenance window (`0` to `23`)."
-        key: maintenance_window_start_hour
+        key: module.kapsule.maintenance_window_start_hour
         widget: slider_range
         type: integer
         default: 5
@@ -650,13 +650,13 @@ scaleway-kapsule:
     node-pool:
       - name: "Node pool name"
         description: "Kapsule node group given name."
-        key: node_pool_name
+        key: module.node-pool.node_pool_name
         widget: simple_text
         type: string
         default: "standard"
       - name: "Node type"
         description: "Type of instance to use for node servers."
-        key: node_type
+        key: module.node-pool.node_type
         widget: auto_complete
         type: string
         default: "GP1-XS"
@@ -669,38 +669,38 @@ scaleway-kapsule:
             - "GP1-XL"
       - name: "Node desired number"
         description: "Desired number of node servers."
-        key: node_count
+        key: module.node-pool.node_count
         widget: number
         type: integer
         default: 1
         required: true
       - name: "Enable auto scaling"
         description: "Enables the autoscaling feature for this pool."
-        key: enable_autoscaling
+        key: module.node-pool.enable_autoscaling
         widget: switch
         type: boolean
         default: false
       - name: "Minimum pool size"
         description: "The minimum size of the pool, used by the autoscaling feature."
-        key: node_autoscaling_min_size
+        key: module.node-pool.node_autoscaling_min_size
         widget: number
         type: integer
         default: 1
       - name: "Maximum pool sizer"
         description: " The maximum size of the pool, used by the autoscaling feature."
-        key: node_autoscaling_max_size
+        key: module.node-pool.node_autoscaling_max_size
         widget: number
         type: integer
         default: 10
       - name: "Enable auto healing"
         description: "Enables the autohealing feature for this pool."
-        key: enable_autohealing
+        key: module.node-pool.enable_autohealing
         widget: switch
         type: boolean
         default: true
       - name: "Extra tags"
         description: "Dict of extra tags to add on aws resources"
-        key: extra_tags
+        key: module.node-pool.extra_tags
         widget: text_area
         type: raw
         default: "[]"
@@ -783,13 +783,13 @@ scaleway-nodes:
     node-pool:
       - name: "Node pool name"
         description: "Kapsule node group given name."
-        key: node_pool_name
+        key: module.node-pool.node_pool_name
         widget: simple_text
         type: string
         default: "standard"
       - name: "Node type"
         description: "Type of instance to use for node servers."
-        key: node_type
+        key: module.node-pool.node_type
         widget: auto_complete
         type: string
         default: "GP1-XS"
@@ -802,38 +802,38 @@ scaleway-nodes:
             - "GP1-XL"
       - name: "Node desired number"
         description: "Desired number of node servers."
-        key: node_count
+        key: module.node-pool.node_count
         widget: number
         type: integer
         default: 1
         required: true
       - name: "Enable auto scaling"
         description: "Enables the autoscaling feature for this pool."
-        key: enable_autoscaling
+        key: module.node-pool.enable_autoscaling
         widget: switch
         type: boolean
         default: false
       - name: "Minimum pool size"
         description: "The minimum size of the pool, used by the autoscaling feature."
-        key: node_autoscaling_min_size
+        key: module.node-pool.node_autoscaling_min_size
         widget: number
         type: integer
         default: 1
       - name: "Maximum pool sizer"
         description: " The maximum size of the pool, used by the autoscaling feature."
-        key: node_autoscaling_max_size
+        key: module.node-pool.node_autoscaling_max_size
         widget: number
         type: integer
         default: 10
       - name: "Enable auto healing"
         description: "Enables the autohealing feature for this pool."
-        key: enable_autohealing
+        key: module.node-pool.enable_autohealing
         widget: switch
         type: boolean
         default: true
       - name: "Extra tags"
         description: "Dict of extra tags to add on aws resources"
-        key: extra_tags
+        key: module.node-pool.extra_tags
         widget: text_area
         type: raw
         default: "[]"
