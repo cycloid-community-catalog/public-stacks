@@ -644,13 +644,13 @@ scaleway-kapsule:
     node-pool:
       - name: "Node pool name"
         description: "Kapsule node group given name."
-        key: module.node-pool.node_pool_name
+        key: module.node_pool.node_pool_name
         widget: simple_text
         type: string
         default: "standard"
       - name: "Node type"
         description: "Type of instance to use for node servers."
-        key: module.node-pool.node_type
+        key: module.node_pool.node_type
         widget: auto_complete
         type: string
         default: "GP1-XS"
@@ -663,32 +663,32 @@ scaleway-kapsule:
             - "GP1-XL"
       - name: "Node desired number"
         description: "Desired number of node servers."
-        key: module.node-pool.node_count
+        key: module.node_pool.node_count
         widget: number
         type: integer
         default: 1
         required: true
       - name: "Enable auto scaling"
         description: "Enables the autoscaling feature for this pool."
-        key: module.node-pool.enable_autoscaling
+        key: module.node_pool.enable_autoscaling
         widget: switch
         type: boolean
         default: false
       - name: "Minimum pool size"
         description: "The minimum size of the pool, used by the autoscaling feature."
-        key: module.node-pool.node_autoscaling_min_size
+        key: module.node_pool.node_autoscaling_min_size
         widget: number
         type: integer
         default: 1
       - name: "Maximum pool sizer"
         description: " The maximum size of the pool, used by the autoscaling feature."
-        key: module.node-pool.node_autoscaling_max_size
+        key: module.node_pool.node_autoscaling_max_size
         widget: number
         type: integer
         default: 10
       - name: "Enable auto healing"
         description: "Enables the autohealing feature for this pool."
-        key: module.node-pool.enable_autohealing
+        key: module.node_pool.enable_autohealing
         widget: switch
         type: boolean
         default: true
@@ -700,7 +700,7 @@ scaleway-kapsule:
         default: ""
       - name: "Extra tags"
         description: "Dict of extra tags to add on aws resources"
-        key: module.node-pool.extra_tags
+        key: module.node_pool.extra_tags
         widget: text_area
         type: raw
         default: "[]"
