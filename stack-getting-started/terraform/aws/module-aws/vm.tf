@@ -28,19 +28,11 @@ resource "random_string" "password" {
   override_special = "_%@"
 }
 
-data "template_file" "user_data" {
-  template = file("${path.module}/userdata.sh.tpl")
-
-  vars = {
-    password = random_string.password.result
-    env      = var.env
-    project  = var.project
-  }
-}
-
 resource "aws_instance" "front" {
   ami                         = data.aws_ami.debian.id
-  user_data_base64            = base64encode(data.template_file.user_data.rendered)
+  user_data                   =  templatefile("${path.module}/userdata.sh.tpl", {
+    password = random_string.password.result
+  })
   associate_public_ip_address = true
   instance_type               = var.instance_type
   vpc_security_group_ids      = [aws_security_group.front.id]
