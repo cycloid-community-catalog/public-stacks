@@ -2,17 +2,17 @@
 # Cycloid
 #
 
-variable project {
+variable "project" {
   type        = string
   description = "Cycloid project name."
 }
 
-variable env {
+variable "env" {
   type        = string
   description = "Cycloid environment name."
 }
 
-variable customer {
+variable "customer" {
   type        = string
   description = "Cycloid customer name."
 }
@@ -21,28 +21,28 @@ variable customer {
 # Scaleway
 #
 
-variable scw_access_key {
+variable "scw_access_key" {
   type        = string
   description = "Scaleway access key."
 }
 
-variable scw_secret_key {
+variable "scw_secret_key" {
   type        = string
   description = "Scaleway secret key."
 }
 
-variable scw_organization_id {
+variable "scw_organization_id" {
   type        = string
   description = "Scaleway organization ID."
 }
 
-variable scw_region {
+variable "scw_region" {
   type        = string
   description = "Scaleway region to create resources."
   default     = "fr-par"
 }
 
-variable scw_zone_id {
+variable "scw_zone_id" {
   type        = string
   description = "Scaleway region's zone ID to create resources."
   default     = "1"
