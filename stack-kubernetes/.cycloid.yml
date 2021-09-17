@@ -18,7 +18,7 @@ keywords:
   - 'kapsule'
   - 'provider:scw'
 author: 'Cycloid'
-image: 'https://raw.githubusercontent.com/marcoldp/k8s-stack/main/docs/k8s-logo.png'
+image: 'https://raw.githubusercontent.com/cycloid-community-catalog/stack-kubernetes/master/docs/k8s-logo.png'
 technologies:
    - technology: GCP
      version: n/a
