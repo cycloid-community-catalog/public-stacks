@@ -13,7 +13,7 @@
 #}
 
 output "prometheus_eip" {
-  value = aws_eip.prometheus[0].public_ip
+  value = var.prometheus_enable_eip ? aws_eip.prometheus[0].public_ip : ""
 }
 
 output "prometheus_secgroup_id" {
@@ -25,21 +25,21 @@ output "prometheus_instance_id" {
 }
 
 output "rds_address" {
-  value = aws_db_instance.grafana[0].address
+  value = var.create_rds_database ? aws_db_instance.grafana[0].address : ""
 }
 
 output "rds_port" {
-  value = aws_db_instance.grafana[0].port
+  value = var.create_rds_database ? aws_db_instance.grafana[0].port : ""
 }
 
 output "rds_database" {
-  value = aws_db_instance.grafana[0].name
+  value = var.create_rds_database ? aws_db_instance.grafana[0].name : ""
 }
 
 output "rds_username" {
-  value = aws_db_instance.grafana[0].username
+  value = var.create_rds_database ? aws_db_instance.grafana[0].username : ""
 }
 
 output "rds_engine" {
-  value = aws_db_instance.grafana[0].engine
+  value = var.create_rds_database ? aws_db_instance.grafana[0].engine : ""
 }
