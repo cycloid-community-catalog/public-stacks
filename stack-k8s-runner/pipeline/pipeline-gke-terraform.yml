@@ -191,7 +191,7 @@ jobs:
   max_in_flight: 1
   build_logs_to_retain: 10
   plan:
-    - aggregate:
+    - in_parallel:
       - get: git_config-terraform
         trigger: false
         passed:
