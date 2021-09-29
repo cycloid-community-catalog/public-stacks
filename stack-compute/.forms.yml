@@ -1,0 +1,864 @@
+---
+aws-ec2:
+  pipeline:
+    Terraform:
+      - name: "AWS access key"
+        description: "Amazon AWS access key for Terraform."
+        key: aws_access_key
+        widget: cy_cred
+        type: string
+        default: "((aws.access_key))"
+      - name: "AWS secret key"
+        description: "Amazon AWS secret key for Terraform."
+        key: aws_secret_key
+        widget: cy_cred
+        type: string
+        default: "((aws.secret_key))"
+      - name: "Amazon AWS region"
+        description: "Amazon AWS region to use for Terraform."
+        key: aws_default_region
+        widget: auto_complete
+        type: string
+        values: ["eu-north-1","ap-south-1","eu-west-3","eu-west-2","eu-west-1","ap-northeast-2","ap-northeast-1","sa-east-1","ca-central-1","ap-southeast-1","ap-southeast-2","eu-central-1","us-east-1","us-east-2","us-west-1","us-west-2"]
+        default: eu-west-1
+      - name: "Terraform storage bucket"
+        description: "AWS S3 bucket name to store terraform remote state file."
+        key: terraform_storage_bucket_name
+        widget: simple_text
+        type: string
+        default: ($ organization_canonical $)-terraform-remote-state
+
+    Repos:
+      - name: "Config repository"
+        key: config_git_repository
+        type: string
+        widget: cy_crs
+        description: "Git repository URL containing the config of the stack."
+        default: "git@github.com:MyUser/config-ec2.git"
+        required: true
+      - name: "Config git key"
+        description: "SSH key pair to fetch the config Git repository."
+        key: config_git_private_key
+        type: string
+        widget: cy_cred
+        default: "((ssh_config.ssh_key))"
+        required: true
+      - name: "Config branch"
+        description: "Branch of the config Git repository."
+        key: config_git_branch
+        widget: cy_branch
+        type: string
+        description: "The branch used by the config repository"
+        source: config_git_repository
+        default: "master"
+        required: true
+
+  terraform:
+    os-image:
+      - name: "AMI enable most recent"
+        description: "If more than one result is returned, use the most recent AMI"
+        key: module.vm.ami_most_recent
+        widget: switch
+        type: boolean
+        default: true
+      - name: "AMI name"
+        description: "The name of the AMI."
+        key: module.vm.ami_name
+        widget: simple_text
+        type: string
+        default: "debian-stretch-*"
+        required: true
+      - name: "AMI virtualization type"
+        description: "The AMI virtualization type."
+        key: module.vm.ami_virtualisation_type
+        widget: radios
+        type: string
+        default: "hvm"
+        values:
+          - "hvm"
+          - "paravirtual"
+      - name: "AMI image architecture"
+        description: "The AMI image architecture"
+        key: module.vm.ami_architecture
+        widget: radios
+        type: string
+        default: "x86_64"
+        values:
+          - "x86_64"
+          - "i386"
+          - "arm64"
+      - name: "AMI type of root device volume"
+        description: "The AMI type of the root device volume."
+        key: module.vm.ami_root_device_type
+        widget: radios
+        type: string
+        default: "ebs"
+        values:
+          - "ebs"
+          - "instance-store"
+      - name: "AMI owners"
+        description: "The AMI owners, used to limit search."
+        key: module.vm.ami_owners
+        widget: auto_complete
+        type: string
+        default: "379101102735" #debian
+        required: true
+        values:
+          - "379101102735" #debian
+          - "amazon"
+          - "microsoft"
+          - "self"
+    instance:
+      - name: "Cloud init file content"
+        description: "The content of the file to use if cloud init is used."
+        key: module.vm.file_content
+        widget: text_area
+        type: string
+        default: ""
+      - name: "Vm type"
+        description: "Type of instance to use for the instance."
+        key: module.vm.instance_type
+        widget: auto_complete
+        type: string
+        default: "t2.micro"
+        required: true
+        values:
+          - "t2.nano"	
+          - "t2.micro"
+          - "t2.small"
+          - "t2.medium"
+          - "t2.large"
+          - "t2.xlarge"
+          - "t2.2xlarge"
+      - name: "Instance extra tags"
+        description: "Dict of extra tags to add to the vm instance."
+        key: module.vm.instance_extra_tags
+        widget: text_area
+        type: raw
+        default: "{}"
+    network:
+      - name: "Subnet ID"
+        description: "VPC Subnet ID to launch in."
+        key: module.vm.subnet_id
+        widget: simple_text
+        type: string
+        default: ""
+        required: true
+      - name: "Private IP"
+        description: "Private IP address to associate with the instance in a VPC."
+        key: module.vm.private_ip
+        widget: simple_text
+        type: string
+        default: ""
+      - name: "Associate public ip"
+        description: "Whether to associate a public IP address with an instance in a VPC."
+        key: module.vm.associate_public_ip_address
+        widget: switch
+        type: boolean
+        default: true
+    volume:
+      - name: "Enable volume deletion on vm termination"
+        description: "Whether the volume should be destroyed on instance termination."
+        key: module.vm.enable_vm_disk_delete_on_termination
+        widget: switch
+        type: boolean
+        default: true
+      - name: "Enable volume encryption"
+        description: "Whether to enable volume encryption."
+        key: module.vm.enable_vm_disk_encrypted
+        widget: switch
+        type: boolean
+        default: true
+      - name: "Volume Size"
+        description: "Size of the volume in gibibytes (GiB)."
+        key: module.vm.vm_disk_size
+        widget: slider_range
+        type: integer
+        default: 5
+        values:
+            - 0
+            - 256
+      - name: "Type of volume"
+        description: "The volume type to use."
+        key: module.vm.vm_disk_type
+        widget: radios
+        type: string
+        default: "gp2"
+        values: 
+          - "gp2"
+          - "gp3"
+          - "io1"
+          - "io2"
+          - "sc1"
+          - "st1"
+      - name: "EBS optimized"
+        description: "If true, the launched EC2 instance will be EBS-optimized."
+        key: module.vm.ebs_optimized
+        widget: switch
+        type: boolean
+        default: false
+      - name: "Volume extra tags"
+        description: "A map of tags to assign, at instance-creation time, to root and EBS volumes."
+        key: module.vm.volume_extra_tags
+        widget: text_area
+        type: raw
+        default: "{}"
+    security:  
+      - name: "Security group name"
+        description: " Name of the security group."
+        key: module.vm.sg_name
+        widget: simple_text
+        type: string
+        default: "" 
+      - name: "VPC id"
+        description: "VPC ID used to create the security group."
+        key: module.vm.vpc_id
+        widget: simple_text
+        type: string
+        default: "" 
+        required: true
+      - name: "Security group ingress rules"
+        description: "Configuration block for ingress rules."
+        key: module.vm.sg_ingress_rules 
+        widget: text_area
+        type: raw
+        default: |+
+          [
+            {
+                description      = "Accept ssh traffic"
+                from_port        = 22
+                to_port          = 22
+                protocol         = "tcp"
+                cidr_blocks      = ["0.0.0.0/0"]
+                ipv6_cidr_blocks = []
+                prefix_list_ids  = []
+                security_groups  = []
+                self             = true
+              }
+            ]
+      - name: "Security group egress rules"
+        description: "Configuration block for ingress rules."
+        key: module.vm.sg_egress_rules 
+        widget: text_area
+        type: raw
+        default: |+
+          [
+            {
+                description      = "Accept all egress"
+                from_port        = 0
+                to_port          = 0
+                protocol         = "-1"
+                cidr_blocks      = ["0.0.0.0/0"]
+                ipv6_cidr_blocks = []
+                prefix_list_ids  = []
+                security_groups  = []
+                self             = true
+              }
+            ]
+      - name: "Security group extra tags"
+        description: "Dict of extra tags to add to security group resources"
+        key: module.vm.sg_extra_tags
+        widget: text_area
+        type: raw
+        default: "{}"    
+
+gcp-gce:
+  pipeline:
+    Terraform:
+      - name: "GCP json credentials"
+        description: "GCP JSON for Terraform. See value format [here](https://docs.cycloid.io/advanced-guide/integrate-and-use-cycloid-credentials-manager.html#vault-in-the-pipeline)"
+        key: gcp_credentials_json
+        widget: cy_cred
+        type: string
+        default: "((gcp.json_key))"
+      - name: "GCP Project"
+        description: "Google Cloud Platform project to use for Terraform."
+        key: gcp_project
+        widget: simple_text
+        type: string
+        default: ($ organization_canonical $)
+      - name: "GCP region"
+        description: "Google Cloud Platform region to use for Terraform."
+        key: gcp_region
+        widget: auto_complete
+        type: string
+        values: ["europe-west1","europe-west2","europe-west3","europe-west4","europe-north1","europe-central2"]
+        default: europe-west1
+      - name: "GCP zone"
+        description: "Google Cloud Platform zone to use for Terraform."
+        key: gcp_zone
+        widget: auto_complete
+        type: string
+        values: ["europe-west1-b","europe-west1-c","europe-west1-d","europe-west4","europe-north1","europe-central2"]
+        default: europe-west1-b
+      - name: "Terraform storage bucket"
+        description: "Google Cloud Storage bucket name to store terraform remote state file."
+        key: terraform_storage_bucket_name
+        widget: simple_text
+        type: string
+        default: ($ organization_canonical $)-terraform-remote-state
+
+    Repos:
+      - name: "Config repository"
+        key: config_git_repository
+        type: string
+        widget: cy_crs
+        description: "Git repository URL containing the config of the stack."
+        default: "git@github.com:MyUser/config-gke.git"
+        required: true
+      - name: "Config git key"
+        description: "SSH key pair to fetch the config Git repository."
+        key: config_git_private_key
+        type: string
+        widget: cy_cred
+        default: "((ssh_config.ssh_key))"
+        required: true
+      - name: "Config branch"
+        description: "Branch of the config Git repository."
+        key: config_git_branch
+        widget: cy_branch
+        type: string
+        description: "The branch used by the config repository"
+        source: config_git_repository
+        default: "master"
+        required: true
+
+  terraform:
+    instance:
+      - name: "Instance Name"
+        description: "The unique name for the instance."
+        key: module.vm.instance_name
+        widget: simple_text
+        type: string
+        default: "${var.customer}-${var.project}-${var.env}-vm"
+        required: true
+      - name: "Enable update in stoped instance"
+        description: "Allows to stop the instance to update its properties."
+        key: module.vm.allow_stopping_for_update
+        widget: switch
+        type: boolean
+        default: true
+      - name: "Machine type"
+        description: "The machine type to create."
+        key: module.vm.machine_type
+        widget: auto_complete
+        type: string
+        default: "e2-small"
+        required: true
+        values:
+          - "e2-micro"	
+          - "e2-small"
+          - "e2-medium"
+          - "e2-standard-2"
+          - "e2-highmem-2"
+          - "e2-highcpu-2"   
+      - name: "Cloud init file content"
+        description: "The content of the file to use if cloud init is used."
+        key: module.vm.file_content
+        widget: text_area
+        type: string
+        default: ""
+      - name: "A list of network tags to attach to the instance."
+        description: "The IP protocol to which the egress deny rule applies.An otional list of IP ports to which the ingress allow rule applies."
+        key: module.vm.instance_tags
+        widget: text_area
+        type: raw
+        default: |+
+          ["${var.customer}-${var.project}-${var.env}-network-tag"]
+      - name: "Instance extra tags"
+        description: "A map of key/value label pairs to assign to the instance."
+        key: module.vm.instance_extra_labels
+        widget: text_area
+        type: raw
+        default: "{}"
+    network:
+      - name: "Network ID"
+        description: "The name or self_link of the network to attach this interface to."
+        key: module.vm.network
+        widget: simple_text
+        type: string
+        default: ""
+        required: true
+      - name: "Private IP"
+        description: "The private IP address to assign to the instance."
+        key: module.vm.network_ip
+        widget: simple_text
+        type: string
+        default: ""  
+    boot-disk:
+      - name: "Enables auto disk deletion"
+        description: "Enables disk deletion when the instance is deleted."
+        key: module.vm.boot_disk_auto_delete 
+        widget: switch
+        type: boolean
+        default: true
+      - name: "Boot disk device name"
+        description: "Name with which attached disk will be accessible, as /dev/disk/by-id/google-{{device_name}}."
+        key: module.vm.boot_disk_device_name
+        widget: simple_text
+        type: string
+        default: ""
+      - name: "Boot disk image"
+        description: "The image from which to initialize this disk."
+        key: module.vm.boot_disk_image
+        widget: simple_text
+        type: string
+        default: "debian-cloud/debian-10"
+      - name: "Boot disk size"
+        description: "The size of the image in gigabytes."
+        key: module.vm.boot_disk_size
+        widget: number
+        type: integer
+        default: 5
+      - name: "Boot disk type"
+        description: "The GCE disk type"
+        key: module.vm.boot_disk_type
+        widget: radios
+        type: string
+        default: "pd-standard"
+        values:
+          - "pd-standard"
+          - "pd-balanced"
+          - "pd-ssd"
+    firewall-ingress:
+      - name: "Firewall Ingress Name"
+        description: "Name of the firewall ingress resource."
+        key: module.vm.ingress_firewall_name
+        widget: simple_text
+        type: string
+        default: "${var.customer}-${var.project}-${var.env}-ingress"
+      - name: "Disable Firewall ingress"
+        description: "Denotes whether the firewall ingress rule is disabled."
+        key: module.vm.ingress_disabled 
+        widget: switch
+        type: boolean
+        default: false
+      - name: "Firewall Ingress Source Ranges"
+        description: "If specified the firewall will only be applied to the source IP address in these ranges."
+        key: module.vm.ingress_source_ranges 
+        widget: text_area
+        type: raw
+        default: |+
+          []
+      - name: "Firewall Ingress Source Tags"
+        description: "If source tags are specified, the firewall will apply only to traffic with source IP that belongs to a tag listed in source tags. "
+        key: module.vm.ingress_source_tags 
+        widget: text_area
+        type: raw
+        default:  |+ 
+          []
+      - name: "Firewall Ingress IP protocol - allow rule"
+        description: "The IP protocol to which the ingress allow rule applies. Allowed values - tcp, udp, icmp, esp, ah, sctp, ipip, all or protocol number"
+        key: module.vm.ingress_allow_protocol
+        widget: simple_text
+        type: string
+        default: "tcp"
+      - name: "Firewall Ingress IP ports - allow rule"
+        description: "The IP protocol to which the ingress allow rule applies.An otional list of IP ports to which the ingress allow rule applies."
+        key: module.vm.ingress_allow_ports
+        widget: text_area
+        type: raw
+        default: |+ 
+          ["22"]
+          
+    firewall-egress:
+      - name: "Firewall Egress Name"
+        description: "Name of the firewall egress resource."
+        key: module.vm.egress_firewall_name
+        widget: simple_text
+        type: string
+        default: ""
+      - name: "Disable Firewall egress"
+        description: "Denotes whether the firewall egress rule is disabled."
+        key: module.vm.egress_disabled 
+        widget: switch
+        type: boolean
+        default: true
+      - name: "Firewall Egress Source Ranges"
+        description: "If specified the firewall will only be applied to the source IP address in these ranges."
+        key: module.vm.egress_source_ranges 
+        widget: text_area
+        type: raw
+        default: |+
+          []
+      - name: "Firewall Egress Source Tags"
+        description: "If source tags are specified, the firewall will apply only to traffic with source IP that belongs to a tag listed in source tags. "
+        key: module.vm.egress_source_tags 
+        widget: text_area
+        type: raw
+        default: |+
+          []
+      - name: "Firewall Egress IP protocol - allow rule"
+        description: "The IP protocol to which the egress allow rule applies. Allowed values - tcp, udp, icmp, esp, ah, sctp, ipip, all or protocol number"
+        key: module.vm.egress_allow_protocol
+        widget: simple_text
+        type: string
+        default: ""
+      - name: "Firewall Egress IP ports - allow rule"
+        description: "The IP protocol to which the egress allow rule applies.An otional list of IP ports to which the ingress allow rule applies."
+        key: module.vm.egress_allow_ports
+        widget: text_area
+        type: raw
+        default: |+
+
+azure-linux:
+  pipeline:
+    Terraform:
+      - name: "Azure Subscription ID" 
+        description: "Azure subscription ID to use for Terraform."
+        key: azure_subscription_id
+        widget: cy_cred
+        type: string
+        default: "((azure_admin.subscription_id))"
+      - name: "Azure Tenant ID"
+        description: "Azure Tenant ID to use for Terraform."
+        key: azure_tenant_id
+        widget: cy_cred
+        type: string
+        default: "((azure_admin.tenant_id))"
+      - name: "Azure Client ID"
+        description: "Azure Client ID to use for Terraform."
+        key: azure_client_id
+        widget: cy_cred
+        type: string
+        default: "((azure_admin.client_id))"    
+      - name: "Azure Client Secret"
+        description: "Azure Client Secret to use for Terraform."
+        key: azure_client_secret
+        widget: cy_cred
+        type: string
+        default: "((azure_admin.client_secret))" 
+      - name: "Azure Environment"
+        description: "Azure environment to use for Terraform."
+        key: azure_env
+        widget: radios
+        type: string
+        default: "public" 
+        values:
+          - "public"
+          - "usgovernment"
+          - "german"
+          - "china"
+      - name: "Azure Location"
+        description: "Azure location to use for Terraform."
+        key: azure_location
+        widget: auto_complete
+        type: string
+        values: ["North Europe","West Europe","France Central","France South"]
+        default: "West Europe" 
+      - name: "Azure Resource Group of the Storage Account"
+        description: "Azure Resource Group of the Storage Account to use to store terraform remote state file."
+        key: terraform_resource_group_name
+        widget: simple_text
+        type: string
+        default: ($ organization_canonical $)-terraform
+      - name: "Azure Storage Account name"
+        description: "Azure Storage Account name to use to store terraform remote state file."
+        key: terraform_storage_account_name
+        widget: cy_cred
+        type: string
+        default: ((azure_storage_aks.account_name))
+      - name: "Azure Storage Account key"
+        description: "Azure Storage Account key to use to store terraform remote state file."
+        key: terraform_storage_access_key
+        widget: cy_cred
+        type: string
+        default: ((azure_storage_aks.access_key))
+      - name: "Azure Storage container name"
+        description: "Azure Storage container name to store terraform remote state file."
+        key: terraform_storage_container_name
+        widget: simple_text
+        type: string
+        default: ($ organization_canonical $)
+      - name: "Azure Storage container path"
+        description: "Azure Storage container path to store terraform remote state file."
+        key: terraform_storage_container_path
+        widget: simple_text
+        type: string
+        default: ($ project $)/($ environment $)
+
+    Repos:
+      - name: "Config repository"
+        description: "Git repository URL containing the config of the stack."
+        key: config_git_repository
+        type: string
+        widget: cy_crs
+        default: "git@github.com:MyUser/config-aks.git"
+        required: true
+      - name: "Config git key"
+        description: "SSH key pair to fetch the config Git repository."
+        key: config_git_private_key
+        type: string
+        widget: cy_cred
+        default: "((ssh_config.ssh_key))"
+        required: true
+      - name: "Config branch"
+        description: "Branch of the config Git repository."
+        key: config_git_branch
+        widget: cy_branch
+        type: string
+        description: "The branch used by the config repository"
+        source: config_git_repository
+        default: "master"
+        required: true  
+
+  terraform:
+    os-image:
+      - name: "VM image publisher"
+        description: "Specifies the publisher of the image used to create the virtual machine."
+        key: module.vm.image_publisher
+        widget: simple_text
+        type: string
+        default: "debian"
+        required: true
+      - name: "VM image offer"
+        description: "Specifies the offer of the image used to create the virtual machine."
+        key: module.vm.image_offer
+        widget: simple_text
+        type: string
+        default: "debian-10"
+        required: true
+      - name: "VM image SKU"
+        description: "Specifies the SKU of the image used to create the virtual machine."
+        key: module.vm.image_sku
+        widget: simple_text
+        type: string
+        default: "10-cloudinit-gen2"
+        required: true
+      - name: "VM image version"
+        description: "Specifies the version of the image used to create the virtual machine."
+        key: module.vm.image_version
+        widget: simple_text
+        type: string
+        default: "latest"
+      - name: "VM image id"
+        description: "Specifies the ID of the Custom Image which the Virtual Machine should be created from."
+        key: module.vm.image_id
+        widget: simple_text
+        type: string
+        default: ""
+
+    instance:
+      - name: "Instance Name"
+        description: Specifies the name of the Virtual Machine.
+        key: module.vm.instance_name
+        widget: simple_text
+        type: string
+        default: "${var.customer}-${var.project}-${var.env}-vm"
+      - name: "Resource Group Name"
+        description: "The name of the resource group to use for the creation of resources."
+        key: module.vm.resource_group_name
+        widget: simple_text
+        type: string
+        default: ""
+        required: true
+      - name: "VM Size"
+        description: "Specifies the size of the Virtual Machine."
+        key: module.vm.vm_size
+        widget: auto_complete
+        type: string
+        default: "Standard_DS1_v2"
+        required: true
+        values:
+          - "Standard_DS1_v2"	
+          - "Standard_DS12_v2"
+          - "Standard_DS13_v2"
+      - name: "Cloud init file content"
+        description: "The content of the file to use if cloud init is used."
+        key: module.vm.file_content
+        widget: text_area
+        type: string
+        default: ""
+      - name: "OS Computer Name"
+        description: "Specifies the name of the Virtual Machine."
+        key: module.vm.os_computer_name
+        widget: simple_text
+        type: string
+        default: "cycloid"
+        required: true
+      - name: "OS Admin Name"
+        description: "Specifies the name of the local admin account."
+        key: module.vm.os_admin_username
+        widget: cy_cred
+        type: string
+        required: true
+      - name: "OS Admin Password"
+        description: "The password associated with the local admin account. Must be [6-72] and contain uppercase + lowercase + number + special caracter"
+        key: module.vm.os_admin_password
+        widget: cy_cred
+        type: string
+        required: true
+      - name: "Disable password authentication"
+        description: "Specifies whether password authentication should be disabled."
+        key: module.vm.disable_linux_password_authentification 
+        widget: switch
+        type: boolean
+        default: false
+        required: true
+      - name: "Instance extra tags"
+        description: "A map of key/value label pairs to assign to the instance."
+        key: module.vm.instance_extra_tags
+        widget: text_area
+        type: raw
+        default: "{}"
+
+    network:
+      - name: "Network Interface Name"
+        description: "The name of the Network Interface."
+        key: module.vm.network_interface_name
+        widget: simple_text
+        type: string
+        default: "${var.customer}-${var.project}-${var.env}-nic"
+      - name: "Public IP Name"
+        description: "Specifies the name of the Public IP resource."
+        key: module.vm.public_ip_name
+        widget: simple_text
+        type: string
+        default: "${var.customer}-${var.project}-${var.env}-public_ip"
+      - name: "IP Config Name"
+        description: "A name used for the IP Configuration in the network interface."
+        key: module.vm.ip_config_name
+        widget: simple_text
+        type: string
+        default: "${var.customer}-${var.project}-${var.env}-ip_config"
+      - name: "Subnet ID"
+        description: "The ID of the Subnet where this Network Interface should be located in."
+        key: module.vm.subnet_id
+        widget: simple_text
+        type: string
+        default: ""
+      - name: "Network extra tags"
+        description: "Map of extra tags to assign to the network resources."
+        key: module.vm.network_extra_tags
+        widget: text_area
+        type: raw
+        default: "{}"
+    os-disk:
+      - name: "OS Disk Name"
+        description: "Specifies the name of the OS Disk."
+        key: module.vm.disk_name
+        widget: simple_text
+        type: string
+        default: "${var.customer}-${var.project}-${var.env}-disk"
+      - name: "OS Managed Disk type"
+        description: "Specifies whether network traffic is allowed or denied by default rule."
+        key: module.vm.disk_managed_type
+        widget: radios
+        type: string
+        default: "Standard_LRS"
+        values:
+          - "Standard_LRS"
+          - "StandardSSD_LRS"
+          - "Premium_LRS"
+      - name: "OS Disk Size"
+        description: "Specifies the name of the OS Disk size in gigabytes."
+        key: module.vm.disk_size
+        widget: number
+        type: integer
+        default: 5
+      - name: "Enables auto disk deletion"
+        description: "Enables disk deletion when the instance is deleted."
+        key: module.vm.delete_os_disk_on_termination 
+        widget: switch
+        type: boolean
+        default: true
+        required: true
+
+    security:
+      - name: "Application Security Group Name"
+        description: "Specifies the name of the Application Security Group."
+        key: module.vm.network_security_group_name
+        widget: simple_text
+        type: string
+        default: "${var.customer}-${var.project}-${var.env}-sg" 
+      - name: "Default security rule name"
+        description: "The name of the default security rule."
+        key: module.vm.security_rule_name
+        widget: simple_text
+        type: string
+        default: "SSH" 
+        required: true
+      - name: "Default security rule description"
+        description: "A description of the default rule."
+        key: module.vm.security_rule_description
+        widget: simple_text
+        type: string
+        default: "Enable SSH inbound traffic."
+      - name: "Default security rule priority"
+        description: "Specifies the priority of the default rule."
+        key: module.vm.security_rule_priority
+        widget: slider_range
+        type: integer
+        default: 1001
+        values:
+          - 100
+          - 4096
+        required: true
+      - name: "Default security rule direction"
+        description: "Specifies if default rule will be evaluated on incoming or outgoing traffic."
+        key: module.vm.security_rule_direction
+        widget: radios
+        type: string
+        default: "Inbound"
+        values:
+          - "Inbound"
+          - "Outbound"
+        required: true
+      - name: "Default security rule access"
+        description: "Specifies whether network traffic is allowed or denied by default rule."
+        key: module.vm.security_rule_access
+        widget: radios
+        type: string
+        default: "Allow"
+        values:
+          - "Allow"
+          - "Deny"
+        required: true 
+      - name: "Default security rule protocol"
+        description: "Network protocol that default rule applies to."
+        key: module.vm.security_rule_protocol
+        widget: radios
+        type: string
+        default: "Tcp"
+        values:
+          - "Tcp"
+          - "Udp"
+          - "Icmp"  
+          - "Esp"  
+          - "Ah"  
+          - "*"
+        required: true
+      - name: "Default security rule sorce port or range"
+        description: "Default rule source port or range."
+        key: module.vm.security_rule_source_port_range
+        widget: simple_text
+        type: string
+        default: "*"
+        required: true
+      - name: "Default security rule destination port or range"
+        description: "Default rule destination port or range."
+        key: module.vm.security_rule_destination_port_range
+        widget: simple_text
+        type: string
+        default: "22"
+        required: true
+      - name: "Default security rule source adress prefix"
+        description: "Default rule, CIDR or source IP range or * to match any IP."
+        key: module.vm.security_rule_source_address_prefix
+        widget: simple_text
+        type: string
+        default: "*"
+        required: true
+      - name: "Default security rule source destination prefix"
+        description: "Default rule, CIDR or source IP range or * to match any IP."
+        key: module.vm.security_rule_destination_address_prefix
+        widget: simple_text
+        type: string
+        default: "*"
+        required: true
+      - name: "Security Group extra tags"
+        description: " Map of extra tags to assign to the security group."
+        key: module.vm.sg_extra_tags
+        widget: text_area
+        type: raw
+        default: "{}"
