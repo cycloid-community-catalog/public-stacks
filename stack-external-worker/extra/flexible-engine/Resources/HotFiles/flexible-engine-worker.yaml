@@ -39,6 +39,10 @@ parameters:
     type: string
   role_tag:
     type: string
+  worker_runtime:
+    type: string
+  worker_dns_server:
+    type: string
   stack_branch:
     type: string
   worker_version:
@@ -81,6 +85,8 @@ resources:
               export LOG_FILE="/var/log/user-data.log"
               exec &> >(tee -a ${LOG_FILE})
 
+
+
               export PROJECT="%PROJECT%"
               export CUSTOMER="%CUSTOMER%"
               export ENV="%ENV%"
@@ -91,11 +97,21 @@ resources:
               export TSA_PUBLIC_KEY="%TSA_PUBLIC_KEY%"
               export TEAM_ID="%TEAM_ID%"
               export STACK_BRANCH="%STACK_BRANCH%"
-              export VERSION="%VERSION%"
               export DEBUG="%DEBUG%"
               export VAULT_URL="%VAULT_URL%"
               export VAULT_SECRET_ID="%VAULT_SECRET_ID%"
               export VAULT_ROLE_ID="%VAULT_ROLE_ID%"
+
+              # By default those 3 values can be empty. But flexible engine does not support a default
+              # value to be "", so using " " instead. And we have to remove those empty spaces during the export
+              # as workaround
+              export VERSION="%VERSION%"
+              export WORKER_RUNTIME="%WORKER_RUNTIME%"
+              export WORKER_DNS_SERVER="%WORKER_DNS_SERVER%"
+              # Remove empty spaces
+              export VERSION=${VERSION// /}
+              export WORKER_RUNTIME=${WORKER_RUNTIME// /}
+              export WORKER_DNS_SERVER=${WORKER_DNS_SERVER// /}
 
               # As those are not autoscaling instances (because Flexible engine does not support templating in user_data)
               # for autoscaling groups. We decided to keep instances running
@@ -110,6 +126,8 @@ resources:
               "%PROJECT%": { get_param: project_tag }
               "%ENV%": { get_param: environment_tag }
               "%ROLE%": { get_param: role_tag }
+              "%WORKER_RUNTIME%": { get_param: worker_runtime }
+              "%WORKER_DNS_SERVER%": { get_param: worker_dns_server }
               "%SCHEDULER_API_ADDRESS%": { get_param: scheduler_api_address }
               "%SCHEDULER_HOST%": { get_param: scheduler_host }
               "%SCHEDULER_PORT%": { get_param: scheduler_port }

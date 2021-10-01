@@ -34,6 +34,14 @@ Parameters:
   WorkerKey:
     Description: Cycloid CI worker private key. Base64 encoded
     Type: String
+  WorkerRuntime:
+    Description: Change the default worker container runtimes https://concourse-ci.org/concourse-worker.html#configuring-runtimes
+    Type: String
+    Default: ""
+  WorkerDnsDerver:
+    Description: "Override DNS server or add additionals one depending of the container runtime you use. ex '1.1.1.1,8.8.8.8'"
+    Type: String
+    Default: ""
   InstanceType:
     Description: Worker EC2 instance type
     Type: String
@@ -480,6 +488,14 @@ Resources:
             - Ref: WorkerKey
             - "'\n"
 
+            - "export WORKER_RUNTIME='"
+            - Ref: WorkerRuntime
+            - "'\n"
+
+            - "export WORKER_DNS_SERVER="
+            - Ref: WorkerDnsDerver
+            - "\n"
+
             - "export TEAM_ID="
             - Ref: TeamId
             - "\n"
@@ -568,6 +584,14 @@ Resources:
             - "export WORKER_KEY='"
             - Ref: WorkerKey
             - "'\n"
+
+            - "export WORKER_RUNTIME='"
+            - Ref: WorkerRuntime
+            - "'\n"
+
+            - "export WORKER_DNS_SERVER="
+            - Ref: WorkerDnsDerver
+            - "\n"
 
             - "export TEAM_ID="
             - Ref: TeamId

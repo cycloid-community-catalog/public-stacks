@@ -88,6 +88,8 @@ resources:
               export STACK_BRANCH="{{ properties["stackBranch"] }}"
               export VERSION="{{ properties["workerVersion"] }}"
               export DEBUG="{{ properties["debugMode"] }}"
+              export WORKER_RUNTIME="{{ properties["workerRuntime"] }}"
+              export WORKER_DNS_SERVER="{{ properties["workerDnsServer"] }}"
 
               # Run the startup installation script.
               # The $RANDOM variable is here used to avoid remote network caching.

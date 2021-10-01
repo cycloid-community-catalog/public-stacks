@@ -96,6 +96,14 @@ properties:
     description: Force a specific worker version. Default it will use the version provided by the scheduler API.
     type: string
     default: ""
+  workerRuntime:
+    description: Change the default worker container runtimes https://concourse-ci.org/concourse-worker.html#configuring-runtimes
+    type: string
+    default: ""
+  workerDnsServer:
+    description: "Override DNS server or add additionals one depending of the container runtime you use. ex '1.1.1.1,8.8.8.8'"
+    type: string
+    default: ""
   debugMode:
     description: Enable of disable debug mode.
     type: boolean

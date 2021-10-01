@@ -49,6 +49,20 @@
         "description": "Cycloid CI worker private key. Base64 encoded."
       }
     },
+    "workerRuntime": {
+      "type": "string",
+      "defaultValue": "",
+      "metadata": {
+        "description": "Change the default worker container runtimes https://concourse-ci.org/concourse-worker.html#configuring-runtimes"
+      }
+    },
+    "workerDnsServer": {
+      "type": "string",
+      "defaultValue": "",
+      "metadata": {
+        "description": "Override DNS server or add additionals one depending of the container runtime you use. ex '1.1.1.1,8.8.8.8'"
+      }
+    },
     "vmSize": {
       "type": "string",
       "defaultValue": "Standard_F4s_v2",
@@ -484,7 +498,7 @@
             "adminUsername": "[variables('adminUsername')]",
             "adminPassword": "[parameters('adminPasswordOrKey')]",
             "linuxConfiguration": "[if(equals(parameters('authenticationType'), 'password'), json('null'), variables('linuxConfiguration'))]",
-            "customData": "[base64(concat('#!/bin/bash -xe', '\n', 'export LOG_FILE=\"/var/log/user-data.log\"', '\n', 'exec &> >(tee -a ${LOG_FILE})', '\n', '\n','export PROJECT=', parameters('projectTag'), '\n', 'export ENV=', parameters('environmentTag'), '\n', 'export ROLE=', parameters('roleTag'), '\n', 'export SCHEDULER_API_ADDRESS=\"', parameters('schedulerApiAddress'), '\"\n', 'export SCHEDULER_HOST=', parameters('schedulerHost'), '\n', 'export SCHEDULER_PORT=', string(parameters('schedulerPort')), '\n', 'export TSA_PUBLIC_KEY=\"', parameters('tsaPublicKey'), '\"\n', 'export WORKER_KEY=\"', parameters('workerKey'), '\"\n', 'export TEAM_ID=', parameters('teamID'), '\n', 'export STACK_BRANCH=', parameters('stackBranch'), '\n', 'export VERSION=', parameters('workerVersion'), '\n', 'export DEBUG=', parameters('debugMode'), '\n', '\n', 'curl -sSL \"https://raw.githubusercontent.com/cycloid-community-catalog/stack-external-worker/${STACK_BRANCH}/extra/startup.sh?${RANDOM}\" | bash -s azure'))]"
+            "customData": "[base64(concat('#!/bin/bash -xe', '\n', 'export LOG_FILE=\"/var/log/user-data.log\"', '\n', 'exec &> >(tee -a ${LOG_FILE})', '\n', '\n','export PROJECT=', parameters('projectTag'), '\n', 'export ENV=', parameters('environmentTag'), '\n', 'export ROLE=', parameters('roleTag'), '\n', 'export SCHEDULER_API_ADDRESS=\"', parameters('schedulerApiAddress'), '\"\n', 'export SCHEDULER_HOST=', parameters('schedulerHost'), '\n', 'export SCHEDULER_PORT=', string(parameters('schedulerPort')), '\n', 'export TSA_PUBLIC_KEY=\"', parameters('tsaPublicKey'), '\"\n', 'export WORKER_KEY=\"', parameters('workerKey'), '\"\n', 'export WORKER_RUNTIME=\"', parameters('workerRuntime'), '\"\n', 'export WORKER_DNS_SERVER=\"', parameters('workerDnsServer'), '\"\n', 'export TEAM_ID=', parameters('teamID'), '\n', 'export STACK_BRANCH=', parameters('stackBranch'), '\n', 'export VERSION=', parameters('workerVersion'), '\n', 'export DEBUG=', parameters('debugMode'), '\n', '\n', 'curl -sSL \"https://raw.githubusercontent.com/cycloid-community-catalog/stack-external-worker/${STACK_BRANCH}/extra/startup.sh?${RANDOM}\" | bash -s azure'))]"
           },
           "networkProfile": {
             "networkInterfaceConfigurations": [

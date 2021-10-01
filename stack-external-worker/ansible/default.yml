@@ -25,15 +25,13 @@ concourse_worker: yes
 concourse_worker_name: "$(hostname)"
 concourse_service_enabled: no
 
+concourse_worker_runtime: "guardian"
+concourse_worker_dns_server: ""
+
 # Get all options available : /var/lib/concourse/bin/gdn server --help
 # CONCOURSE_GARDEN_FOO_BAR=a,b' for '--foo-bar a --foo-bar b'
-concourse_worker_env:
-  CONCOURSE_GARDEN_ASSETS_DIR: "{{ concourse_work_dir }}/garden_assets/"
-  CONCOURSE_GARDEN_DEPOT: "{{ concourse_work_dir }}/garden_depot"
-  CONCOURSE_GARDEN_LOG_LEVEL: "error"
-  CONCOURSE_GARDEN_NETWORK_POOL: "10.254.0.0/16"
-  CONCOURSE_GARDEN_MAX_CONTAINERS: 1024
-  CONCOURSE_GARDEN_ADDITIONAL_DNS_SERVER: "1.1.1.1,1.0.0.1"
+#concourse_worker_env:
+#  CONCOURSE_GARDEN_MAX_CONTAINERS: 1024
 
 concourse_worker_options: "{% if concourse_version is version('5.0', '>=') %}{{ concourse_worker_default_options }}{% else %}{{ concourse_4_worker_default_options }}{% endif %}"
 
