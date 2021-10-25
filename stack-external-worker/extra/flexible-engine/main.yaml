@@ -139,6 +139,8 @@ resources:
             team_id: { get_param: team_id }
             stack_branch: { get_param: stack_branch }
             worker_version: { get_param: worker_version }
+            worker_runtime: { get_param: worker_runtime }
+            worker_dns_server: { get_param: worker_dns_server }
             debug_mode: { get_param: debug_mode }
             vault_role_id: { get_param: vault_role_id }
             vault_secret_id: { get_param: vault_secret_id }

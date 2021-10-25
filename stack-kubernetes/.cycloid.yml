@@ -87,7 +87,7 @@ config:
   # define the default environment for kapsule 
   scaleway-kapsule:
     name: 'scaleway-kapsule'
-    #cloud_provider: scaleway #temporarily disabled issue:https://github.com/cycloidio/youdeploy-frontend-web/issues/5215
+    cloud_provider: scaleway
     description: 'Creates Scaleway Kubernetes Kapsule cluster with 1+ node pools'
     # Configuration of the CI pipeline
     pipeline:
@@ -104,7 +104,7 @@ config:
 
   scaleway-nodes:
     name: 'Node pool'
-    #cloud_provider: scaleway #temporarily disabled: issue:https://github.com/cycloidio/youdeploy-frontend-web/issues/5215
+    cloud_provider: scaleway
     description: 'Adds Kapsule node pools deployment to an existing cluster.'
     # Configuration of the CI pipeline
     pipeline:
