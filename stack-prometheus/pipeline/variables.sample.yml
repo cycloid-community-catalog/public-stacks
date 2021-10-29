@@ -91,10 +91,10 @@ config_ansible_path: ($ project $)/ansible
 #+ Path of Terraform files in the config Git repository
 config_terraform_path: ($ project $)/terraform/($ environment $)
 
-#. ansible_version (required): "2.7"
+#. ansible_version (required): "2.9"
 #+ Ansible version used in packer and cycloid-toolkit ansible runner
-ansible_version: "2.7"
+ansible_version: "2.9"
 
-#. terraform_version (required): '1.0.6'
+#. terraform_version (required): '1.0.7'
 #+ terraform version used to execute your code.
-terraform_version: '1.0.6'
+terraform_version: '1.0.7'

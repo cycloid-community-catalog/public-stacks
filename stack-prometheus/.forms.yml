@@ -94,7 +94,7 @@ default:
         key: ansible_version
         widget: simple_text
         type: string
-        default: "2.7"
+        default: "2.9"
   terraform:
     application:
       - name: "Extra AWS tags"
