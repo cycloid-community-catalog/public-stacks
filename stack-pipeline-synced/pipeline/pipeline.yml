@@ -75,7 +75,7 @@ jobs:
             cy login --org "$ORG" --api-key "$CY_API_KEY"
 
             # Format Cycloid event message in HTML format
-            echo "Here is the list of pipelines that have to be updated using the stack template:</br>" > final_report
+            echo "Here is the list of pipelines that have to be updated using their respective stack template:</br>" > final_report
             echo "<ul>" >> final_report
             cat report/issues >> final_report
             echo "</ul>" >> final_report
