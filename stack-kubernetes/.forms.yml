@@ -535,7 +535,7 @@ scaleway-kapsule:
         values: ["fr-par","nl-ams","pl-waw"]
         default: fr-par        
       - name: "Terraform storage bucket"
-        description: "AWS S3 Bucket name to store terraform remote state file."
+        description: "Object Storage Bucket name to store terraform remote state file."
         key: terraform_storage_bucket_name
         widget: simple_text
         type: string
@@ -699,7 +699,7 @@ scaleway-kapsule:
         type: string
         default: ""
       - name: "Extra tags"
-        description: "Dict of extra tags to add on aws resources"
+        description: "Dict of extra tags to add on the pool."
         key: module.node_pool.extra_tags
         widget: text_area
         type: raw
@@ -734,7 +734,7 @@ scaleway-nodes:
         values: ["fr-par","nl-ams","pl-waw"]
         default: fr-par        
       - name: "Terraform storage bucket"
-        description: "AWS S3 Bucket name to store terraform remote state file."
+        description: "Object Storage Bucket name to store terraform remote state file."
         key: terraform_storage_bucket_name
         widget: simple_text
         type: string
@@ -838,7 +838,7 @@ scaleway-nodes:
         type: string
         default: ""      
       - name: "Extra tags"
-        description: "Dict of extra tags to add on aws resources"
+        description: "Dict of extra tags to add on the pool."
         key: module.node_pool.extra_tags
         widget: text_area
         type: raw
