@@ -273,13 +273,13 @@
     "virtualNetworkName": {
       "type": "string",
       "metadata": {
-        "description": "Virtual network name to use in this subscription/resource group."
+        "description": "Virtual network name to use in this subscription or resource group. Example: my-virtual-network-name"
       }
     },
     "subnetName": {
       "type": "string",
       "metadata": {
-        "description": "Subnet name of the chosen virtual network to use in this subscription/resource group."
+        "description": "Subnet name of the chosen virtual network to use in this subscription or resource group. Example: my-subnet-name"
       }
     },
     "sgAuthorizedCidrs": {
