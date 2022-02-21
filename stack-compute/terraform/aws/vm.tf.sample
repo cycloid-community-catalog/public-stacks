@@ -92,6 +92,10 @@ module "vm" {
   #+ A map of tags to assign to the resource.
   instance_extra_tags =  {}
 
+  #. key_name (optional, string):
+  #+ Key name of the Key Pair to use for the instance
+  key_name =  ""
+
   ## EC2-Network
 
   #. subnet_id (required, string):

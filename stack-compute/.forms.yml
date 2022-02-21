@@ -115,6 +115,12 @@ aws-ec2:
         widget: text_area
         type: string
         default: ""
+      - name: "Key name"
+        description: "Key name of the Key Pair to use for the instance."
+        key: module.vm.key_name
+        widget: simple_text
+        type: string
+        default: ""
       - name: "Vm type"
         description: "Type of instance to use for the instance."
         key: module.vm.instance_type

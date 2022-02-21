@@ -48,6 +48,7 @@ Name|Description|Type|Default|Required|
 |---|---|:---:|:---:|:---:|
 |`instance_type`|The instance type to use for the instance. "|`string`|``|`True`|
 |`file_content`|The content of the file to use if cloud init is used.|`string`|``|`False`|
+|`key_name`|Key name of the Key Pair to use for the instance.|`string`|``|`False`|
 |`instance_extra_tags`|A map of tags to assign to the resource.|`-`|``|`False`|
 
 **Network Configurations**

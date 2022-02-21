@@ -67,6 +67,9 @@ resource "aws_instance" "vm" {
   // cloud init script - if enabled 
   user_data_base64 = base64encode(data.template_file.user_data.rendered)
 
+  // keypair name - if enabled
+  key_name = var.key_name
+
   //network
   vpc_security_group_ids      = [aws_security_group.ec2.id]
   subnet_id                   = var.subnet_id

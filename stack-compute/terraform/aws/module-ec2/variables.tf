@@ -119,6 +119,11 @@ variable "instance_extra_tags" {
   default     = {}
 }
 
+variable "key_name" {
+  description = "Key name of the Key Pair to use for the instance."
+  default     = ""
+}
+
 //EC2- Network
 variable "subnet_id" {
   description = "VPC Subnet ID to launch in."
