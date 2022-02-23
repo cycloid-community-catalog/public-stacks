@@ -22,11 +22,9 @@ def test_mount_point(host):
 
 
 def test_services_running(host):
-    fluentd = host.process.filter(user='root', comm='fluentd')
     telegraf = host.process.filter(user='telegraf', comm='telegraf')
     concourse = host.process.filter(user='root', comm='concourse')
 
-    assert len(fluentd) >= 1
     assert len(telegraf) >= 1
     assert len(concourse) >= 1
 

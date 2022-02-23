@@ -151,12 +151,6 @@
       tags:
         - concourse
 
-    - role: cycloid.fluentd
-      ignore_errors: true
-      tags:
-        - fluentd
-        - runatboot
-
   tasks:
     # jq used by user-data to send cloudformation signal
     - name: Install jq for user-data signal

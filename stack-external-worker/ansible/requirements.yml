@@ -18,11 +18,6 @@
   name: cycloid.systemd
   scm: git
 
-- src: https://github.com/cycloidio/ansible-fluentd
-  version: master
-  name: cycloid.fluentd
-  scm: git
-
 - src: https://github.com/nickhammond/ansible-logrotate
   version: master
   name: nickhammond.ansible-logrotate
