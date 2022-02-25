@@ -66,6 +66,10 @@ module "vpc" {
 
   resource_group_name = module.config.azurerm_resource_group_name
   location            = module.config.azurerm_resource_group_location
+
+  depends_on = [
+    module.config,
+  ]
 }
 
 module "aks" {
@@ -116,7 +120,7 @@ module "aks" {
   #. cluster_version (optional): null
   #+ AKS Cluster version to use, defaults to the latest recommended but no auto-upgrade.
 
-  #. cluster_allowed_ips (optional): [] 
+  #. cluster_allowed_ips (optional): []
   #+ Allow Inbound IP CIDRs to access the Kubernetes API.
 
   #. node_admin_username (optional): cycloid
@@ -207,10 +211,14 @@ module "aks" {
   ###
 
   resource_group_name             = module.config.azurerm_resource_group_name
-  location                        = module.config.azurerm_resource_group_location 
+  location                        = module.config.azurerm_resource_group_location
   cluster_name                    = module.config.cluster_name
   service_principal_client_id     = var.aks_service_principal_client_id
   service_principal_client_secret = var.aks_service_principal_client_secret
+
+  depends_on = [
+    module.config,
+  ]
 }
 
 # You can duplicate this module to create mutiple AKS node groups.
