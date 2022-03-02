@@ -102,8 +102,10 @@ resources:
     baseInstanceName: {{ name_prefix }}-vm
     instanceTemplate: $(ref.{{ name_prefix }}-template.selfLink)
     targetSize: 1
-    autoHealingPolicies:
-    - initialDelaySec: 120
+    # Disable initialDelaySec as it require healthcheck to be configured.
+    # Worker don't have http healthcheck for now
+    #autoHealingPolicies:
+    #- initialDelaySec: 120
     updatePolicy:
       minimalAction: REPLACE
       type: PROACTIVE
