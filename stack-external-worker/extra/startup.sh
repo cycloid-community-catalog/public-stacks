@@ -267,7 +267,6 @@ EOF
 
     ansible-galaxy install -r requirements.yml --force --roles-path=/etc/ansible/roles
 
-    set -x
     echo "Run packer.yml"
     ANSIBLE_FORCE_COLOR=1 PYTHONUNBUFFERED=1 ansible-playbook -e role=${ROLE} -e env=${ENV} -e project=${PROJECT} --connection local packer.yml
 
@@ -279,7 +278,6 @@ EOF
 
     echo "Run external-worker.yml boot steps"
     ANSIBLE_FORCE_COLOR=1 PYTHONUNBUFFERED=1 ansible-playbook -e role=${ROLE} -e env=${ENV} -e project=${PROJECT} --connection local external-worker.yml --diff --tags runatboot,notforbuild
-    set +x
 
     sleep 60 && systemctl status concourse-worker
 }
