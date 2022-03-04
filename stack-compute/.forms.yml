@@ -156,6 +156,7 @@ aws-ec2:
         widget: simple_text
         type: string
         default: ""
+        required: true
       - name: "Associate public ip"
         description: "Whether to associate a public IP address with an instance in a VPC."
         key: module.vm.associate_public_ip_address
@@ -180,9 +181,9 @@ aws-ec2:
         key: module.vm.vm_disk_size
         widget: slider_range
         type: integer
-        default: 5
+        default: 20
         values:
-            - 0
+            - 10
             - 256
       - name: "Type of volume"
         description: "The volume type to use."
