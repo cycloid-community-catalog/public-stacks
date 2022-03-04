@@ -180,9 +180,9 @@ aws-ec2:
         key: module.vm.vm_disk_size
         widget: slider_range
         type: integer
-        default: 5
+        default: 20
         values:
-            - 0
+            - 10
             - 256
       - name: "Type of volume"
         description: "The volume type to use."
