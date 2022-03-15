@@ -106,6 +106,12 @@ aws-eks:
         type: array
         default:
             - "0.0.0.0/0"
+      - name: "AWS IAM role ARN to map as admin"
+        description: "AWS IAM role ARN to map as system:masters within the Kubernetes cluster. By default, a default arbitrary role called 'admin' will be allowed."
+        key: module.eks.eks_admin_iam_role_arn
+        widget: simple_text
+        type: string
+        default: ""
 
     eks-node:
       - name: "SSH keypair"
@@ -204,12 +210,18 @@ aws-eks:
         values:
              - "ondemand"
              - "spot"
-      - name: "Spot price"
-        description: "EKS nodes spot price when `node_market_type = spot`."
+      - name: "Spot instance request type"
+        description: "EKS nodes spot request type when `node_market_type = spot`. Can be either `one-time`, `persistent` or left undefined."
+        key: module.eks-node.node_spot_request_type
+        widget: simple_text
+        type: string
+        default: ""
+      - name: "Spot instance max price"
+        description: "EKS nodes max spot price when `node_market_type = spot`. Undefined by default."
         key: module.eks-node.node_spot_price
         widget: simple_text
         type: string
-        default: "0.3"
+        default: ""
       - name: "Enable Cluster Autoscaler"
         description: "Should be true to add Cluster Autoscaler ASG tags."
         key: module.eks-node.node_enable_cluster_autoscaler_tags
@@ -220,7 +232,7 @@ aws-eks:
 azure-aks:
   pipeline:
     Terraform:
-      - name: "Azure Subscription ID" 
+      - name: "Azure Subscription ID"
         description: "Azure subscription ID to use for Terraform."
         key: azure_subscription_id
         widget: cy_cred
@@ -237,20 +249,20 @@ azure-aks:
         key: azure_client_id
         widget: cy_cred
         type: string
-        default: "((azure_admin.client_id))"    
+        default: "((azure_admin.client_id))"
       - name: "Azure Client Secret"
         description: "Azure Client Secret to use for Terraform."
         key: azure_client_secret
         widget: cy_cred
         type: string
-        default: "((azure_admin.client_secret))" 
+        default: "((azure_admin.client_secret))"
       - name: "Azure Location"
         description: "Azure location to use for Terraform."
         key: azure_location
         widget: auto_complete
         type: string
         values: ["North Europe","West Europe","France Central","France South"]
-        default: "West Europe" 
+        default: "West Europe"
       - name: "Azure Resource Group of the Storage Account"
         description: "Azure Resource Group of the Storage Account to use to store terraform remote state file."
         key: terraform_resource_group_name
@@ -319,7 +331,7 @@ azure-aks:
         description: "The branch used by the config repository"
         source: config_git_repository
         default: "master"
-        required: true  
+        required: true
 
   terraform:
     config:
@@ -335,7 +347,7 @@ azure-aks:
         widget: simple_text
         type: string
         default: "($ project $)-($ environment $)"
-        
+
     vpc:
       - name: "Address Space"
         description: "The virtual network address space."
@@ -533,7 +545,7 @@ scaleway-kapsule:
         widget: auto_complete
         type: string
         values: ["fr-par","nl-ams","pl-waw"]
-        default: fr-par        
+        default: fr-par
       - name: "Terraform storage bucket"
         description: "Object Storage Bucket name to store terraform remote state file."
         key: terraform_storage_bucket_name
@@ -574,7 +586,7 @@ scaleway-kapsule:
         widget: simple_text
         type: string
         default: "($ project $)-($ environment $)"
- 
+
     kapsule:
       - name: "Cluster version"
         description: "Kapsule cluster version."
@@ -627,7 +639,7 @@ scaleway-kapsule:
             - "monday"
             - "tuesday"
             - "wednesday"
-            - "thursday" 
+            - "thursday"
             - "friday"
             - "saturday"
             - "sunday"
@@ -732,7 +744,7 @@ scaleway-nodes:
         widget: auto_complete
         type: string
         values: ["fr-par","nl-ams","pl-waw"]
-        default: fr-par        
+        default: fr-par
       - name: "Terraform storage bucket"
         description: "Object Storage Bucket name to store terraform remote state file."
         key: terraform_storage_bucket_name
@@ -836,7 +848,7 @@ scaleway-nodes:
         key: module.node_pool.placement_group_id
         widget: simple_text
         type: string
-        default: ""      
+        default: ""
       - name: "Extra tags"
         description: "Dict of extra tags to add on the pool."
         key: module.node_pool.extra_tags

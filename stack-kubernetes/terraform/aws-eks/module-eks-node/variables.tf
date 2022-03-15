@@ -111,7 +111,7 @@ variable "node_group_name" {
 
 variable "node_launch_template_profile" {
   description = "EKS nodes profile, can be either `ondemand` or `spot`."
-  default = "ondemand"
+  default     = "ondemand"
 }
 
 variable "node_launch_template_id" {
@@ -122,9 +122,14 @@ variable "node_launch_template_latest_version" {
   default = ""
 }
 
+variable "node_spot_request_type" {
+  description = "EKS nodes spot request type when `node_market_type = spot`. Can be either `one-time`, `persistent` or left undefined."
+  default     = ""
+}
+
 variable "node_spot_price" {
-  description = "EKS nodes spot price when `node_market_type = spot`."
-  default     = "0.3"
+  description = "EKS nodes max spot price when `node_market_type = spot`. Undefined by default."
+  default     = ""
 }
 
 variable "node_type" {

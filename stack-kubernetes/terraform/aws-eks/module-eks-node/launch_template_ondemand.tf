@@ -9,6 +9,11 @@ resource "aws_launch_template" "eks-node-ondemand" {
   user_data     = base64encode(data.template_file.user-data-eks-node.rendered)
   key_name      = var.keypair_name
 
+  metadata_options {
+    http_endpoint               = "enabled"
+    http_put_response_hop_limit = 2
+  }
+
   network_interfaces {
     associate_public_ip_address = var.node_associate_public_ip_address
     delete_on_termination       = true
@@ -35,7 +40,9 @@ resource "aws_launch_template" "eks-node-ondemand" {
     Name                                        = "${var.project}-${var.env}-eks-node-${var.node_group_name}-template"
     role                                        = "eks-node-template"
     "kubernetes.io/cluster/${var.cluster_name}" = "owned"
-    "kubernetes.io/nodegroup/name"             = "${var.node_group_name}"
+    "kubernetes.io/nodegroup/name"              = var.node_group_name
+    "eks:cluster-name"                          = var.cluster_name
+    "eks:nodegroup-name"                        = var.node_group_name
   })
 
   tag_specifications {
@@ -45,7 +52,9 @@ resource "aws_launch_template" "eks-node-ondemand" {
       Name                                        = "${var.project}-${var.env}-eks-node-${var.node_group_name}"
       role                                        = "eks-node"
       "kubernetes.io/cluster/${var.cluster_name}" = "owned"
-      "kubernetes.io/nodegroup/name"             = "${var.node_group_name}"
+      "kubernetes.io/nodegroup/name"              = var.node_group_name
+      "eks:cluster-name"                          = var.cluster_name
+      "eks:nodegroup-name"                        = var.node_group_name
     })
   }
   tag_specifications {
@@ -55,7 +64,9 @@ resource "aws_launch_template" "eks-node-ondemand" {
       Name                                        = "${var.project}-${var.env}-eks-node-${var.node_group_name}"
       role                                        = "eks-node"
       "kubernetes.io/cluster/${var.cluster_name}" = "owned"
-      "kubernetes.io/nodegroup/name"             = "${var.node_group_name}"
+      "kubernetes.io/nodegroup/name"              = var.node_group_name
+      "eks:cluster-name"                          = var.cluster_name
+      "eks:nodegroup-name"                        = var.node_group_name
     })
   }
 

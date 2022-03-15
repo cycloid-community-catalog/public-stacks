@@ -125,7 +125,10 @@ module "eks" {
   #+ EKS cluster enabled log types.
 
   #. control_plane_allowed_ips (optional): ["0.0.0.0/0"]
-  #+ Allow Inbound IP CIDRs to access the Kubernetes API. 
+  #+ Allow Inbound IP CIDRs to access the Kubernetes API.
+
+  #. eks_admin_iam_role_arn (optional): ""
+  #+ AWS IAM role ARN to map as system:masters within the Kubernetes cluster. By default, a default arbitrary role called 'admin' will be allowed.
 
   ###
   # Required (should probably not be touched)
@@ -221,9 +224,11 @@ module "eks-node" {
   #+ EKS nodes profile, can be either `ondemand` or `spot`.
   node_launch_template_profile = "ondemand"
 
-  #. node_spot_price (optional): 0.3
-  #+ EKS nodes spot price when `node_market_type = spot`.
-  node_spot_price = 0.3
+  #. node_spot_request_type (optional): ""
+  #+ EKS nodes spot request type when `node_market_type = spot`. Can be either `one-time`, `persistent` or left undefined.
+
+  #. node_spot_price (optional): ""
+  #+ EKS nodes max spot price when `node_market_type = spot`. Undefined by default.
 
   #. node_enable_cluster_autoscaler_tags (optional): false
   #+ Should be true to add Cluster Autoscaler ASG tags.

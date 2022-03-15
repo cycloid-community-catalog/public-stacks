@@ -13,9 +13,14 @@ resource "aws_launch_template" "eks-node-spot" {
     market_type = "spot"
 
     spot_options {
-      spot_instance_type = "one-time"
-      max_price          = var.node_spot_price
+      spot_instance_type = var.node_spot_request_type != "" ? var.node_spot_request_type : null
+      max_price          = var.node_spot_price != "" ? var.node_spot_price : null
     }
+  }
+
+  metadata_options {
+    http_endpoint               = "enabled"
+    http_put_response_hop_limit = 2
   }
 
   network_interfaces {
@@ -44,7 +49,9 @@ resource "aws_launch_template" "eks-node-spot" {
     Name                                        = "${var.project}-${var.env}-eks-node-${var.node_group_name}-template"
     role                                        = "eks-node-template"
     "kubernetes.io/cluster/${var.cluster_name}" = "owned"
-    "kubernetes.io/nodegroup/name"             = "${var.node_group_name}"
+    "kubernetes.io/nodegroup/name"              = var.node_group_name
+    "eks:cluster-name"                          = var.cluster_name
+    "eks:nodegroup-name"                        = var.node_group_name
   })
 
   tag_specifications {
@@ -54,7 +61,9 @@ resource "aws_launch_template" "eks-node-spot" {
       Name                                        = "${var.project}-${var.env}-eks-node-${var.node_group_name}"
       role                                        = "eks-node"
       "kubernetes.io/cluster/${var.cluster_name}" = "owned"
-      "kubernetes.io/nodegroup/name"             = "${var.node_group_name}"
+      "kubernetes.io/nodegroup/name"              = var.node_group_name
+      "eks:cluster-name"                          = var.cluster_name
+      "eks:nodegroup-name"                        = var.node_group_name
     })
   }
   tag_specifications {
@@ -64,7 +73,9 @@ resource "aws_launch_template" "eks-node-spot" {
       Name                                        = "${var.project}-${var.env}-eks-node-${var.node_group_name}"
       role                                        = "eks-node"
       "kubernetes.io/cluster/${var.cluster_name}" = "owned"
-      "kubernetes.io/nodegroup/name"             = "${var.node_group_name}"
+      "kubernetes.io/nodegroup/name"              = var.node_group_name
+      "eks:cluster-name"                          = var.cluster_name
+      "eks:nodegroup-name"                        = var.node_group_name
     })
   }
 

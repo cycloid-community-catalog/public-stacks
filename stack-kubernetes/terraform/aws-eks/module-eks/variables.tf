@@ -86,3 +86,13 @@ variable "control_plane_allowed_ips" {
   description = "Allow Inbound IP CIDRs to access the Kubernetes API."
   default     = ["0.0.0.0/0"]
 }
+
+locals {
+  k8s_eks_admin_iam_role_arn = var.eks_admin_iam_role_arn != "" ? var.eks_admin_iam_role_arn : "arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/admin"
+}
+
+variable "eks_admin_iam_role_arn" {
+  description = "AWS IAM role ARN to map as system:masters within the Kubernetes cluster. By default, a default arbitrary role called 'admin' will be allowed."
+  default     = ""
+}
+

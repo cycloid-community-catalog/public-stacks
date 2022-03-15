@@ -17,7 +17,9 @@ resource "aws_security_group" "eks-node" {
   tags = merge(local.merged_tags, {
     Name                           = "${var.project}-${var.env}-eks-node-${var.node_group_name}"
     role                           = "eks-node"
-    "kubernetes.io/nodegroup/name" = "${var.node_group_name}"
+    "kubernetes.io/nodegroup/name" = var.node_group_name
+    "eks:cluster-name"             = var.cluster_name
+    "eks:nodegroup-name"           = var.node_group_name
   })
 }
 
@@ -47,9 +49,11 @@ locals {
     [
       { "Key" = "Name", "Value" = "${var.project}-${var.env}-eks-node-${var.node_group_name}", "PropagateAtLaunch" = "true" },
       { "Key" = "role", "Value" = "eks-node", "PropagateAtLaunch" = "true" },
-      { "Key" = "Spot", "Value" = "%{ if var.node_launch_template_profile == "spot" }true%{ else }false%{ endif }", "PropagateAtLaunch" = "true" },
+      { "Key" = "Spot", "Value" = "%{if var.node_launch_template_profile == "spot"}true%{else}false%{endif}", "PropagateAtLaunch" = "true" },
       { "Key" = "kubernetes.io/cluster/${var.cluster_name}", "Value" = "owned", "PropagateAtLaunch" = "true" },
-      { "Key" = "kubernetes.io/nodegroup/name", "Value" = "${var.node_group_name}", "PropagateAtLaunch" = "true" }
+      { "Key" = "kubernetes.io/nodegroup/name", "Value" = var.node_group_name, "PropagateAtLaunch" = "true" },
+      { "Key" = "eks:cluster-name", "Value" = var.cluster_name, "PropagateAtLaunch" = "true" },
+      { "Key" = "eks:nodegroup-name", "Value" = var.node_group_name, "PropagateAtLaunch" = "true" }
     ],
     [
       for tag in keys(local.cluster_autoscaler_tags) :
@@ -83,7 +87,7 @@ data "template_file" "user-data-eks-node" {
     apiserver_endpoint = var.control_plane_endpoint
     b64_cluster_ca     = var.control_plane_ca
     cluster_name       = var.cluster_name
-    bootstrap_args     = "--kubelet-extra-args --node-labels=node.kubernetes.io/nodegroup=${var.node_group_name},node.kubernetes.io/lifecycle=%{ if var.node_launch_template_profile == "spot" }Ec2Spot%{ else }OnDemand%{ endif },node.cycloid.io/customer=${var.customer},node.cycloid.io/project=${var.project},node.cycloid.io/env=${var.env}"
+    bootstrap_args     = "--kubelet-extra-args --node-labels=node.kubernetes.io/nodegroup=${var.node_group_name},node.kubernetes.io/lifecycle=%{if var.node_launch_template_profile == "spot"}Ec2Spot%{else}OnDemand%{endif},node.cycloid.io/customer=${var.customer},node.cycloid.io/project=${var.project},node.cycloid.io/env=${var.env},eks.amazonaws.com/capacityType=%{if var.node_launch_template_profile == "spot"}SPOT%{else}ON_DEMAND%{endif},eks.amazonaws.com/nodegroup=${var.node_group_name},eks.amazonaws.com/nodegroup-image=${data.aws_ami.eks-node.id}"
   }
 }
 
@@ -108,9 +112,9 @@ resource "aws_cloudformation_stack" "eks-node" {
         "DesiredCapacity": "${var.node_count}",
         "MinSize": "${var.node_asg_min_size}",
         "MaxSize": "${var.node_asg_max_size}",
-        "TerminationPolicies": ["OldestLaunchConfiguration", "NewestInstance"],
+        "TerminationPolicies": ["AllocationStrategy", "OldestLaunchTemplate", "OldestInstance"],
         "HealthCheckType": "EC2",
-        "HealthCheckGracePeriod": 600,
+        "HealthCheckGracePeriod": 15,
         "MetricsCollection": [{
           "Granularity": "1Minute",
           "Metrics": ["GroupMinSize", "GroupMaxSize", "GroupDesiredCapacity", "GroupInServiceInstances", "GroupPendingInstances", "GroupStandbyInstances", "GroupTerminatingInstances", "GroupTotalInstances"]

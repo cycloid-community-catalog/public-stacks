@@ -34,5 +34,7 @@ export AWS_UNIQUE_ID=$(curl http://169.254.169.254/latest/meta-data/instance-id)
 /etc/eks/bootstrap.sh \
     --apiserver-endpoint '${apiserver_endpoint}' \
     --b64-cluster-ca '${b64_cluster_ca}' \
+    --dns-cluster-ip 172.20.0.10 \
+    --use-max-pods false \
     '${cluster_name}' \
     ${bootstrap_args} 2>&1 >> $LOG_FILE

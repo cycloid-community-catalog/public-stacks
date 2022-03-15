@@ -10,6 +10,10 @@ resource "kubernetes_config_map" "aws_auth" {
           groups:
             - system:bootstrappers
             - system:nodes
+        - rolearn: ${local.k8s_eks_admin_iam_role_arn}
+          username: admin
+          groups:
+            - system:masters
 MAPROLES
   }
 
