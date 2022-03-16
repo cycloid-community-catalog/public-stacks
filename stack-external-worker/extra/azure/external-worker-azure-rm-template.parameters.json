@@ -14,26 +14,11 @@
     "vmSize": {
       "value": "Standard_B1s"
     },
-    "vmSize": {
-      "value": "Standard_B1s"
-    },
     "virtualNetworkName": {
       "value": "VIRTUAL-NETWORK-NAME"
     },
     "subnetName": {
       "value": "SUBNET-NAME"
-    },
-    "customerTag": {
-      "value": "CYCLOID-ORGANIZATION-NAME"
-    },
-    "projectTag": {
-      "value": "cycloid-ci-workers"
-    },
-    "environmentTag": {
-      "value": "prod"
-    },
-    "roleTag": {
-      "value": "workers"
     },
     "authenticationType": {
       "value": "sshPublicKey"

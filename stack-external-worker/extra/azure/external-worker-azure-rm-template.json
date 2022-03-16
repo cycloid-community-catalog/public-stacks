@@ -2,45 +2,10 @@
   "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
   "contentVersion": "1.0.0.0",
   "parameters": {
-    "numberOfWorkers": {
-      "type": "int",
-      "defaultValue": 1,
-      "metadata": {
-        "description": "Number of Cycloid CI workers."
-      }
-    },
-    "schedulerApiAddress": {
-      "type": "string",
-      "defaultValue": "https://scheduler.cycloid.io",
-      "metadata": {
-        "description": "Cycloid CI scheduler http api address."
-      }
-    },
-    "schedulerHost": {
-      "type": "string",
-      "defaultValue": "scheduler.cycloid.io",
-      "metadata": {
-        "description": "Cycloid CI scheduler address."
-      }
-    },
-    "schedulerPort": {
-      "type": "int",
-      "defaultValue": 32223,
-      "metadata": {
-        "description": "Cycloid CI scheduler port."
-      }
-    },
     "teamID": {
       "type": "string",
       "metadata": {
         "description": "Cycloid CI team ID."
-      }
-    },
-    "tsaPublicKey": {
-      "type": "string",
-      "defaultValue": "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQC+To6R1hDAO00Xrt8q5Md38J9dh+aMIbV2GTqQkFcKwVAB6czbPPcitPWZ7y3Bw1dKMC8R7DGRAt01yWlkYo/voRp5prqKMc/uzkObhHNy42eJgZlStKU1IMw/fx0Rx+6Y3NClCCOecx415dkAH+PFudKosq4pFB9KjfOp3tMHqirMSF7dsbM3910gcPBL2NFHkOZ4cNfeSztXEg9wy4SExX3CHiUyLiShpwXa+C2f6IPdOJt+9ueXQIL0hcMmd12PRL5UU6/e5U5kldM4EWiJoohVbfoA1CRFF9QwJt6H3IiZPmd3sWqIVVy6Vssn5okjYLRwCwEd8+wd8tI6OnNb",
-      "metadata": {
-        "description": "Cycloid CI tsa public key."
       }
     },
     "workerKey": {
@@ -49,18 +14,33 @@
         "description": "Cycloid CI worker private key. Base64 encoded."
       }
     },
-    "workerRuntime": {
+    "virtualNetworkName": {
       "type": "string",
-      "defaultValue": "",
       "metadata": {
-        "description": "Change the default worker container runtimes https://concourse-ci.org/concourse-worker.html#configuring-runtimes"
+        "description": "Virtual network name to use in this subscription or resource group. Example: my-virtual-network-name"
       }
     },
-    "workerDnsServer": {
+    "subnetName": {
       "type": "string",
-      "defaultValue": "",
       "metadata": {
-        "description": "Override DNS server or add additionals one depending of the container runtime you use. ex '1.1.1.1,8.8.8.8'"
+        "description": "Subnet name of the chosen virtual network to use in this subscription or resource group. Example: my-subnet-name"
+      }
+    },
+    "authenticationType": {
+      "type": "string",
+      "defaultValue": "sshPublicKey",
+      "allowedValues": [
+        "sshPublicKey",
+        "password"
+      ],
+      "metadata": {
+        "description": "Type of authentication to use on the Cycloid CI worker. SSH key is recommended."
+      }
+    },
+    "adminPasswordOrKey": {
+      "type": "securestring",
+      "metadata": {
+        "description": "SSH Key or password for the Cycloid CI worker `admin` user. SSH key is recommended."
       }
     },
     "vmSize": {
@@ -234,6 +214,62 @@
         "description": "Linux virtual machine size for the Cycloid CI worker."
       }
     },
+    "numberOfWorkers": {
+      "type": "int",
+      "defaultValue": 1,
+      "metadata": {
+        "description": "Number of Cycloid CI workers."
+      }
+    },
+    "schedulerApiAddress": {
+      "type": "string",
+      "defaultValue": "https://scheduler.cycloid.io",
+      "metadata": {
+        "description": "Cycloid CI scheduler http api address."
+      }
+    },
+    "schedulerHost": {
+      "type": "string",
+      "defaultValue": "scheduler.cycloid.io",
+      "metadata": {
+        "description": "Cycloid CI scheduler address."
+      }
+    },
+    "schedulerPort": {
+      "type": "int",
+      "defaultValue": 32223,
+      "metadata": {
+        "description": "Cycloid CI scheduler port."
+      }
+    },
+    "tsaPublicKey": {
+      "type": "string",
+      "defaultValue": "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQC+To6R1hDAO00Xrt8q5Md38J9dh+aMIbV2GTqQkFcKwVAB6czbPPcitPWZ7y3Bw1dKMC8R7DGRAt01yWlkYo/voRp5prqKMc/uzkObhHNy42eJgZlStKU1IMw/fx0Rx+6Y3NClCCOecx415dkAH+PFudKosq4pFB9KjfOp3tMHqirMSF7dsbM3910gcPBL2NFHkOZ4cNfeSztXEg9wy4SExX3CHiUyLiShpwXa+C2f6IPdOJt+9ueXQIL0hcMmd12PRL5UU6/e5U5kldM4EWiJoohVbfoA1CRFF9QwJt6H3IiZPmd3sWqIVVy6Vssn5okjYLRwCwEd8+wd8tI6OnNb",
+      "metadata": {
+        "description": "Cycloid CI tsa public key."
+      }
+    },
+    "workerRuntime": {
+      "type": "string",
+      "defaultValue": "",
+      "metadata": {
+        "description": "Change the default worker container runtimes https://concourse-ci.org/concourse-worker.html#configuring-runtimes"
+      }
+    },
+    "workerDnsServer": {
+      "type": "string",
+      "defaultValue": "",
+      "metadata": {
+        "description": "Override DNS server or add additionals one depending of the container runtime you use. ex '1.1.1.1,8.8.8.8'"
+      }
+    },
+    "sgAuthorizedCidrs": {
+      "type": "array",
+      "defaultValue": ["0.0.0.0/0"],
+      "metadata": {
+        "description": "Authorized CIDRs to access the worker from the outside."
+      }
+    },
     "dataDiskSize": {
       "type": "int",
       "defaultValue": 150,
@@ -253,44 +289,16 @@
         "description": "Disk type for the Cycloid CI worker."
       }
     },
-    "authenticationType": {
+    "subnetResourceGroupName": {
       "type": "string",
-      "defaultValue": "sshPublicKey",
-      "allowedValues": [
-        "sshPublicKey",
-        "password"
-      ],
+      "defaultValue": "",
       "metadata": {
-        "description": "Type of authentication to use on the Cycloid CI worker. SSH key is recommended."
-      }
-    },
-    "adminPasswordOrKey": {
-      "type": "securestring",
-      "metadata": {
-        "description": "SSH Key or password for the Cycloid CI worker `admin` user. SSH key is recommended."
-      }
-    },
-    "virtualNetworkName": {
-      "type": "string",
-      "metadata": {
-        "description": "Virtual network name to use in this subscription or resource group. Example: my-virtual-network-name"
-      }
-    },
-    "subnetName": {
-      "type": "string",
-      "metadata": {
-        "description": "Subnet name of the chosen virtual network to use in this subscription or resource group. Example: my-subnet-name"
-      }
-    },
-    "sgAuthorizedCidrs": {
-      "type": "array",
-      "defaultValue": ["0.0.0.0/0"],
-      "metadata": {
-        "description": "Authorized CIDRs to access the worker from the outside."
+        "description": "If your vnet and subnet is located in a different ressource group, specify the name of the resource group here."
       }
     },
     "customerTag": {
       "type": "string",
+      "defaultValue": "cycloid",
       "metadata": {
         "description": "Name of the Cycloid Organization."
       }
@@ -354,6 +362,7 @@
     "nicName": "[concat(variables('namePrefix'), '-nic')]",
     "ipConfigName": "[concat(variables('namePrefix'), '-ipconfig')]",
     "adminUsername": "cycloid",
+    "subnetID": "[if(not(empty(parameters('subnetResourceGroupName'))), resourceId(parameters('subnetResourceGroupName'), 'Microsoft.Network/virtualNetworks/subnets', parameters('virtualNetworkName'), parameters('subnetName')), resourceId('Microsoft.Network/virtualNetworks/subnets', parameters('virtualNetworkName'), parameters('subnetName')))]",
     "linuxConfiguration": {
       "disablePasswordAuthentication": true,
       "ssh": {
@@ -514,7 +523,7 @@
                       "name": "[variables('ipConfigName')]",
                       "properties": {
                         "subnet": {
-                          "id": "[resourceId('Microsoft.Network/virtualNetworks/subnets', parameters('virtualNetworkName'), parameters('subnetName'))]"
+                          "id": "[variables('subnetID')]"
                         },
                         "publicIPAddressConfiguration": {
                           "name": "pub1",
