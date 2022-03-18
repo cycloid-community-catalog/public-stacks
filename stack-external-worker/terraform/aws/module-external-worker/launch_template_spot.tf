@@ -10,8 +10,8 @@ resource "aws_launch_template" "worker" {
     market_type = "spot"
 
     spot_options {
-      spot_instance_type = "one-time"
-      max_price          = var.worker_spot_price
+      spot_instance_type = var.worker_spot_request_type != "" ? var.worker_spot_request_type : null
+      max_price          = var.worker_spot_price != "" ? var.worker_spot_price : null
     }
   }
 

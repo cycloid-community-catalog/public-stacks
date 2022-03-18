@@ -82,8 +82,14 @@ variable "worker_ami_id" {
   default = ""
 }
 
+variable "worker_spot_request_type" {
+  description = "The Spot Instances request type to use. Can be either `one-time`, `persistent` or left undefined."
+  default     = ""
+}
+
 variable "worker_spot_price" {
-  default = "0.3"
+  description = "The maximum hourly price you're willing to pay for the Spot Instances. Linked to instance type. Undefined by default."
+  default     = ""
 }
 
 variable "worker_extra_args" {
