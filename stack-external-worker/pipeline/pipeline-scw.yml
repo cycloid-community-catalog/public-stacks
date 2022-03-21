@@ -7,7 +7,7 @@ shared:
     config:
       platform: linux
       image_resource:
-        type: docker-image
+        type: registry-image
         source:
           repository: cycloid/cycloid-toolkit
           tag: latest
@@ -26,7 +26,7 @@ shared:
   - &merge-stack-and-config
     platform: linux
     image_resource:
-      type: docker-image
+      type: registry-image
       source:
         repository: cycloid/cycloid-toolkit
         tag: latest
@@ -75,13 +75,13 @@ groups:
 
 resource_types:
 - name: terraform
-  type: docker-image
+  type: registry-image
   source:
     repository: ljfranklin/terraform-resource
     tag: ((terraform_version))
 
 - name: packer
-  type: docker-image
+  type: registry-image
   source:
     # repository: snapkitchen/concourse-packer-resource
     repository: cycloid/concourse-packer-resource
@@ -201,9 +201,10 @@ jobs:
       params:
         template: merged-stack/packer/scw.json
         vars:
-          scw_region: ((packer_scw_region))
-          scw_organization: ((scw_organization_id))
-          scw_api_token: ((scw_secret_key))
+          scw_zone: ((packer_scw_zone))
+          scw_project: ((scw_project_id))
+          scw_access_key: ((scw_access_key))
+          scw_secret_key: ((scw_secret_key))
           env: ((env))
           project: ((project))
           customer: ((customer))

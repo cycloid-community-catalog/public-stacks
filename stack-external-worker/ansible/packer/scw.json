@@ -1,8 +1,9 @@
 {
   "variables": {
-    "scw_region": "{{env `SCW_REGION`}}",
-    "scw_organization": "{{env `SCALEWAY_ORGANIZATION`}}",
-    "scw_api_token": "{{env `SCALEWAY_API_TOKEN`}}",
+    "scw_zone": "{{env `SCW_ZONE`}}",
+    "scw_project": "{{env `SCALEWAY_PROJECT`}}",
+    "scw_access_key": "{{env `SCALEWAY_ACCESS_KEY`}}",
+    "scw_secret_key": "{{env `SCALEWAY_SECRET_KEY`}}",
     "exposed_team": "{{env `BUILD_TEAM_NAME`}}",
     "customer": "{{env `CUSTOMER`}}",
     "project": "{{env `PROJECT`}}",
@@ -21,10 +22,11 @@
   "builders": [
     {
       "type": "scaleway",
-      "region": "{{user `scw_region`}}",
-      "organization_id": "{{user `scw_organization`}}",
-      "api_token": "{{user `scw_api_token`}}",
-      "image": "cc9188b3-3938-47d7-b091-c9ecad1fe507",
+      "zone": "{{user `scw_zone`}}",
+      "project_id": "{{user `scw_project`}}",
+      "access_key": "{{user `scw_access_key`}}",
+      "secret_key": "{{user `scw_secret_key`}}",
+      "image": "debian_buster",
       "image_name": "{{user `project`}}_{{user `role`}}_{{user `env`}}_{{timestamp}}",
       "snapshot_name": "{{user `project`}}_{{user `role`}}_{{user `env`}}_{{timestamp}}",
       "remove_volume": true,

@@ -5,16 +5,20 @@
 # Scaleway access to use to run terraform.
 
 #. scw_access_key (required): ((scaleway.access_key))
-#+ Scaleway access key for Terraform. See [here](https://console.scaleway.com/account/organization/credentials).
+#+ Scaleway access key for Terraform. See [here](https://console.scaleway.com/project/credentials).
 scw_access_key: ((scaleway.access_key))
 
-#. scw_organization_id (required): ((scaleway.secret_key))
-#+ Scaleway secret key for Terraform. See [here](https://console.scaleway.com/account/organization/credentials).
-scw_organization_id: ((scaleway.secret_key))
-
 #. scw_secret_key (required): ((scaleway.secret_key))
-#+ Scaleway organization ID for Terraform. See [here](https://console.scaleway.com/account/organization/credentials).
+#+ Scaleway secret key for Terraform. See [here](https://console.scaleway.com/project/credentials).
 scw_secret_key: ((scaleway.secret_key))
+
+#. scw_organization_id (required): ((scaleway.organization_id))
+#+ Scaleway organization ID for Terraform. See [here](https://console.scaleway.com/account/organization/profile).
+scw_organization_id: ((scaleway.organization_id))
+
+#. scw_project_id (required): ((scaleway.project_id))
+#+ Scaleway project ID for Terraform. See [here](https://console.scaleway.com/project/settings)
+scw_project_id: ((scaleway.project_id))
 
 #. scw_default_region (required): fr-par
 #+ Scaleway region to use for Terraform.
@@ -63,9 +67,9 @@ debug_public_key: "ssh-rsa ..."
 #+ Version of ansible used during Packer build to run Ansible playbook
 packer_ansible_version: "2.9.*"
 
-#. packer_scw_region: "par1"
-#+ Packer specific naming for the Scaleway region to use. The image built will only be usable in this region, so make sure it matches the one in `scw_default_region`. 
-packer_scw_region: par1
+#. packer_scw_zone: "fr-par-1"
+#+ Packer specific naming for the Scaleway zone to use. The image built will only be usable in this zone, so make sure it matches the one in `scw_default_region`.
+packer_scw_zone: fr-par-1
 
 #
 # Repos
@@ -116,6 +120,6 @@ config_terraform_path: ($ project $)/terraform/($ environment $)
 #+ terraform version used to execute your code.
 terraform_version: '0.13.5'
 
-#. packer_version (required): '1.6.4'
+#. packer_version (required): '1.8.0'
 #+ packer version used to build the instance image.
-packer_version: '1.6.4'
+packer_version: '1.8.0'
