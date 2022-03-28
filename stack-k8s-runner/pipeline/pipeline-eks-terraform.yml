@@ -25,13 +25,13 @@ groups:
 resource_types:
 
 - name: kubernetes
-  type: docker-image
+  type: registry-image
   source:
     repository: cycloid/kubernetes-resource
     tag: ((k8s_version))
 
 - name: terraform
-  type: docker-image
+  type: registry-image
   source:
     repository: ljfranklin/terraform-resource
     tag: ((terraform_version))
@@ -82,7 +82,7 @@ resources:
       AWS_ACCESS_KEY_ID: ((aws_access_key))
       AWS_DEFAULT_REGION: ((aws_default_region))
       AWS_SECRET_ACCESS_KEY: ((aws_secret_key))
-  
+
 - name: git_config-terraform
   type: git
   icon: git
@@ -111,7 +111,7 @@ jobs:
         config:
           platform: linux
           image_resource:
-            type: docker-image
+            type: registry-image
             source:
               repository: alpine
               tag: latest

@@ -2,9 +2,9 @@
 # Kubernetes
 #
 
-#. k8s_version (required): '1.15'
+#. k8s_version (required): '1.23'
 #+ Kubernetes version for the concourse resource used to apply your manifests.
-k8s_version: '1.15'
+k8s_version: '1.23'
 
 #. k8s_kubeconfig (required): ((custom_kubeconfig))
 #+ Kubernetes config used to connect to the cluster.

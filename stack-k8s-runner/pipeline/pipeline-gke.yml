@@ -12,7 +12,7 @@ groups:
 resource_types:
 
 - name: kubernetes
-  type: docker-image
+  type: registry-image
   source:
     repository: cycloid/kubernetes-resource
     tag: ((k8s_version))
@@ -51,7 +51,7 @@ jobs:
         config:
           platform: linux
           image_resource:
-            type: docker-image
+            type: registry-image
             source:
               repository: alpine
               tag: latest
