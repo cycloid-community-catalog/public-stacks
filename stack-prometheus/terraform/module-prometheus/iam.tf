@@ -43,6 +43,16 @@ data "aws_iam_policy_document" "ec2-prometheus-checks" {
   statement {
     actions = [
       "cloudwatch:ListMetrics",
+      "cloudwatch:GetMetricData",
+      "ec2:DescribeInstanceStatus",
+      "elasticloadbalancing:DescribeLoadBalancers",
+      "elasticloadbalancing:DescribeListeners",
+      "acm:GetCertificate",
+      "rds:DescribeDBInstances",
+      "rds:DescribeEvents",
+      "ses:GetAccountSendingEnabled",
+      "ses:GetSendQuota",
+      "ses:GetSendStatistics",
     ]
 
     effect    = "Allow"
