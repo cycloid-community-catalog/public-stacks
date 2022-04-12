@@ -4,7 +4,7 @@ canonical: infra-amazon-s3
 author: Cycloid
 status: private
 description: |
-  This infrastructure will deploy a S3 bucket on AWS
+  This infrastructure will deploy a S3 bucket on AWS.
 image: https://raw.githubusercontent.com/cycloid-community-catalog/infra-amazon-s3/master/icon.png
 keywords:
 - s3
