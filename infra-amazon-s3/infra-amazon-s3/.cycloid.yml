@@ -1,0 +1,33 @@
+version: "2"
+name: Amazon S3 Bucket
+canonical: infra-amazon-s3
+author: Cycloid
+status: private
+description: |
+  This infrastructure will deploy a S3 bucket on AWS
+image: https://raw.githubusercontent.com/cycloid-community-catalog/infra-amazon-s3/master/icon.png
+keywords:
+- s3
+- iam
+- terraform
+- provider:aws
+technologies:
+- technology: Amazon s3
+  version: n/a
+- technology: terraform
+  version: n/a
+dependencies: []
+config:
+  default:
+    description: Default pipeline usecase
+    name: Default
+    pipeline:
+      pipeline:
+        path: pipeline/pipeline.yml
+      variables:
+        destination: ($ project $)/pipeline/variables-($ environment $).yml
+        path: pipeline/variables.sample.yml
+    terraform:
+      s3:
+        destination: ($ project $)/terraform/($ environment $)/s3.tf
+        path: terraform/s3.tf.sample
