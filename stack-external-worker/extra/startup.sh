@@ -187,6 +187,8 @@ _() {
 
         if [[ ${DEBUG} == "true" ]]; then
             DEBUG=1
+            # Prevent halting the instance when running in DEBUG mode
+            touch /tmp/keeprunning
         else
             DEBUG=0
         fi

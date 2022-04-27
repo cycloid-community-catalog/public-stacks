@@ -1,6 +1,6 @@
 ---
 
-{% set name_prefix = properties["customerTag"] + "-" + properties["projectTag"] + "-" + properties["environmentTag"] %}
+{% set name_prefix = properties["organizationTag"] + "-" + properties["projectTag"] + "-" + properties["environmentTag"] %}
 
 resources:
 
@@ -50,7 +50,8 @@ resources:
         labels:
           cycloidio: "true"
           project: {{ properties["projectTag"] }}
-          customer: {{ properties["customerTag"] }}
+          customer: {{ properties["organizationTag"] }}
+          organization: {{ properties["organizationTag"] }}
           role: {{ properties["roleTag"] }}
           env: {{ properties["environmentTag"] }}
           app: {{ name_prefix }}
@@ -58,7 +59,8 @@ resources:
       labels:
         cycloidio: "true"
         project: {{ properties["projectTag"] }}
-        customer: {{ properties["customerTag"] }}
+        customer: {{ properties["organizationTag"] }}
+        organization: {{ properties["organizationTag"] }}
         role: {{ properties["roleTag"] }}
         env: {{ properties["environmentTag"] }}
         app: {{ name_prefix }}
@@ -112,7 +114,8 @@ resources:
     labels:
       cycloidio: "true"
       project: {{ properties["projectTag"] }}
-      customer: {{ properties["customerTag"] }}
+      customer: {{ properties["organizationTag"] }}
+      organization: {{ properties["organizationTag"] }}
       role: {{ properties["roleTag"] }}
       env: {{ properties["environmentTag"] }}
       app: {{ name_prefix }}
@@ -131,7 +134,8 @@ resources:
     labels:
       cycloidio: "true"
       project: {{ properties["projectTag"] }}
-      customer: {{ properties["customerTag"] }}
+      customer: {{ properties["organizationTag"] }}
+      organization: {{ properties["organizationTag"] }}
       role: {{ properties["roleTag"] }}
       env: {{ properties["environmentTag"] }}
       app: {{ name_prefix }}

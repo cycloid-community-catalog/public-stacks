@@ -3,7 +3,7 @@ description: Create Cycloid workers
 parameters:
   project_tag:
     type: string
-  customer_tag:
+  organization_tag:
     type: string
   flavor:
     type: string
@@ -70,7 +70,7 @@ resources:
         #   - list_join: ['=', [ {get_param: role_tag}, 'role']]
         #   - list_join: ['=', [ {get_param: project_tag}, 'project']]
         #   - list_join: ['=', [ {get_param: environment_tag}, 'env']]
-        #   - list_join: ['=', [ {get_param: customer_tag}, 'customer']]
+        #   - list_join: ['=', [ {get_param: organization_tag}, 'organization']]
         networks:
            - network: { get_param: network_id }
         security_groups:
@@ -85,10 +85,8 @@ resources:
               export LOG_FILE="/var/log/user-data.log"
               exec &> >(tee -a ${LOG_FILE})
 
-
-
               export PROJECT="%PROJECT%"
-              export CUSTOMER="%CUSTOMER%"
+              export ORG="%ORG%"
               export ENV="%ENV%"
               export ROLE="%ROLE%"
               export SCHEDULER_API_ADDRESS="%SCHEDULER_API_ADDRESS%"
@@ -122,7 +120,7 @@ resources:
               curl -sSL "https://raw.githubusercontent.com/cycloid-community-catalog/stack-external-worker/${STACK_BRANCH}/extra/startup.sh?${RANDOM}" | bash -s flexible-engine
 
             params:
-              "%CUSTOMER%": { get_param: customer_tag }
+              "%ORG%": { get_param: organization_tag }
               "%PROJECT%": { get_param: project_tag }
               "%ENV%": { get_param: environment_tag }
               "%ROLE%": { get_param: role_tag }

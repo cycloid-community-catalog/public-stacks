@@ -16,62 +16,48 @@ imports:
 required:
 - workerKey
 - teamId
-- customerTag
 
 properties:
-  workerKey:
-    Description: Cycloid CI worker private key. Base64 encoded
-    Type: string
   teamId:
     description: Cycloid CI team ID
     type: string
-  numberOfWorkers:
+  workerKey:
+    Description: Cycloid CI worker private key. Base64 encoded
+    Type: string
+  schedulerApiAddress:
+    description: "Scheduler API url: Cycloid CI scheduler http api address (On-premises)"
+    type: string
+    default: https://scheduler.cycloid.io
+  schedulerHost:
+    description: "Scheduler host: Cycloid CI scheduler host address (On-premises)"
+    type: string
+    default: scheduler.cycloid.io
+  schedulerPort:
+    description: "Scheduler port: Cycloid CI scheduler port (On-premises)"
     type: integer
-    description: Number of workers to create.
-    default: 1
+    default: 32223
+  tsaPublicKey:
+    description: "Scheduler TSA public key: Cycloid CI scheduler public key (On-premises)"
+    type: string
+    default: "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQC+To6R1hDAO00Xrt8q5Md38J9dh+aMIbV2GTqQkFcKwVAB6czbPPcitPWZ7y3Bw1dKMC8R7DGRAt01yWlkYo/voRp5prqKMc/uzkObhHNy42eJgZlStKU1IMw/fx0Rx+6Y3NClCCOecx415dkAH+PFudKosq4pFB9KjfOp3tMHqirMSF7dsbM3910gcPBL2NFHkOZ4cNfeSztXEg9wy4SExX3CHiUyLiShpwXa+C2f6IPdOJt+9ueXQIL0hcMmd12PRL5UU6/e5U5kldM4EWiJoohVbfoA1CRFF9QwJt6H3IiZPmd3sWqIVVy6Vssn5okjYLRwCwEd8+wd8tI6OnNb"
+
   region:
     type: string
     default: "europe-west1"
-    description: Region in which to run the service
-  customerTag:
+    description: Region in which to deploy the workers
+  numberOfWorkers:
+    type: integer
+    description: Number of Cycloid CI workers
+    default: 1
+  instanceType:
     type: string
-    description: Name of the Cycloid Organization, used as customer variable name.
-  projectTag:
-    type: string
-    default: "cycloid-ci-workers"
-    description: Name of the project.
-  environmentTag:
-    type: string
-    default: "prod"
-    description: Name of the project's environment.
-  roleTag:
-    type: string
-    default: "workers"
-    description: Name of the project's role tag.
+    default: "n1-standard-4"
+    description: GCP compute instance type used for Cycloid worker
   preemptible:
     type: boolean
     default: false
     description: Enable preemptible instance type. Warning enabling this could make some jobs fail if the instance is killed.
-  instanceType:
-    type: string
-    default: "n1-standard-4"
-    description: Type of instance to deploy
-  diskType:
-    type: string
-    default: "pd-standard"
-    description: Disk type
-  schedulerApiAddress:
-    description: Cycloid CI scheduler http api address
-    type: string
-    default: https://scheduler.cycloid.io
-  schedulerHost:
-    description: Cycloid CI scheduler address
-    type: string
-    default: scheduler.cycloid.io
-  schedulerPort:
-    description: Cycloid CI scheduler port
-    type: integer
-    default: 32223
+
   minNumberOfWorkers:
     description: Minimum number of Cycloid CI workers
     type: integer
@@ -80,20 +66,35 @@ properties:
     description: Maximum number of Cycloid CI workers
     type: integer
     default: 2
+  organizationTag:
+    type: string
+    description: Name of the Cycloid Organization, used as GCP label
+  projectTag:
+    type: string
+    default: "cycloid-ci-workers"
+    description: Name of the project, used as GCP label
+  environmentTag:
+    type: string
+    default: "prod"
+    description: Name of the environment, used as GCP label
+  roleTag:
+    type: string
+    default: "workers"
+    description: Name for the worker role, used as GCP label
+  diskType:
+    type: string
+    default: "pd-standard"
+    description: Type of the disk used for worker instances
   volumeSize:
     description: Size of the EBS volume for Cycloid CI worker
     type: integer
     default: 150
-  tsaPublicKey:
-    description: Cycloid CI tsa public key
-    type: string
-    default: "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQC+To6R1hDAO00Xrt8q5Md38J9dh+aMIbV2GTqQkFcKwVAB6czbPPcitPWZ7y3Bw1dKMC8R7DGRAt01yWlkYo/voRp5prqKMc/uzkObhHNy42eJgZlStKU1IMw/fx0Rx+6Y3NClCCOecx415dkAH+PFudKosq4pFB9KjfOp3tMHqirMSF7dsbM3910gcPBL2NFHkOZ4cNfeSztXEg9wy4SExX3CHiUyLiShpwXa+C2f6IPdOJt+9ueXQIL0hcMmd12PRL5UU6/e5U5kldM4EWiJoohVbfoA1CRFF9QwJt6H3IiZPmd3sWqIVVy6Vssn5okjYLRwCwEd8+wd8tI6OnNb"
   stackBranch:
-    description: Branch of the external-worker stack to use.
+    description: Git branch of the external-worker stack to use (Advanced).
     type: string
     default: master
   workerVersion:
-    description: Force a specific worker version. Default it will use the version provided by the scheduler API.
+    description: Force a specific worker version. Default it will use the version exposed by the scheduler, https://scheduler_api_address/api/v1/info
     type: string
     default: ""
   workerRuntime:
@@ -101,10 +102,10 @@ properties:
     type: string
     default: ""
   workerDnsServer:
-    description: "Override DNS server or add additionals one depending of the container runtime you use. ex '1.1.1.1,8.8.8.8'"
+    description: "Override DNS server or add additionals one depending of the worker runtime specified. ex '1.1.1.1,8.8.8.8'"
     type: string
     default: ""
   debugMode:
-    description: Enable of disable debug mode.
+    description: Enable of disable debug mode. Debug will ensure the worker keep running even if the initial setub boot script is failing.
     type: boolean
     default: false
