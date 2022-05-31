@@ -1,0 +1,23 @@
+version: "2"
+name: Test1
+canonical: test1
+author: admin
+status: private
+description: Test 1 of Hugo
+image: ""
+keywords:
+- test
+- hugo
+- provider:aws
+technologies: []
+dependencies: []
+config:
+  default:
+    description: ""
+    name: default
+    pipeline:
+      pipeline:
+        path: pipeline/default/terraform-pipeline.yaml
+      variables:
+        destination: ($ project $)/pipeline/variables-($ environment $).yml
+        path: pipeline/default/variables.sample.yaml

@@ -1,0 +1,74 @@
+#
+# Terraform
+#
+
+# Amazon access to use to run terraform. Usually admin account to be able to create Amazon services.
+
+#. aws_access_key (required): ((aws.access_key))
+#+ Amazon AWS access key for Terraform. Usually admin account to be able to create Amazon services. See value format [here](https://docs.cycloid.io/advanced-guide/integrate-and-use-cycloid-credentials-manager.html#vault-in-the-pipeline)
+aws_access_key: ((aws_admin.access_key))
+
+#. aws_secret_key (required): ((aws.secret_key))
+#+ Amazon AWS secret key for Terraform. Usually admin account to be able to create Amazon services. See value format [here](https://docs.cycloid.io/advanced-guide/integrate-and-use-cycloid-credentials-manager.html#vault-in-the-pipeline)
+aws_secret_key: ((aws_admin.secret_key))
+
+#. aws_default_region (required): eu-west-1
+#+ Amazon AWS region to use for Terraform.
+aws_default_region: eu-west-1
+
+#. terraform_storage_bucket_name (required): ($ organization_canonical $)-terraform-remote-state
+#+ AWS S3 bucket name to store Terraform remote state file.
+terraform_storage_bucket_name: cycloid-terraform-remote-state
+
+#
+# Repos
+#
+
+#. sc_repository (required): ""
+#+ Git repository URL of your service catalog containing the stack.
+sc_repository: "git@github.com:cycloid-community-catalog/public-stacks.git"
+
+#. config_git_repository (required): ""
+#+ Path of the stack located in the git of your service catalog.
+sc_path: "test1"
+
+#. sc_git_key (required): ((git_readonly.ssh_key))
+#+ SSH key pair to fetch the stack Git repository.
+sc_git_key: ((ssh_github.ssh_key))
+
+#. config_git_repository (required): ""
+#+ Git repository URL containing the config of the stack.
+config_git_repository: "git@github.com:cycloidio/onprem-test.git"
+
+#. config_git_private_key (required): ((ssh_config.ssh_key))
+#+ SSH key pair to fetch the config Git repository.
+config_git_private_key: ((ssh_github.ssh_key))
+
+#. config_git_branch (required): config
+#+ Git branch containing the config of the stack.
+config_git_branch: config
+
+#
+# Default variables that shouldn't be changed except if needed
+#
+
+#. sc_branch (required): stacks
+#+ Branch to use on the stack Git repository
+sc_branch: hr-fix-forms
+
+#. env (required): ($ environment $)
+#+ Name of the project's environment.
+env: ($ environment $)
+
+#. project (required): ($ project $)
+#+ Name of the project.
+project: ($ project $)
+
+#. customer (required): ($ organization_canonical $)
+#+ Name of the Cycloid Organization, used as customer variable name.
+customer: ($ organization_canonical $)
+organization: ($ organization_canonical $)
+
+#. terraform_version (required): '1.0.7'
+#+ terraform version used to execute your code.
+terraform_version: '1.0.7'
