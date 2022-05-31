@@ -1,0 +1,22 @@
+module "test1" {
+  # aws_security_group_cycloidio_website_albfront_staging_description = "Front staging for cycloidio-website"
+  # aws_security_group_cycloidio_website_albfront_staging_name        = "cycloidio-website-albfront-staging"
+  # aws_security_group_cycloidio_website_albfront_staging_vpc_id      = "vpc-0c96ad68"
+  # aws_security_group_cycloidio_website_front_staging_description    = "Front staging for cycloidio-website"
+  # aws_security_group_cycloidio_website_front_staging_name           = "cycloidio-website-front-staging"
+  # aws_security_group_cycloidio_website_front_staging_vpc_id         = "vpc-0c96ad68"
+  source = "./module-test1"
+}
+
+
+terraform {
+  required_providers {
+    aws = {
+      source = "hashicorp/aws"
+    }
+
+  }
+
+  required_version = ">= 1.0"
+}
+

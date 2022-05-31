@@ -1,0 +1,106 @@
+version: "2"
+use_cases:
+- name: default
+  sections:
+  - name: Config
+    groups:
+    - name: pipeline
+      technologies:
+      - pipeline
+      vars:
+      - widget: text_area
+        required: true
+        default: test1
+        type: string
+        key: sc_path
+        name: sc_path
+      - widget: text_area
+        required: true
+        default: config
+        type: string
+        key: config_git_branch
+        name: config_git_branch
+      - widget: text_area
+        required: true
+        default: cycloid
+        type: string
+        key: organization
+        name: organization
+      - widget: text_area
+        required: true
+        default: eu-west-1
+        type: string
+        key: aws_default_region
+        name: aws_default_region
+      - widget: text_area
+        required: true
+        default: git@github.com:cycloid-community-catalog/public-stacks.git
+        type: string
+        key: sc_repository
+        name: sc_repository
+      - widget: text_area
+        required: true
+        default: ((ssh_github.ssh_key))
+        type: string
+        key: sc_git_key
+        name: sc_git_key
+      - widget: text_area
+        required: true
+        default: hr-fix-forms
+        type: string
+        key: sc_branch
+        name: sc_branch
+      - widget: text_area
+        required: true
+        default: test1
+        type: string
+        key: project
+        name: project
+      - widget: text_area
+        required: true
+        default: ((aws_admin.access_key))
+        type: string
+        key: aws_access_key
+        name: aws_access_key
+      - widget: text_area
+        required: true
+        default: ((aws_admin.secret_key))
+        type: string
+        key: aws_secret_key
+        name: aws_secret_key
+      - widget: text_area
+        required: true
+        default: cycloid-terraform-remote-state
+        type: string
+        key: terraform_storage_bucket_name
+        name: terraform_storage_bucket_name
+      - widget: text_area
+        required: true
+        default: git@github.com:cycloidio/onprem-test.git
+        type: string
+        key: config_git_repository
+        name: config_git_repository
+      - widget: text_area
+        required: true
+        default: cycloid
+        type: string
+        key: customer
+        name: customer
+      - widget: text_area
+        required: true
+        default: 1.0.7
+        type: string
+        key: terraform_version
+        name: terraform_version
+      - widget: text_area
+        required: true
+        default: ((ssh_github.ssh_key))
+        type: string
+        key: config_git_private_key
+        name: config_git_private_key
+      - widget: text_area
+        required: true
+        default: test
+        type: string
+        key: env
+        name: env

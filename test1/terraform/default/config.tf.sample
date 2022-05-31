@@ -1,0 +1,7 @@
+
+# Cycloid
+variable "organization" {}
+variable "customer" {}
+variable "project" {}
+variable "env" {}
+	
