@@ -21,6 +21,18 @@ aws_default_region: eu-west-1
 #+ AWS S3 bucket name to store terraform remote state file.
 terraform_storage_bucket_name: ($ organization_canonical $)-terraform-remote-state
 
+#. terraform_s3_endpoint (required): ''
+#+ A custom endpoint for the S3 API.
+terraform_s3_endpoint: ""
+
+#. terraform_s3_skip_credentials_validation (optional): 'false'
+#+ Skip the credentials validation via the STS API.
+terraform_s3_skip_credentials_validation: false
+
+#. terraform_s3_force_path_style (optional): 'false'
+#+ Always use path-style S3 URLs (https://<HOST>/<BUCKET> instead of https://<BUCKET>.<HOST>).
+terraform_s3_force_path_style: false
+
 #. terraform_modules_private_key (optional): ""
 #+ SSH key to use to clone private terraform modules from Git.
 terraform_modules_private_key: ""

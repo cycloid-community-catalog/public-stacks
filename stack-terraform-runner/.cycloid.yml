@@ -29,15 +29,6 @@ config:
       variables:
         path: 'pipeline/variables.sample.yml'
         destination: '($ project $)/pipeline/variables-($ environment $).yml'
-  s3-compatible:
-    name: 'S3 API-compatible'
-    description: 'Using an S3 API-compatible terraform backend like minio.io'
-    pipeline:
-      pipeline:
-        path: 'pipeline/pipeline-s3-compatible.yml'
-      variables:
-        path: 'pipeline/variables-s3-compatible.sample.yml'
-        destination: '($ project $)/pipeline/variables-s3-compatible-($ environment $).yml'
   gcp:
     name: 'GCP'
     description: 'Using Google GCS terraform backend.'
