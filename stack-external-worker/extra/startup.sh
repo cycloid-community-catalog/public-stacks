@@ -207,6 +207,8 @@ _() {
     apt-get install -yqq --no-install-recommends libssl-dev libffi-dev python3-dev python3-setuptools python3-pip git curl jq cargo gnupg2
 
     cd /opt/
+    # Remove potential existing file, in case you want to re-run the setup script on the same instance
+    rm -rf stack-external-worker
     git clone -b ${STACK_BRANCH} https://github.com/cycloid-community-catalog/stack-external-worker
     cd stack-external-worker/ansible
 
