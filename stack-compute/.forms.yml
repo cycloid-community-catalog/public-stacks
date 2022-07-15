@@ -506,6 +506,7 @@ gcp-gce:
         widget: text_area
         type: raw
         default: |+
+          []
 
 azure-linux:
   pipeline:
