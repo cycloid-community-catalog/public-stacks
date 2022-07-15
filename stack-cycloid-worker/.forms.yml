@@ -1,0 +1,330 @@
+---
+version: "2"
+use_cases:
+- name: cycloid-common
+  sections:
+  - name: Cycloid Worker
+    groups:
+    - name: Virtual machine specifications
+      technologies: [terraform]
+      vars:
+      - name: "Disk size"
+        unit: Go
+        description: "Disk size for the instance."
+        key: vm_disk_size
+        widget: slider_range
+        type: integer
+        default: 20
+        values:
+            - 20
+            - 250
+        required: true
+    - name: SSH Keypair to access new instances
+      technologies: [pipeline]
+      vars:
+      - name: "Keypair public"
+        description: "The public SSH key, for SSH access to newly-created instances."
+        key: keypair_public
+        widget: cy_cred
+        type: string
+        default: "((custom_keypair.ssh_pub))"
+        required: true
+
+    - name: Concourse integration
+      technologies: [pipeline]
+      vars:
+      - name: "Team ID"
+        description: "This parameter can be obtained in Cycloid console, by clicking on your profile picture at the top right corner, then organization settings, then use the value of the ci_team_member field."
+        key: team_id
+        widget: simple_text
+        type: string
+        default: ""
+        required: true
+      - name: "Worker Private Key"
+        description: "Leave default value if the worker is intended to run for the current organization. Otherwise, add Cycloid-worker-keys.ssh_prv credentials of the target organization."
+        key: worker_key
+        widget: cy_cred
+        type: string
+        default: "((cycloid-worker-keys.ssh_prv))"
+        required: true
+
+  - name: Git Repositories
+    groups:
+    - name: Stack Git Repository
+      technologies: [pipeline]
+      vars:
+      - name: "URI"
+        key: stack_git_repository
+        type: string
+        widget: cy_scs
+        description: "Git repository URI containing the stack service catalog automation."
+        default: "($ scs_url $)"
+        required: true
+      - name: "SSH key"
+        description: "SSH key pair to fetch the stack Git repository."
+        key: stack_git_private_key
+        type: string
+        widget: cy_cred
+        default: "((git.ssh_key))"
+        required: true
+      - name: "Branch"
+        description: "Branch of the stack Git repository."
+        key: stack_git_branch
+        widget: cy_branch
+        type: string
+        source: stack_git_repository
+        default: "($ scs_branch $)"
+        required: true
+    - name: Config Git Repository
+      technologies: [pipeline]
+      vars:
+      - name: "URI"
+        key: config_git_repository
+        type: string
+        widget: cy_crs
+        description: "Git repository URI containing the config of the stack for each project environment."
+        default: "($ cr_url $)"
+        required: true
+      - name: "SSH key"
+        description: "SSH key pair to fetch the config Git repository."
+        key: config_git_private_key
+        type: string
+        widget: cy_cred
+        default: "((git.ssh_key))"
+        required: true
+      - name: "Branch"
+        description: "Branch of the config Git repository."
+        key: config_git_branch
+        widget: cy_branch
+        type: string
+        source: config_git_repository
+        default: "($ cr_branch $)"
+        required: true
+
+  - name: Cycloid Configuration
+    groups:
+    - name: Cycloid API
+      technologies: [pipeline]
+      vars:
+      - name: "API Key"
+        description: "API key to grant access to Cycloid API."
+        key: cycloid_api_key
+        type: string
+        widget: cy_cred
+        default: "((cycloid-api-key.key))"
+        required: true
+
+
+- name: aws
+  sections:
+  - name: Cycloid Worker
+    groups:
+    - name: Virtual machine specifications
+      technologies: [terraform]
+      vars:
+      - name: "Instance type"
+        description: "Instance type for the worker."
+        key: vm_instance_type
+        widget: slider_list
+        type: string
+        default: "t3a.small"
+        values:
+            - "t3a.small"
+            - "t3a.medium"
+            - "t3a.large"
+        required: true
+
+  - name: AWS Cloud Provider
+    groups:
+    - name: Access Configuration
+      technologies: [pipeline]
+      vars:
+      - name: "AWS access key"
+        description: "Amazon AWS access key for Terraform."
+        key: aws_access_key
+        widget: cy_cred
+        type: string
+        default: "((aws_cycloid-demo.access_key))"
+        required: true
+      - name: "AWS secret key"
+        description: "Amazon AWS secret key for Terraform."
+        key: aws_secret_key
+        widget: cy_cred
+        type: string
+        default: "((aws_cycloid-demo.secret_key))"
+        required: true
+      - name: "Amazon AWS region"
+        description: "Amazon AWS region to use for Terraform."
+        key: aws_region
+        widget: auto_complete
+        type: string
+        values: ["eu-north-1","ap-south-1","eu-west-3","eu-west-2","eu-west-1","ap-northeast-2","ap-northeast-1","sa-east-1","ca-central-1","ap-southeast-1","ap-southeast-2","eu-central-1","us-east-1","us-east-2","us-west-1","us-west-2"]
+        default: eu-west-1
+        required: true
+
+    - name: Terraform Backend Configuration
+      technologies: [pipeline]
+      vars:
+      - name: "Terraform storage bucket"
+        description: "AWS S3 bucket name to store terraform remote state file."
+        key: terraform_storage_bucket_name
+        widget: simple_text
+        type: string
+        default: ($ organization_canonical $)-terraform-remote-state
+        required: true
+
+- name: azure
+  sections:
+  - name: Cycloid Worker
+    groups:
+    - name: Virtual machine specifications
+      technologies: [terraform]
+      vars:
+      - name: "Instance type"
+        description: "Instance type for the worker."
+        key: vm_instance_type
+        widget: slider_list
+        type: string
+        default: "Standard_DS2_v2"
+        values:
+            - "Standard_DS1_v2"
+            - "Standard_DS2_v2"
+            - "Standard_DS3_v2"
+        required: true
+
+  - name: Azure Cloud Provider
+    groups:
+    - name: Access Configuration
+      technologies: [pipeline]
+      vars:
+      - name: "Azure subscription ID"
+        description: "Azure subscription ID for Terraform."
+        key: azure_subscription_id
+        widget: cy_cred
+        type: string
+        default: "((azure_step-by-step.subscription_id))"
+        required: true
+      - name: "Azure tenant ID"
+        description: "Azure tenant ID for Terraform."
+        key: azure_tenant_id
+        widget: cy_cred
+        type: string
+        default: "((azure_step-by-step.tenant_id))"
+        required: true
+      - name: "Azure client ID"
+        description: "Azure client ID for Terraform."
+        key: azure_client_id
+        widget: cy_cred
+        type: string
+        default: "((azure_step-by-step.client_id))"
+        required: true
+      - name: "Azure client secret"
+        description: "Azure client secret for Terraform."
+        key: azure_client_secret
+        widget: cy_cred
+        type: string
+        default: "((azure_step-by-step.client_secret))"
+        required: true
+      - name: "Azure location"
+        description: "Azure location for Terraform."
+        key: azure_location
+        widget: auto_complete
+        type: string
+        values: ["West Europe","North Europe","France Central","France South","East US","West US","East Asia","Southeast Asia","South Africa North","South Africa West","Australia Central","China East","China North"]
+        default: "West Europe"
+        required: true
+      - name: "Azure Resource Group"
+        description: "Azure Resource Group for Terraform."
+        key: rg_name
+        widget: simple_text
+        type: string
+        default: "cycloid-worker"
+        required: true
+
+    - name: Terraform Backend Configuration
+      technologies: [pipeline]
+      vars:
+      - name: "Terraform resource group name"
+        description: "Azure Resource Group of the Storage Account to use to store terraform remote state file."
+        key: terraform_resource_group_name
+        widget: simple_text
+        type: string
+        default: "($ organization_canonical $)-terraform"
+      - name: "Terraform storage account name"
+        description: "Azure Storage Account name to use to store terraform remote state file."
+        key: terraform_storage_account_name
+        widget: cy_cred
+        type: string
+        default: "((azure_storage.account_name))"
+      - name: "Terraform storage access key"
+        description: "Azure Storage Account key to use to store terraform remote state file."
+        key: terraform_storage_access_key
+        widget: cy_cred
+        type: string
+        default: "((azure_storage.access_key))"
+      - name: "Terraform storage container name"
+        description: "Azure Storage container name to store terraform remote state file."
+        key: terraform_storage_container_name
+        widget: simple_text
+        type: string
+        default: "($ organization_canonical $)"
+
+- name: gcp
+  sections:
+  - name: Cycloid Worker
+    groups:
+    - name: Virtual machine specifications
+      technologies: [terraform]
+      vars:
+      - name: "Machine type"
+        description: "Instance type for the worker."
+        key: vm_machine_type
+        widget: slider_list
+        type: string
+        default: "n2d-standard-2"
+        values:
+            - n1-standard-2
+            - n2-standard-2
+            - n2d-standard-2
+        required: true
+
+  - name: GCP Cloud Provider
+    groups:
+    - name: Access Configuration
+      technologies: [pipeline]
+      vars:
+      - name: "GCP project"
+        description: "Google Cloud Platform project ID for Terraform."
+        key: gcp_project
+        widget: simple_text
+        type: string
+        default: "($ organization_canonical $)"
+        required: true
+      - name: "GCP region"
+        description: "Google Cloud Platform region to use for Terraform."
+        key: gcp_region
+        widget: auto_complete
+        type: string
+        default: "europe-west1"
+        values:
+            - europe-west1
+            - europe-west2
+        required: true
+      - name: "GCP credentials"
+        description: "Google Cloud Platform JSON credentials to use for Terraform."
+        key: gcp_credentials_json
+        widget: cy_cred
+        type: string
+        default: "((gcp.json_key))"
+        required: true
+
+    - name: Terraform Backend Configuration
+      technologies: [pipeline]
+      vars:
+      - name: "Terraform Remote State File bucket name"
+        description: "GCP bucket name to store terraform remote state file."
+        key: terraform_storage_bucket_name
+        widget: simple_text
+        type: string
+        default: ($ organization_canonical $)-terraform-remote-state
+        required: true

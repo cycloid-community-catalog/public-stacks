@@ -1,0 +1,160 @@
+#
+# Cloud Provider
+#
+
+# Azure access to use to run terraform.
+
+#. azure_subscription_id (required): ((azure.subscription_id))
+#+ Azure subscription ID to use for Terraform.
+azure_subscription_id: ((azure.subscription_id))
+
+#. azure_tenant_id (required): ((azure.tenant_id))
+#+ Azure tenant ID to use for Terraform.
+azure_tenant_id: ((azure.tenant_id))
+
+#. azure_client_id (required): ((azure.client_id))
+#+ Azure client ID to use for Terraform.
+azure_client_id: ((azure.client_id))
+
+#. azure_client_secret (required): ((azure.client_secret))
+#+ Azure client secret to use for Terraform.
+azure_client_secret: ((azure.client_secret))
+
+#. azure_env (required): public
+#+ Azure environment to use for Terraform. Can be either `public`, `usgovernment`, `german` or `china`.
+azure_env: "public"
+
+#. azure_location (required): West Europe
+#+ Azure location to use for terraform. 
+azure_location: "West Europe"
+
+#. rg_name (required): "cycloid-worker"
+#+ Azure Resource Group to use for terraform. 
+rg_name: "cycloid-worker"
+
+
+#
+# Terraform remote state file
+#
+
+#. terraform_resource_group_name (required): ($ organization_canonical $)-terraform
+#+ Azure Resource Group of the Storage Account to use to store terraform remote state file.
+terraform_resource_group_name: ($ organization_canonical $)-terraform
+
+#. terraform_storage_account_name (required): ((azure_storage.account_name))
+#+ Azure Storage Account name to use to store terraform remote state file.
+terraform_storage_account_name: ((azure_storage.account_name))
+
+#. terraform_storage_account_key (required): ((azure_storage.access_key))
+#+ Azure Storage Account key to use to store terraform remote state file.
+terraform_storage_access_key: ((azure_storage.access_key))
+
+#. terraform_storage_container_name (required): ($ organization_canonical $)
+#+ Azure Storage container name to store terraform remote state file.
+terraform_storage_container_name: ($ organization_canonical $)
+
+#. terraform_storage_container_path (required): ($ project $)/($ environment $)
+#+ Azure Storage container path to store terraform remote state file.
+terraform_storage_container_path: ($ project $)/($ environment $)
+
+
+#
+# Keypair to use for newly created instances
+#
+
+#. keypair_public (required): ((custom_keypair.ssh_pub))
+#+ The public SSH key to provision to bastion for external access through SSH
+keypair_public: ((custom_keypair.ssh_pub))
+
+
+#
+# Admin username for newly created instances
+#
+
+#. vm_os_user (required): cycloid
+#+ Admin username for newly created instances
+vm_os_user: cycloid
+
+
+#
+# Worker instance configuration
+#
+
+#. team_id (required): ""
+#+ This parameter can be obtained in Cycloid console, by clicking on your profile picture at the top right corner, then organization settings, then use the value of the ci_team_member field
+team_id: ""
+
+#. worker_key (required): ((cycloid-worker-keys.ssh_prv))
+#+ Leave default value if the worker is intended to run for the current organization. Otherwise, add Cycloid-worker-keys.ssh_prv credentials of the target organization
+worker_key: ((cycloid-worker-keys.ssh_prv))
+
+
+#
+# Stack Git repository
+#
+
+#. stack_git_repository (required): ($ scs_url $)
+#+ Git repository URL containing the stack.
+stack_git_repository: ($ scs_url $)
+
+#. stack_git_branch (required): ($ scs_branch $)
+#+ Branch to use on the stack Git repository.
+stack_git_branch: ($ scs_branch $)
+
+#. stack_git_private_key (required): ((git.ssh_key))
+#+ SSH key pair to fetch the stack Git repository.
+stack_git_private_key: ((git.ssh_key))
+
+#. stack_terraform_path (required): stack-cycloid-worker/terraform/azure
+#+ Path of Terraform files in the stack git repository
+stack_terraform_path: stack-cycloid-worker/terraform/azure
+
+
+#
+# Config Git repository
+#
+
+#. config_git_repository (required): ($ cr_url $)
+#+ Git repository URL containing the config of the stack.
+config_git_repository: ($ cr_url $)
+
+#. config_git_branch (required): ($ cr_branch $)
+#+ Branch to use on the config Git repository.
+config_git_branch: ($ cr_branch $)
+
+#. config_git_private_key (required): ((git.ssh_key))
+#+ SSH key pair to fetch the config Git repository.
+config_git_private_key: ((git.ssh_key))
+
+#. config_terraform_path (required): ($ project $)/terraform/($ environment $)
+#+ Path of Terraform files in the config git repository
+config_terraform_path: ($ project $)/terraform/($ environment $)
+
+
+#
+# Default variables that shouldn't be changed except if needed
+#
+
+#. env (required): ($ environment $)
+#+ Name of the project's environment.
+env: ($ environment $)
+
+#. project (required): ($ project $)
+#+ Name of the project.
+project: ($ project $)
+
+#. customer (required): ($ organization_canonical $)
+#+ Name of the Cycloid Organization, used as customer variable name.
+customer: ($ organization_canonical $)
+
+#. cycloid_api_url (required): https://http-api.cycloid.io
+#+ Cycloid API URL.
+cycloid_api_url: 'https://http-api.cycloid.io'
+
+#. cycloid_api_key (required): ((cycloid-api-key.key))
+#+ API key to grant admin acess to Cycloid API.
+cycloid_api_key: ((cycloid-api-key.key))
+
+#. terraform_version (required): '1.0.5'
+#+ terraform version used to execute your code.
+terraform_version: '1.0.5'

@@ -1,0 +1,119 @@
+#
+# Cloud Provider
+#
+
+# Amazon access to use to run terraform with priviledges to be able to create Amazon services.
+
+#. aws_access_key (required): ((aws_cycloid-demo.access_key))
+#+ Amazon AWS access key for Terraform. See value format [here](https://docs.cycloid.io/advanced-guide/integrate-and-use-cycloid-credentials-manager.html#vault-in-the-pipeline)
+aws_access_key: ((aws_cycloid-demo.access_key))
+
+#. aws_secret_key (required): ((aws_cycloid-demo.secret_key))
+#+ Amazon AWS secret key for Terraform. See value format [here](https://docs.cycloid.io/advanced-guide/integrate-and-use-cycloid-credentials-manager.html#vault-in-the-pipeline)
+aws_secret_key: ((aws_cycloid-demo.secret_key))
+
+#. aws_default_region (required): eu-west-1
+#+ Amazon AWS region to use for Terraform.
+aws_region: eu-west-1
+
+
+#
+# Terraform remote state file
+#
+
+#. terraform_storage_bucket_name (required): ($ organization_canonical $)-terraform-remote-state
+#+ AWS S3 bucket name to store terraform remote state file.
+terraform_storage_bucket_name: ($ organization_canonical $)-terraform-remote-state
+
+
+#
+# Keypair to use for newly created instances
+#
+
+#. keypair_public (required): ((custom_keypair.ssh_pub))
+#+ The public SSH key to provision to bastion for external access through SSH
+keypair_public: ((custom_keypair.ssh_pub))
+
+
+#
+# Worker instance configuration
+#
+
+#. team_id (required): ""
+#+ This parameter can be obtained in Cycloid console, by clicking on your profile picture at the top right corner, then organization settings, then use the value of the ci_team_member field
+team_id: ""
+
+#. worker_key (required): ((cycloid-worker-keys.ssh_prv))
+#+ Leave default value if the worker is intended to run for the current organization. Otherwise, add Cycloid-worker-keys.ssh_prv credentials of the target organization
+worker_key: ((cycloid-worker-keys.ssh_prv))
+
+
+#
+# Stack Git repository
+#
+
+#. stack_git_repository (required): ($ scs_url $)
+#+ Git repository URL containing the stack.
+stack_git_repository: ($ scs_url $)
+
+#. stack_git_branch (required): ($ scs_branch $)
+#+ Branch to use on the stack Git repository.
+stack_git_branch: ($ scs_branch $)
+
+#. stack_git_private_key (required): ((git.ssh_key))
+#+ SSH key pair to fetch the stack Git repository.
+stack_git_private_key: ((git.ssh_key))
+
+#. stack_terraform_path (required): stack-cycloid-worker/terraform/aws
+#+ Path of Terraform files in the stack git repository
+stack_terraform_path: stack-cycloid-worker/terraform/aws
+
+
+#
+# Config Git repository
+#
+
+#. config_git_repository (required): ($ cr_url $)
+#+ Git repository URL containing the config of the stack.
+config_git_repository: ($ cr_url $)
+
+#. config_git_branch (required): ($ cr_branch $)
+#+ Branch to use on the config Git repository.
+config_git_branch: ($ cr_branch $)
+
+#. config_git_private_key (required): ((git.ssh_key))
+#+ SSH key pair to fetch the config Git repository.
+config_git_private_key: ((git.ssh_key))
+
+#. config_terraform_path (required): ($ project $)/terraform/($ environment $)
+#+ Path of Terraform files in the config git repository
+config_terraform_path: ($ project $)/terraform/($ environment $)
+
+
+#
+# Default variables that shouldn't be changed except if needed
+#
+
+#. env (required): ($ environment $)
+#+ Name of the project's environment.
+env: ($ environment $)
+
+#. project (required): ($ project $)
+#+ Name of the project.
+project: ($ project $)
+
+#. customer (required): ($ organization_canonical $)
+#+ Name of the Cycloid Organization, used as customer variable name.
+customer: ($ organization_canonical $)
+
+#. cycloid_api_url (required): https://http-api.cycloid.io
+#+ Cycloid API URL.
+cycloid_api_url: 'https://http-api.cycloid.io'
+
+#. cycloid_api_key (required): ((cycloid-api-key.key))
+#+ API key to grant admin acess to Cycloid API.
+cycloid_api_key: ((cycloid-api-key.key))
+
+#. terraform_version (required): '1.0.5'
+#+ terraform version used to execute your code.
+terraform_version: '1.0.5'

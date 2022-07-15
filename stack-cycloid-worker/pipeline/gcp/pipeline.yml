@@ -1,0 +1,234 @@
+# YAML anchors
+shared:
+# Task : sync and merge with rsync 2 rep. Used to merge stack and config
+- &merge-stack-and-config
+  platform: linux
+  image_resource:
+    type: registry-image
+    source:
+      repository: cycloid/cycloid-toolkit
+      tag: latest
+  run:
+    path: /usr/bin/merge-stack-and-config
+
+
+resource_types:
+- name: terraform
+  type: registry-image
+  source:
+    repository: ljfranklin/terraform-resource
+    tag: ((terraform_version))
+
+# Allow to send custom events to Cycloid from this pipeline
+- name: cycloid-events
+  type: registry-image
+  source:
+    repository: cycloid/cycloid-events-resource
+    tag: latest
+
+
+resources:
+- name: tfstate
+  type: terraform
+  icon: terraform
+  source:
+    env_name: ((env))
+    backend_type: gcs
+    backend_config:
+      bucket: ((terraform_storage_bucket_name))
+      prefix: ((project))/((env))
+      credentials: ((gcp_credentials_json))
+    vars:
+      gcp_project: ((gcp_project))
+      gcp_region: ((gcp_region))
+      keypair_public: ((keypair_public))
+      vm_os_user: ((vm_os_user))
+      team_id: ((team_id))
+      worker_key: ((worker_key))
+      env: ((env))
+      project: ((project))
+      customer: ((customer))
+    env:
+      GOOGLE_PROJECT: ((gcp_project))
+      GOOGLE_REGION: ((gcp_region))
+      GOOGLE_CREDENTIALS: ((gcp_credentials_json))
+
+# The Cycloid event resource to log events
+- name: cycloid-event
+  type: cycloid-events
+  source:
+    api_key: ((cycloid_api_key))
+    api_url: ((cycloid_api_url))
+    icon: fa-code-branch
+    organization: ((customer))
+    severity: info
+    type: Custom
+    tags:
+      - key: project
+        value: ((project))
+      - key: env
+        value: ((env))
+  icon: calendar
+
+# The Terraform stack (will be merged with the config)
+- name: git_stack-terraform
+  type: git
+  icon: git
+  source:
+    uri: ((stack_git_repository))
+    branch: ((stack_git_branch))
+    private_key: ((stack_git_private_key))
+    paths:
+      - ((stack_terraform_path))/*
+
+# The Terraform config (will be merged with the stack)
+- name: git_config-terraform
+  type: git
+  icon: git
+  source:
+    uri: ((config_git_repository))
+    branch: ((config_git_branch))
+    private_key: ((config_git_private_key))
+    paths:
+      - ((config_terraform_path))/*
+
+
+groups:
+- name: overview
+  jobs:
+    - terraform-plan
+    - terraform-apply
+    
+- name: destroy
+  jobs:
+    - terraform-destroy
+
+
+jobs:
+  # Merge and trigger a plan whenever there is a commit in Terraform stack or config
+  - name: terraform-plan
+    serial: true
+    max_in_flight: 1
+    build_logs_to_retain: 10
+    plan:
+      - in_parallel:
+        - get: git_stack-terraform
+          trigger: true
+
+        - get: git_config-terraform
+          trigger: true
+
+      - task: merge-stack-and-config
+        config:
+          <<: *merge-stack-and-config
+          inputs:
+          - name: git_config-terraform
+            path: "config"
+          - name: git_stack-terraform
+            path: "stack"
+          outputs:
+          - name: merged-stack
+            path: "merged-stack"
+        params:
+          CONFIG_PATH: ((config_terraform_path))
+          STACK_PATH: ((stack_terraform_path))
+
+      - put: tfstate
+        params:
+          plan_only: true
+          terraform_source: merged-stack/
+
+
+  # Merge and trigger an apply whenever there is a terraform plan passed successfully
+  - name: terraform-apply
+    serial: true
+    max_in_flight: 1
+    build_logs_to_retain: 10
+    plan:
+      - in_parallel:
+        - get: git_stack-terraform
+          trigger: false
+          passed:
+            - terraform-plan
+
+        - get: git_config-terraform
+          trigger: false
+          passed:
+            - terraform-plan
+
+        - get: tfstate
+          trigger: true
+          passed:
+            - terraform-plan
+
+      - task: merge-stack-and-config
+        config:
+          <<: *merge-stack-and-config
+          inputs:
+          - name: git_config-terraform
+            path: "config"
+          - name: git_stack-terraform
+            path: "stack"
+          outputs:
+          - name: merged-stack
+            path: "merged-stack"
+        params:
+          CONFIG_PATH: ((config_terraform_path))
+          STACK_PATH: ((stack_terraform_path))
+
+      - put: tfstate
+        params:
+          plan_run: true
+          terraform_source: merged-stack/
+
+        on_success:
+          do:
+            - put: cycloid-event
+              params:
+                severity: info
+                title: Cycloid worker deployment successful
+                message: The project ((project)) on ((env)) environment deployed successfully
+
+
+  # Destroy the infrastructure
+  - name: terraform-destroy
+    max_in_flight: 1
+    build_logs_to_retain: 10
+    plan:
+      - in_parallel:
+        - get: git_stack-terraform
+          trigger: false
+          passed:
+            - terraform-plan
+
+        - get: git_config-terraform
+          trigger: false
+          passed:
+            - terraform-plan
+
+        - get: tfstate
+          trigger: false
+          passed:
+            - terraform-apply
+
+      - task: merge-stack-and-config
+        config:
+          <<: *merge-stack-and-config
+          inputs:
+          - name: git_config-terraform
+            path: "config"
+          - name: git_stack-terraform
+            path: "stack"
+          outputs:
+          - name: merged-stack
+            path: "merged-stack"
+        params:
+          CONFIG_PATH: ((config_terraform_path))
+          STACK_PATH: ((stack_terraform_path))
+
+      - put: tfstate
+        params:
+          action: destroy
+          terraform_source: merged-stack/
+        get_params:
+          action: destroy
