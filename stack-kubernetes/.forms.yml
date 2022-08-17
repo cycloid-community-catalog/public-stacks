@@ -44,7 +44,6 @@ aws-eks:
         default: "((ssh_config.ssh_key))"
         required: true
       - name: "Config branch"
-        description: "Branch of the config Git repository."
         key: config_git_branch
         widget: cy_branch
         type: string
@@ -328,7 +327,6 @@ azure-aks:
         key: config_git_branch
         widget: cy_branch
         type: string
-        description: "The branch used by the config repository"
         source: config_git_repository
         default: "master"
         required: true
@@ -459,7 +457,6 @@ gcp-gke:
         key: config_git_branch
         widget: cy_branch
         type: string
-        description: "The branch used by the config repository"
         source: config_git_repository
         default: "master"
         required: true
@@ -573,7 +570,6 @@ scaleway-kapsule:
         key: config_git_branch
         widget: cy_branch
         type: string
-        description: "The branch used by the config repository"
         source: config_git_repository
         default: "master"
         required: true
@@ -772,7 +768,6 @@ scaleway-nodes:
         key: config_git_branch
         widget: cy_branch
         type: string
-        description: "The branch used by the config repository"
         source: config_git_repository
         default: "master"
         required: true
