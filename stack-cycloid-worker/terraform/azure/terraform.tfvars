@@ -13,8 +13,8 @@ azure_location = "YOUR_LOCATION"
 rg_name = "YOUR_EXISTING_RESOURCE_GROUP"
 
 # Worker instance
-vm_instance_type = "Standard_DS2_v2"
-vm_disk_size = "30"
+vm_instance_type = "t3.small"
+vm_disk_size = "20"
 vm_os_user = "cycloid"
 keypair_public = "YOUR_PUBLIC_KEY"
 

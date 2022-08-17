@@ -6,6 +6,7 @@ customer = "bootstrap"
 # GCP variables
 gcp_project = "YOUR_PROJECT"
 gcp_region = "YOUR_REGION"
+gcp_zone = "YOUR_ZONE"
 
 # Worker instance
 vm_machine_type = "n2-standard-2"

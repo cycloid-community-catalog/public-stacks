@@ -5,15 +5,6 @@ variable "project" {}
 
 
 #
-# Cloud provider
-#
-
-data "google_compute_zones" "available" {
-  status = "UP"
-}
-
-
-#
 # Instance
 #
 variable "vm_machine_type" {

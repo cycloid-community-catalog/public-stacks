@@ -14,7 +14,6 @@ resource "google_compute_instance" "cycloid-worker" {
   name           = "${var.customer}-${var.project}-${var.env}-cycloid-worker"
   machine_type   = var.vm_machine_type
   can_ip_forward = false
-  zone           = data.google_compute_zones.available.names[length(data.google_compute_zones.available.names)-1]
 
   boot_disk {
     initialize_params {
