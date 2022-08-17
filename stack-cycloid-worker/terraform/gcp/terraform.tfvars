@@ -14,9 +14,9 @@ vm_os_user = "cycloid"
 keypair_public = "YOUR_PUBLIC_KEY"
 
 # Worker config
-team_id = "YOUR_TEAM_ID"
 worker_key = <<-EOF
 -----BEGIN RSA PRIVATE KEY-----
 xxx
 -----END RSA PRIVATE KEY-----
 EOF
+team_id = "YOUR_TEAM_ID"
