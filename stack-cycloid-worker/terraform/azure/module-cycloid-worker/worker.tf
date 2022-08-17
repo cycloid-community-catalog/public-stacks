@@ -2,7 +2,7 @@
 resource "azurerm_linux_virtual_machine" "cycloid-worker" {
   name                  = "${var.customer}-${var.project}-${var.env}-cycloid-worker"
   resource_group_name   = data.azurerm_resource_group.cycloid-worker.name
-  location              = data.azurerm_resource_group.cycloid-worker.location
+  location              = var.azure_location
   network_interface_ids = [azurerm_network_interface.cycloid-worker.id]
   size                  = var.vm_instance_type
   admin_username        = var.vm_os_user

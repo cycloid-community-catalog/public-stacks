@@ -2,7 +2,7 @@
 resource "azurerm_network_security_group" "cycloid-worker" {
   name                = "${var.customer}-${var.project}-${var.env}-cycloid-worker"
   resource_group_name = data.azurerm_resource_group.cycloid-worker.name
-  location            = data.azurerm_resource_group.cycloid-worker.location
+  location            = var.azure_location
 
   security_rule {
     name                       = "inbound-ssh"
@@ -25,7 +25,7 @@ resource "azurerm_network_security_group" "cycloid-worker" {
 resource "azurerm_public_ip" "cycloid-worker" {
   name                = "${var.customer}-${var.project}-${var.env}-cycloid-worker"
   resource_group_name = data.azurerm_resource_group.cycloid-worker.name
-  location            = data.azurerm_resource_group.cycloid-worker.location
+  location            = var.azure_location
   allocation_method   = "Dynamic"
 
   tags = merge(local.merged_tags, {
@@ -37,7 +37,7 @@ resource "azurerm_public_ip" "cycloid-worker" {
 resource "azurerm_network_interface" "cycloid-worker" {
   name                = "${var.customer}-${var.project}-${var.env}-cycloid-worker"
   resource_group_name = data.azurerm_resource_group.cycloid-worker.name
-  location            = data.azurerm_resource_group.cycloid-worker.location
+  location            = var.azure_location
 
   ip_configuration {
       name                          = "${var.customer}-${var.project}-${var.env}-cycloid-worker"
@@ -60,7 +60,7 @@ resource "azurerm_network_interface_security_group_association" "cycloid-worker"
 resource "azurerm_virtual_network" "cycloid-worker" {
   name                = "${var.customer}-${var.project}-${var.env}-cycloid-worker"
   resource_group_name = data.azurerm_resource_group.cycloid-worker.name
-  location            = data.azurerm_resource_group.cycloid-worker.location
+  location            = var.azure_location
   address_space       = ["10.0.0.0/16"]
 
   tags = merge(local.merged_tags, {
