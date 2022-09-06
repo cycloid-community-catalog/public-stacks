@@ -118,7 +118,7 @@ config_terraform_path: ($ project $)/terraform/($ environment $)
 
 #. terraform_version (required): '0.13.5'
 #+ terraform version used to execute your code.
-terraform_version: '0.13.5'
+terraform_version: '1.0.7'
 
 #. packer_version (required): '1.8.0'
 #+ packer version used to build the instance image.

@@ -35,7 +35,7 @@ resource "aws_launch_template" "worker" {
   ebs_optimized = var.worker_ebs_optimized
 
   iam_instance_profile {
-    name = aws_iam_instance_profile.worker_profile.name
+    arn = aws_iam_instance_profile.worker_profile.arn
   }
 
   tags = merge(local.merged_tags, {
