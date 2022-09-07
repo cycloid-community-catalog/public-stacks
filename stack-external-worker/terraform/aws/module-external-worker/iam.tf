@@ -21,7 +21,7 @@ resource "aws_iam_role" "worker" {
 }
 
 resource "aws_iam_instance_profile" "worker_profile" {
-  name = "profile-worker-${var.project}-${var.env}"
+  name = "worker-${var.project}-${var.env}"
   role = aws_iam_role.worker.name
 }
 

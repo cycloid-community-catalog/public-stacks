@@ -63,6 +63,11 @@ locals {
 
 resource "aws_cloudformation_stack" "worker" {
   name = "${var.project}-worker-${var.env}"
+  depends_on = [
+    aws_launch_template.worker,
+    aws_launch_template.worker_ondemand
+  ]
+
 
   template_body = <<EOF
 {
