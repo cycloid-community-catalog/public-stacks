@@ -259,9 +259,9 @@ concourse_worker_team: "${TEAM_ID}"
 nvme_mapping_run: true
 install_user: ${INSTALL_USER}
 use_local_device: ${USE_LOCAL_DEVICE}
-var_lib_device: ${VAR_LIB_DEVICE}
-cloud_provider: ${CLOUD_PROVIDER}
-concourse_worker_dns_server: ${WORKER_DNS_SERVER}
+var_lib_device: "${VAR_LIB_DEVICE}"
+cloud_provider: "${CLOUD_PROVIDER}"
+concourse_worker_dns_server: "${WORKER_DNS_SERVER}"
 EOF
 
     # Override worker runtime only if specified. If not using the default one from the stack located into ansible/default.yml
