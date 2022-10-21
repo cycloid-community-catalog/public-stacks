@@ -111,9 +111,7 @@ nginx_application_vhost:
         try_files $uri $uri/ /index.php?$args;
     }
 
-  - location ~ \.php$ { echo_exec @fastcgi_backend; }
-
-  - location @fastcgi_backend {
+  - location ~ \.php$ {
       expires off;
       fastcgi_pass php;
       fastcgi_read_timeout 900s;
@@ -126,8 +124,6 @@ nginx_application_vhost:
       fastcgi_param  X-FORWARDED-HOST  $host;
       include        fastcgi_params;
     }
-
-
 
 nginx_sites:
   00-metrics:
@@ -163,6 +159,9 @@ nginx_snippets:
 #
 # Logs
 #
+
+# Use the latest version
+fluentd_tdagent_version: 4
 
 extra_cycloid_files_watched: []
 default_cycloid_files_watched:
@@ -210,7 +209,7 @@ php_expose_php: "Off"
 php_webserver_daemon: nginx
 php_debian_pkg_managed: true
 php_debian_pkg_name:
-  - deb https://packages.sury.org/php/ stretch main
+  - deb https://packages.sury.org/php/ bullseye main
 php_debian_pkg_key: https://packages.sury.org/php/apt.gpg
 
 php_packages:

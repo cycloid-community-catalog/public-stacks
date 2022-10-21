@@ -33,7 +33,7 @@ resource "aws_db_instance" "application" {
   engine            = var.rds_engine
   engine_version    = var.rds_engine_version
   instance_class    = var.rds_type
-  name              = var.rds_database
+  db_name           = var.rds_database
   username          = var.rds_username
   password          = var.rds_password
 
@@ -70,17 +70,17 @@ resource "aws_db_subnet_group" "rds-subnet" {
 #
 
 output "rds_address" {
-  value = join("", aws_db_instance.application.*.address)
+  value = try(aws_db_instance.application[0].address, "")
 }
 
 output "rds_port" {
-  value = join("", aws_db_instance.application.*.port)
+  value = try(aws_db_instance.application[0].port, "")
 }
 
 output "rds_database" {
-  value = join("", aws_db_instance.application.*.name)
+  value = try(aws_db_instance.application[0].name, "")
 }
 
 output "rds_username" {
-  value = join("", aws_db_instance.application.*.username)
+  value = try(aws_db_instance.application[0].username, "")
 }

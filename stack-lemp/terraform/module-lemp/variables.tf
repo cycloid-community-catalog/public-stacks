@@ -194,7 +194,7 @@ variable "front_associate_public_ip_address" {
 }
 
 variable "debian_ami_name" {
-  default = "debian-stretch-*"
+  default = "debian-11-amd64-*"
 }
 
 #

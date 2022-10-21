@@ -10,11 +10,11 @@ data "template_file" "user_data_front" {
     role               = "front"
     signal_stack_name  = "${var.project}-front-${var.env}"
     signal_resource_id = "Fronts${var.env}"
-    rds_address        = join("", aws_db_instance.application.*.address)
-    rds_port           = join("", aws_db_instance.application.*.port)
-    rds_database       = join("", aws_db_instance.application.*.name)
-    rds_username       = join("", aws_db_instance.application.*.username)
-    s3_medias          = join("", aws_s3_bucket.medias.*.id)
+    rds_address        = try(aws_db_instance.application[0].address, "")
+    rds_port           = try(aws_db_instance.application[0].port, "")
+    rds_database       = try(aws_db_instance.application[0].name, "")
+    rds_username       = try(aws_db_instance.application[0].username, "")
+    s3_medias          = try(aws_s3_bucket.medias[0].id, "")
     elasticache_address = element(
       concat(
         [

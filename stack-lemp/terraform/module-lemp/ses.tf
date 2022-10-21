@@ -53,17 +53,17 @@ resource "aws_iam_role_policy_attachment" "ses_access" {
 }
 
 output "iam_ses_user_key" {
-  value = join("", aws_iam_access_key.ses.*.id)
+  value = try(aws_iam_access_key.ses[0].id, "")
 }
 
 output "iam_ses_user_secret" {
-  value = join("", aws_iam_access_key.ses.*.secret)
+  value = try(aws_iam_access_key.ses[0].secret, "")
 }
 
 output "iam_ses_smtp_user_key" {
-  value = join("", aws_iam_access_key.ses.*.id)
+  value = try(aws_iam_access_key.ses[0].id, "")
 }
 
 output "iam_ses_smtp_user_secret" {
-  value = join("", aws_iam_access_key.ses.*.ses_smtp_password_v4)
+  value = try(aws_iam_access_key.ses[0].ses_smtp_password_v4, "")
 }

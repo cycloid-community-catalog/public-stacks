@@ -89,7 +89,6 @@ default:
         default: "((ssh_config.ssh_key))"
         required: true
       - name: "Config branch"
-        description: "Branch of the config Git repository."
         key: config_git_branch
         widget: cy_branch
         type: string

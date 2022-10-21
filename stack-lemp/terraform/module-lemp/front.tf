@@ -94,7 +94,7 @@ resource "aws_launch_template" "front" {
     })
   }
   block_device_mappings {
-    device_name = "xvda"
+    device_name = "/dev/xvda"
 
     ebs {
       volume_size           = var.front_disk_size

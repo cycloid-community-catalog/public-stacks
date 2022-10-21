@@ -116,17 +116,17 @@ resource "aws_iam_role_policy_attachment" "front_medias_access" {
 }
 
 output "iam_s3-medias_user_key" {
-  value = join("", aws_iam_access_key.s3-medias.*.id)
+  value = try(aws_iam_access_key.s3-medias[0].id, "")
 }
 
 output "iam_s3-medias_user_secret" {
-  value = join("", aws_iam_access_key.s3-medias.*.secret)
+  value = try(aws_iam_access_key.s3-medias[0].secret, "")
 }
 
 output "iam_s3-medias_user_name" {
-  value = join("", aws_iam_user.s3-medias.*.name)
+  value = try(aws_iam_user.s3-medias[0].name, "")
 }
 
 output "s3_medias" {
-  value = join("", aws_s3_bucket.medias.*.id)
+  value = try(aws_s3_bucket.medias[0].id, "")
 }

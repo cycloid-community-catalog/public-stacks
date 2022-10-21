@@ -21,7 +21,17 @@ data "aws_ami" "debian" {
     values = ["ebs"]
   }
 
-  owners = ["379101102735"] # Debian
+  owners = [
+    "379101102735",
+    "136693071363",
+    "125523088429",
+    "099720109477",
+  ]
+
+  #"379101102735", # old debian
+  #"136693071363", # debian10 & debian11
+  #"125523088429", # centos
+  #"099720109477", # Ubuntu
 }
 
 data "aws_ami" "front" {

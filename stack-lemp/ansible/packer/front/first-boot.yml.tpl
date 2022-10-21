@@ -5,7 +5,7 @@
   become: yes
   vars:
     ami_hostname: "{{ ansible_hostname }}"
-    ami_ip_address: "{{ ansible_eth0.ipv4.address }}"
+    ami_ip_address: "{{ ansible_default_ipv4.address }}"
 {% raw %}
     ami_client: "{{ client }}"
     ami_role: "{{ role }}"
@@ -35,8 +35,8 @@
 
    - name: "Setup instance AWS Hosts file"
      lineinfile: dest=/etc/hosts
-                 regexp='^{{ ansible_eth0.ipv4.address }}.*'
-                 line="{{ ansible_eth0.ipv4.address }} {{ ansible_hostname }}"
+                 regexp='^{{ ansible_default_ipv4.address }}.*'
+                 line="{{ ansible_default_ipv4.address }} {{ ansible_hostname }}"
                  state=present
 
    - name: "Find files containing packer's hostname"
@@ -58,7 +58,7 @@
      replace:
        dest: "{{ item }}"
        regexp: "{{ ami_ip_address }}"
-       replace: "{{ ansible_eth0.ipv4.address }}"
+       replace: "{{ ansible_default_ipv4.address }}"
      with_items: "{{ relics_ip_address.stdout_lines }}"
 
 {% endraw %}

@@ -77,5 +77,5 @@ resource "aws_cloudfront_distribution" "cdn" {
 }
 
 output "cloudfront_medias_domain_name" {
-  value = join("", aws_cloudfront_distribution.cdn.*.domain_name)
+  value = try(aws_cloudfront_distribution.cdn[0].domain_name, "")
 }
