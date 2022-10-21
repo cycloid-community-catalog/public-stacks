@@ -1,6 +1,6 @@
 base_extra_packages:
   - jq
-  - python-mysqldb
+  - python3-mysqldb
 base_extra_pip_packages:
   - boto3
 
