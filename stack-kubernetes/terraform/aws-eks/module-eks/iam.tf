@@ -4,23 +4,25 @@
 
 # Role
 
-resource "aws_iam_role" "eks-cluster" {
-  name = "${var.project}-${var.env}-eks-cluster"
+data "aws_iam_policy_document" "assume_role_eks" {
+  statement {
+    effect = "Allow"
 
-  assume_role_policy = <<POLICY
-{
-  "Version": "2012-10-17",
-  "Statement": [
-    {
-      "Effect": "Allow",
-      "Principal": {
-        "Service": "eks.amazonaws.com"
-      },
-      "Action": "sts:AssumeRole"
+    actions = [
+      "sts:AssumeRole",
+    ]
+
+    principals {
+      type        = "Service"
+      identifiers = ["eks.amazonaws.com"]
     }
-  ]
+  }
 }
-POLICY
+
+
+resource "aws_iam_role" "eks-cluster" {
+  name               = "${var.project}-${var.env}-eks-cluster"
+  assume_role_policy = data.aws_iam_policy_document.assume_role_eks.json
 }
 
 # EKS policies
@@ -41,23 +43,24 @@ resource "aws_iam_role_policy_attachment" "eks-cluster-AmazonEKSServicePolicy" {
 
 # Role
 
-resource "aws_iam_role" "eks-node" {
-  name = "${var.project}-${var.env}-eks-node"
+data "aws_iam_policy_document" "assume_role_ec2" {
+  statement {
+    effect = "Allow"
 
-  assume_role_policy = <<POLICY
-{
-  "Version": "2012-10-17",
-  "Statement": [
-    {
-      "Effect": "Allow",
-      "Principal": {
-        "Service": "ec2.amazonaws.com"
-      },
-      "Action": "sts:AssumeRole"
+    actions = [
+      "sts:AssumeRole",
+    ]
+
+    principals {
+      type        = "Service"
+      identifiers = ["ec2.amazonaws.com"]
     }
-  ]
+  }
 }
-POLICY
+
+resource "aws_iam_role" "eks-node" {
+  name               = "${var.project}-${var.env}-eks-node"
+  assume_role_policy = data.aws_iam_policy_document.assume_role_ec2.json
 }
 
 # EKS policies
@@ -106,6 +109,8 @@ resource "aws_iam_role_policy_attachment" "eks-node-ecr-pull" {
 }
 
 # Cluster autoscaler
+# Used by Cluster Autoscaler autodiscover to get Autoscaling group managed by the cluster
+# Docs: https://docs.aws.amazon.com/eks/latest/userguide/autoscaling.html
 
 data "aws_iam_policy_document" "eks-node-cluster-autoscaler" {
   statement {
@@ -137,7 +142,7 @@ resource "aws_iam_role_policy_attachment" "eks-node-cluster-autoscaler" {
 }
 
 # CloudFormation signal
-
+# Use by eks-node userdata.sh when updating cloudformation stack
 data "aws_iam_policy_document" "cloudformation-signal" {
   statement {
     actions = [
@@ -165,7 +170,9 @@ resource "aws_iam_role_policy_attachment" "cloudformation-signal" {
 }
 
 # Amazon EBS CSI driver
-
+# The Amazon Elastic Block Store (Amazon EBS) Container Storage Interface (CSI) driver allows Amazon Elastic Kubernetes Service (Amazon EKS) clusters to manage the lifecycle of Amazon EBS volumes for persistent volumes.
+# The Amazon EBS CSI driver isn't installed when you first create a cluster. To use the driver, you must add it as an Amazon EKS add-on or as a self-managed add-on.
+# https://docs.aws.amazon.com/eks/latest/userguide/ebs-csi.html
 data "aws_iam_policy_document" "ebs-csi-driver" {
   statement {
     actions = [

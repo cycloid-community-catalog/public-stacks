@@ -25,7 +25,7 @@ concourse_worker: yes
 concourse_worker_name: "$(hostname)"
 concourse_service_enabled: no
 
-concourse_worker_runtime: "guardian"
+concourse_worker_runtime: "containerd"
 concourse_worker_dns_server: ""
 
 # Get all options available : /var/lib/concourse/bin/gdn server --help
@@ -157,7 +157,7 @@ sysctl_configs:
     value: 262144
 
 # This var is sent by the pipeline
-# concourse_version: 3.9.2
+# concourse_version: 7.8.3
 
 #
 # Require override

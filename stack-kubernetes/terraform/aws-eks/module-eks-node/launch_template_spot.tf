@@ -9,6 +9,7 @@ resource "aws_launch_template" "eks-node-spot" {
   user_data     = base64encode(data.template_file.user-data-eks-node.rendered)
   key_name      = var.keypair_name
 
+  # TODO: replace with dynamic "spot_options" {
   instance_market_options {
     market_type = "spot"
 

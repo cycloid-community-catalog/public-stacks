@@ -13,7 +13,7 @@
     - name: Generate Concourse worker key
       docker_container:
         name: "concourse-worker-key-generate"
-        image: "concourse/concourse:6.7.1"
+        image: "concourse/concourse:7.8.3"
         state: started
         command: ["generate-key", "-t", "ssh", "-f", "/keys/worker_key"]
         volumes:
@@ -21,7 +21,7 @@
     - name: Generate Concourse session signing key
       docker_container:
         name: "concourse-signing-key-generate"
-        image: "concourse/concourse:6.7.1"
+        image: "concourse/concourse:7.8.3"
         state: started
         command: ["generate-key", "-t", "rsa", "-f", "/keys/session_signing_key"]
         volumes:
@@ -29,7 +29,7 @@
     - name: Generate Concourse tsa host key
       docker_container:
         name: "concourse-tsa-key-generate"
-        image: "concourse/concourse:6.7.1"
+        image: "concourse/concourse:7.8.3"
         state: started
         command: ["generate-key", "-t", "ssh", "-f", "/keys/tsa_host_key"]
         volumes:

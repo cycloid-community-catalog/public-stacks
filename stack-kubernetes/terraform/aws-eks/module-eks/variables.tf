@@ -77,6 +77,7 @@ variable "cluster_version" {
   default     = "1.16"
 }
 
+# Available logs types: https://docs.aws.amazon.com/eks/latest/userguide/control-plane-logs.html
 variable "cluster_enabled_log_types" {
   description = "EKS Cluster log types to forward to CloudWatch."
   default     = ["api", "audit", "authenticator", "controllerManager", "scheduler"]
@@ -95,4 +96,3 @@ variable "eks_admin_iam_role_arn" {
   description = "AWS IAM role ARN to map as system:masters within the Kubernetes cluster. By default, a default arbitrary role called 'admin' will be allowed."
   default     = ""
 }
-

@@ -57,6 +57,8 @@ resource "aws_eks_cluster" "eks-cluster" {
   ]
 }
 
+
+# Set the retention on the default log group /aws/eks/<cluster-name>/cluster created when enabled_cluster_log_types defined
 resource "aws_cloudwatch_log_group" "eks-cluster" {
   name              = "/aws/eks/${var.cluster_name}/cluster"
   retention_in_days = 7

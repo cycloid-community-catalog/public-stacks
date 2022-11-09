@@ -1,5 +1,7 @@
 # ref. https://docs.aws.amazon.com/eks/latest/userguide/add-user-role.html
 
+# https://amazon-eks.s3.us-west-2.amazonaws.com/docs/eks-console-full-access.yaml
+# https://amazon-eks.s3.us-west-2.amazonaws.com/docs/eks-console-restricted-access.yaml
 resource "kubernetes_cluster_role" "eks-console-dashboard-full-access" {
   metadata {
     name = "eks-console-dashboard-full-access-clusterrole"
@@ -115,4 +117,3 @@ resource "kubernetes_role_binding" "eks-console-dashboard-restricted-access-role
     name      = "eks-console-dashboard-restricted-access-group"
   }
 }
-

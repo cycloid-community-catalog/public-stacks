@@ -14,6 +14,9 @@ module "aws-vpc" {
   single_nat_gateway = true
 
   private_subnets = var.private_subnets
+
+  # Tags used to if you want to deploy load balancers or ingress controllers in the public or private subnets of your Amazon Virtual Private Cloud
+  # https://aws.amazon.com/premiumsupport/knowledge-center/eks-vpc-subnet-discovery/?nc1=h_ls
   private_subnet_tags = {
     "kubernetes.io/role/internal-elb" = "1"
   }

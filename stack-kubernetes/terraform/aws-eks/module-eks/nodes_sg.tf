@@ -18,13 +18,13 @@ resource "aws_security_group" "eks-node" {
 }
 
 resource "aws_security_group_rule" "eks-node-ingress-self" {
-  description              = "Allow nodes to communicate with each other"
-  from_port                = 0
-  protocol                 = "-1"
-  security_group_id        = aws_security_group.eks-node.id
-  source_security_group_id = aws_security_group.eks-node.id
-  to_port                  = 65535
-  type                     = "ingress"
+  description       = "Allow nodes to communicate with each other"
+  from_port         = 0
+  to_port           = 65535
+  protocol          = "-1"
+  security_group_id = aws_security_group.eks-node.id
+  self              = true
+  type              = "ingress"
 }
 
 resource "aws_security_group_rule" "eks-node-ingress-cluster" {

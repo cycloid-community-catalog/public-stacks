@@ -31,7 +31,7 @@ platforms:
       POSTGRES_DB: concourse
 
   - name: concourse-web
-    image: concourse/concourse:6.7.1
+    image: concourse/concourse:7.8.3
     volumes:
       - "/tmp/molecule_test:/concourse-keys:ro"
     networks:
@@ -89,7 +89,7 @@ provisioner:
     group_vars:
       localhost:
         concourse_tsa_host: concourse-web
-        concourse_version: "6.7.1"
+        concourse_version: "7.8.3"
         systemd_mount_device: 'LABEL=ephemeral0'
         concourse_tsa_public_key: "{{lookup('file', '/tmp/molecule_test/tsa_host_key.pub')}}"
         concourse_tsa_worker_key: "{{lookup('file', '/tmp/molecule_test/worker_key')}}"

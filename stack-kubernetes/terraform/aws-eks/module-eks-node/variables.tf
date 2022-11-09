@@ -177,6 +177,12 @@ variable "node_ebs_optimized" {
   default     = true
 }
 
+# Autoscaling is done with Cluster Autoscaler which is a standalone program that adjusts the size of a Kubernetes cluster to meet the current needs.
+# Cluster Autoscaler is not deployed with this stack
+# Docs: https://docs.aws.amazon.com/eks/latest/userguide/autoscaling.html
+# https://github.com/kubernetes/autoscaler/blob/master/cluster-autoscaler/FAQ.md
+
+# Tags used by Cluster Autoscaler: https://github.com/kubernetes/autoscaler/tree/master/cluster-autoscaler
 locals {
   cluster_autoscaler_tags = {
     "k8s.io/cluster-autoscaler/${var.cluster_name}" = "owned",

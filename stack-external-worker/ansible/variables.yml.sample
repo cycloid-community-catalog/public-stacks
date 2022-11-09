@@ -13,7 +13,7 @@
 #. concourse_worker_team (optional):
 #+ The name of the team that this worker will be assigned to. Team ID is linked to your Cycloid organization.
 
-#. concourse_worker_runtime (optional): guardian
+#. concourse_worker_runtime (optional): containerd
 #+ Change the default worker container runtimes https://concourse-ci.org/concourse-worker.html#configuring-runtimes
 
 #. concourse_worker_dns_server (optional): ""
