@@ -49,21 +49,16 @@ resources:
     backend_config:
       container_name: ((terraform_storage_container_name))
       key: ((terraform_storage_container_path))/((project))-((env)).tfstate
-      resource_group_name: ((azure_resource_group_name))
       storage_account_name: ((terraform_storage_account_name))
       access_key: ((terraform_storage_access_key))
     vars:
       azure_resource_group_name: ((azure_resource_group_name))
       azure_location: ((azure_location))
       azure_env: ((azure_env))
-      azure_client_id: ((azure_client_id))
-      azure_client_secret: ((azure_client_secret))
-      azure_subscription_id: ((azure_subscription_id))
-      azure_tenant_id: ((azure_tenant_id))
+      azure_cred: ((azure_cred))
       env: ((env))
       project: ((project))
       customer: ((customer))
-
 
 # The Terraform stack (will be merged with the config)
 - name: git_stack

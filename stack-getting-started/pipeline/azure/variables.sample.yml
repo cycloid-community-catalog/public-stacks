@@ -19,7 +19,9 @@ azure_resource_group_name: cycloid-demo
 azure_location: francecentral
 azure_env: public
 
-azure_subscription_id: ((azure_step-by-step.subscription_id))
-azure_tenant_id: ((azure_step-by-step.tenant_id))
-azure_client_id: ((azure_step-by-step.client_id))
-azure_client_secret: ((azure_step-by-step.client_secret))
+azure_cred: ((azure_step-by-step))
+# contains:
+# .subscription_id
+# .tenant_id
+# .client_id
+# .client_secret
