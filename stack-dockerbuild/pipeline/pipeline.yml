@@ -109,8 +109,6 @@ jobs:
       file: merged-stack/.ci/build.yml
       privileged: true
       params:
-        REPOSITORY: ((registry_image_name))
-        TAG: ((registry_tag))
         CONTEXT: merged-stack
         DOCKERFILE: merged-stack/((code_dockerfile_location))
         BUILD_ARGS_FILE: merged-stack/.ci/build_args_file

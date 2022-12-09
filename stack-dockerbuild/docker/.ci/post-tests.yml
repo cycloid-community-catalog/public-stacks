@@ -14,8 +14,9 @@ run:
       source /opt/docker-utils.sh
       docker_load image/image.tar
 
-      docker images | awk -F' ' '{print $1":"$2}' | tail -1 | tee image/name
-      docker inspect $(cat image/name)
+      docker tag $(cat image/digest) ${REPOSITORY}:${TAG}
+      docker images
+      docker inspect ${REPOSITORY}:${TAG}
 inputs:
 - name: merged-stack
 - name: image
