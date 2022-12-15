@@ -38,7 +38,6 @@ concourse_worker_options: "{% if concourse_version is version('5.0', '>=') %}{{ 
 concourse_worker_default_options: |
   --ephemeral \
   --baggageclaim-log-level=error \
-  --baggageclaim-volumes={{ concourse_work_dir }}/baggageclaim_volumes \
   --baggageclaim-driver={{ fs_volume_options[fs_volume_type]['bc_driver'] }} 2>&1 | tee -a /var/log/concourse-worker.log ; exit ${PIPESTATUS[0]}
 
 concourse_4_worker_default_options: |
@@ -47,9 +46,6 @@ concourse_4_worker_default_options: |
   --garden-max-containers 1024 \
   --garden-log-level=error \
   --baggageclaim-log-level=error \
-  --garden-assets-dir={{ concourse_work_dir }}/garden_assets/ \
-  --garden-depot={{ concourse_work_dir }}/garden_depot \
-  --baggageclaim-volumes={{ concourse_work_dir }}/baggageclaim_volumes \
   --baggageclaim-driver={{ fs_volume_options[fs_volume_type]['bc_driver'] }} 2>&1 | tee -a /var/log/concourse-worker.log ; exit ${PIPESTATUS[0]}
 
 #concourse_worker_tag: "foo"
