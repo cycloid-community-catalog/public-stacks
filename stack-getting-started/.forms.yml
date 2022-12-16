@@ -109,7 +109,7 @@ azure:
         key: azure_cred
         widget: cy_cred
         widget_config:
-          full_cred: false
+          display_keys: false
           cred_types:
             - azure
         type: string
