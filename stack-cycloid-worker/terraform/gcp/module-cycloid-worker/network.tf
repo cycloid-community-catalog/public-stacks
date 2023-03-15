@@ -5,6 +5,6 @@ resource "google_compute_network" "cycloid-worker" {
 
 resource "google_compute_subnetwork" "cycloid-worker" {
   name          = "${var.customer}-${var.project}-${var.env}-cycloid-worker-subnet"
-  ip_cidr_range = "10.2.0.0/16"
+  ip_cidr_range = "10.222.0.0/16"
   network       = google_compute_network.cycloid-worker.id
 }

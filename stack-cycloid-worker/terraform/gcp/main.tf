@@ -26,10 +26,6 @@ module "cycloid-worker" {
   #+ Disk size for the Cycloid worker (Go)
   vm_disk_size = var.vm_disk_size
 
-  #. vm_os_user: admin
-  #+ Admin username for newly created instances
-  vm_os_user = var.vm_os_user
-
   #. keypair_public: ""
   #+ The public SSH key, for SSH access to newly-created instances
   keypair_public = var.keypair_public

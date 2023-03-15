@@ -3,7 +3,7 @@ data "aws_ami" "debian" {
 
   filter {
     name   = "name"
-    values = ["debian-10-amd64-*"]
+    values = ["debian-11-amd64-*"]
   }
 
   filter {
@@ -21,5 +21,15 @@ data "aws_ami" "debian" {
     values = ["ebs"]
   }
 
-  owners = ["101072000470"] # Debian
+  owners = [
+    "379101102735",
+    "136693071363",
+    "125523088429",
+    "099720109477",
+  ]
+
+  #"379101102735", # Old debian
+  #"136693071363", # Debian10 & debian11
+  #"125523088429", # Centos
+  #"099720109477", # Ubuntu
 }

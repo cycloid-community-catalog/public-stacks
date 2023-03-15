@@ -4,14 +4,16 @@ project = "cycloid-worker"
 customer = "bootstrap"
 
 # AWS variables
-aws_access_key = "YOUR_ACCESS_KEY"
-aws_secret_key = "YOUR_SECRET_KEY"
-aws_region = "YOUR_REGION"
+aws_cred = {
+    access_key = "<YOUR_ACCESS_KEY>",
+    secret_key = "<YOUR_SECRET_KEY>",
+}
+aws_region = "<YOUR_REGION>"
 
 # Worker instance
 vm_instance_type = "t3.small"
-vm_disk_size = "20"
-keypair_public = "YOUR_PUBLIC_KEY"
+vm_disk_size = "30"
+keypair_public = "<YOUR_PUBLIC_KEY>"
 
 # Worker config
 worker_key = <<-EOF

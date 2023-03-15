@@ -16,7 +16,7 @@ resource_types:
 - name: terraform
   type: registry-image
   source:
-    repository: ljfranklin/terraform-resource
+    repository: cycloid/terraform-resource
     tag: ((terraform_version))
 
 # Allow to send custom events to Cycloid from this pipeline
@@ -33,23 +33,12 @@ resources:
   icon: terraform
   source:
     env_name: ((env))
-    backend_type: azurerm
+    backend_type: http
     backend_config:
-      container_name: ((terraform_storage_container_name))
-      key: ((terraform_storage_container_path))/((project))-((env)).tfstate
-      resource_group_name: ((terraform_resource_group_name))
-      storage_account_name: ((terraform_storage_account_name))
-      access_key: ((terraform_storage_access_key))
+      address: '((cycloid_api_url))/inventory?jwt=((cycloid_inventory_jwt))'
     vars:
-      azure_location: ((azure_location))
-      rg_name: ((rg_name))
-      azure_env: ((azure_env))
-      azure_client_id: ((azure_client_id))
-      azure_client_secret: ((azure_client_secret))
-      azure_subscription_id: ((azure_subscription_id))
-      azure_tenant_id: ((azure_tenant_id))
+      azure_cred: ((azure_cred))
       keypair_public: ((keypair_public))
-      vm_os_user: ((vm_os_user))
       team_id: ((team_id))
       worker_key: ((worker_key))
       env: ((env))
@@ -80,7 +69,6 @@ resources:
   source:
     uri: ((stack_git_repository))
     branch: ((stack_git_branch))
-    private_key: ((stack_git_private_key))
     paths:
       - ((stack_terraform_path))/*
 
@@ -92,6 +80,8 @@ resources:
     uri: ((config_git_repository))
     branch: ((config_git_branch))
     private_key: ((config_git_private_key))
+    # username: ((config_git_username))
+    # password: ((config_git_token))
     paths:
       - ((config_terraform_path))/*
 
@@ -181,7 +171,7 @@ jobs:
 
       - put: tfstate
         params:
-          plan_run: true
+          plan_run: false
           terraform_source: merged-stack/
 
         on_success:

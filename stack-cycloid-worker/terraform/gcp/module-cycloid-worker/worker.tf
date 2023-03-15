@@ -17,7 +17,7 @@ resource "google_compute_instance" "cycloid-worker" {
 
   boot_disk {
     initialize_params {
-      image = "debian-cloud/debian-10"
+      image = "debian-cloud/debian-11"
       size  = var.vm_disk_size
     }
   }

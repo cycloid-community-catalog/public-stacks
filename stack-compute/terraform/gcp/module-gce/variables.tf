@@ -162,7 +162,7 @@ variable "instance_extra_labels" {
 
 locals {
   standard_labels = {
-    "cycloid.io" = "true"
+    cycloidio = "true"
     env          = var.env
     project      = var.project
     client       = var.customer

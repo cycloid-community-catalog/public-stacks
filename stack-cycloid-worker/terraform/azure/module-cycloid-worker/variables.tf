@@ -34,7 +34,7 @@ variable "vm_disk_size" {
 
 variable "vm_os_user" {
   description = "Admin username to connect to instance via SSH"
-  default     = "admin"
+  default     = "cycloid"
 }
 
 variable "keypair_public" {

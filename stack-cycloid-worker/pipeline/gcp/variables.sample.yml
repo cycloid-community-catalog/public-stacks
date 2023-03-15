@@ -12,17 +12,13 @@ gcp_project: ($ organization_canonical $)
 #+ Google Cloud Platform region to use for Terraform.
 gcp_region: europe-west1
 
+#. gcp_zone (required): "b"
+#+ Google Cloud Platform zone to use for Terraform.
+gcp_zone: "b"
+
 #. gcp_credentials_json (required): ((gcp.json_key))
 #+ Google Cloud Platform credentials JSON for Terraform. See value format [here](https://docs.cycloid.io/advanced-guide/integrate-and-use-cycloid-credentials-manager.html#vault-in-the-pipeline)
 gcp_credentials_json: ((gcp.json_key))
-
-#
-# Terraform remote state file
-#
-
-#. terraform_storage_bucket_name (required): ($ organization_canonical $)-terraform-remote-state
-#+ Google Cloud Storage bucket name to store terraform remote state file.
-terraform_storage_bucket_name: ($ organization_canonical $)-terraform-remote-state
 
 
 #
@@ -32,15 +28,6 @@ terraform_storage_bucket_name: ($ organization_canonical $)-terraform-remote-sta
 #. keypair_public (required): ((custom_keypair.ssh_pub))
 #+ The public SSH key to provision to bastion for external access through SSH
 keypair_public: ((custom_keypair.ssh_pub))
-
-
-#
-# Admin username for newly created instances
-#
-
-#. vm_os_user (required): admin
-#+ Admin username for newly created instances
-vm_os_user: admin
 
 
 #
@@ -60,21 +47,17 @@ worker_key: ((cycloid-worker-keys.ssh_prv))
 # Stack Git repository
 #
 
-#. stack_git_repository (required): ($ scs_url $)
+#. stack_git_repository (required): https://github.com/cycloid-community-catalog/stack-cycloid-worker.git
 #+ Git repository URL containing the stack.
-stack_git_repository: ($ scs_url $)
+stack_git_repository: https://github.com/cycloid-community-catalog/stack-cycloid-worker.git
 
-#. stack_git_branch (required): ($ scs_branch $)
+#. stack_git_branch (required): master
 #+ Branch to use on the stack Git repository.
-stack_git_branch: ($ scs_branch $)
+stack_git_branch: master
 
-#. stack_git_private_key (required): ((git.ssh_key))
-#+ SSH key pair to fetch the stack Git repository.
-stack_git_private_key: ((git.ssh_key))
-
-#. stack_terraform_path (required): stack-cycloid-worker/terraform/gcp
+#. stack_terraform_path (required): terraform/gcp
 #+ Path of Terraform files in the stack git repository
-stack_terraform_path: stack-cycloid-worker/terraform/gcp
+stack_terraform_path: terraform/gcp
 
 
 #
@@ -92,6 +75,14 @@ config_git_branch: ($ cr_branch $)
 #. config_git_private_key (required): ((git.ssh_key))
 #+ SSH key pair to fetch the config Git repository.
 config_git_private_key: ((git.ssh_key))
+
+#. config_git_username (required): ((git.username))
+#+ Username for HTTP(S) auth when pulling/pushing.
+# config_git_username: ((git.username))
+
+#. config_git_token (required): ((git.password))
+#+ Password for HTTP(S) auth when pulling/pushing.
+# config_git_token: ((git.password))
 
 #. config_terraform_path (required): ($ project $)/terraform/($ environment $)
 #+ Path of Terraform files in the config git repository
@@ -122,6 +113,10 @@ cycloid_api_url: 'https://http-api.cycloid.io'
 #+ API key to grant admin acess to Cycloid API.
 cycloid_api_key: ((cycloid-api-key.key))
 
-#. terraform_version (required): '1.0.5'
-#+ terraform version used to execute your code.
-terraform_version: '1.0.5'
+#. cycloid_inventory_jwt (required): ($ inventory_jwt $)
+#+ JWT token to access Cycloid inventory (acting as HTTP Terraform backend).
+cycloid_inventory_jwt: ($ inventory_jwt $)
+
+#. terraform_version (required): '1.1.9'
+#+ terraform version used to execute your code. Please select a Terraform version matching a container image tag here: https://hub.docker.com/r/cycloid/terraform-resource/tags
+terraform_version: '1.1.9'

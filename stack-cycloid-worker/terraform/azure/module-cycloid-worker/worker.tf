@@ -14,8 +14,8 @@ resource "azurerm_linux_virtual_machine" "cycloid-worker" {
 
   source_image_reference {
       publisher = "Debian"
-      offer     = "debian-10"
-      sku       = "10"
+      offer     = "debian-11"
+      sku       = "11"
       version   = "latest"
   }
 

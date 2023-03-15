@@ -61,7 +61,7 @@ resource "azurerm_virtual_network" "cycloid-worker" {
   name                = "${var.customer}-${var.project}-${var.env}-cycloid-worker"
   resource_group_name = data.azurerm_resource_group.cycloid-worker.name
   location            = var.azure_location
-  address_space       = ["10.0.0.0/16"]
+  address_space       = ["10.222.0.0/16"]
 
   tags = merge(local.merged_tags, {
     Name = "${var.customer}-${var.project}-${var.env}-cycloid-worker"
@@ -73,5 +73,5 @@ resource "azurerm_subnet" "cycloid-worker" {
   virtual_network_name = azurerm_virtual_network.cycloid-worker.name
   resource_group_name  = data.azurerm_resource_group.cycloid-worker.name
 
-  address_prefixes     = ["10.0.1.0/24"]
+  address_prefixes     = ["10.222.1.0/24"]
 }

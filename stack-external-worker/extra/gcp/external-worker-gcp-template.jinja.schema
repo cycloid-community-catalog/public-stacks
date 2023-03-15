@@ -101,6 +101,10 @@ properties:
     description: Change the default worker container runtimes https://concourse-ci.org/concourse-worker.html#configuring-runtimes
     type: string
     default: ""
+  workerTag:
+    description: Specify a TAG for worker https://concourse-ci.org/concourse-worker.html#tags-and-team-workers
+    type: string
+    default: ""
   workerDnsServer:
     description: "Override DNS server or add additionals one depending of the worker runtime specified. ex '1.1.1.1,8.8.8.8'"
     type: string

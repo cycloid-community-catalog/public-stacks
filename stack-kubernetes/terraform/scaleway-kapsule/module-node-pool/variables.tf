@@ -110,7 +110,7 @@ variable enable_autohealing {
 variable container_runtime {
   type        = string
   description = "The container runtime of the pool. Important: Updates to this field will recreate a new resource."
-  default     = "docker"
+  default     = "containerd"
 }
 
 variable placement_group_id {

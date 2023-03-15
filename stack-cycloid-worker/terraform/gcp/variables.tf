@@ -16,6 +16,7 @@ variable "gcp_zone" {
 }
 
 
+
 #
 # Instance
 #
@@ -23,17 +24,10 @@ variable "vm_machine_type" {
   description = "Machine type for the Cycloid worker"
   default     = "n2-standard-2"
 }
-
 variable "vm_disk_size" {
   description = "Disk size for the Cycloid worker (Go)"
-  default = "20"
+  default = "30"
 }
-
-variable "vm_os_user" {
-  description = "The default admin user for the instance"
-  default = "cycloid"
-}
-
 variable "keypair_public" {
   description = "The public SSH key, for SSH access to newly-created instances"
 }
@@ -45,7 +39,6 @@ variable "keypair_public" {
 variable "team_id" {
   description = "Cycloid team ID"
 }
-
 variable "worker_key" {
   description = "Cycloid worker private key"
 }

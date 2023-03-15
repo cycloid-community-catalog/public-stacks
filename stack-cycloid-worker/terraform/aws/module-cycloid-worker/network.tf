@@ -6,10 +6,10 @@ module "vpc" {
   source = "terraform-aws-modules/vpc/aws"
 
   name = "${var.customer}-${var.project}-${var.env}-cycloid-worker"
-  cidr = "10.0.0.0/16"
+  cidr = "10.222.0.0/16"
 
   azs             = [data.aws_availability_zones.available.names[0]]
-  public_subnets  = ["10.0.101.0/24"]
+  public_subnets  = ["10.222.101.0/24"]
 
   enable_nat_gateway = false
   enable_vpn_gateway = false

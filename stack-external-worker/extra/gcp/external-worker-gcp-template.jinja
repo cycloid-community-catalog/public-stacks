@@ -39,7 +39,7 @@ resources:
         boot: true
         autoDelete: true
         initializeParams:
-          sourceImage: https://www.googleapis.com/compute/v1/projects/debian-cloud/global/images/family/debian-9
+          sourceImage: https://www.googleapis.com/compute/v1/projects/debian-cloud/global/images/family/debian-11
   
       - deviceName: data-volume
         type: PERSISTENT
@@ -91,6 +91,7 @@ resources:
               export VERSION="{{ properties["workerVersion"] }}"
               export DEBUG="{{ properties["debugMode"] }}"
               export WORKER_RUNTIME="{{ properties["workerRuntime"] }}"
+              export WORKER_TAG="{{ properties["workerTag"] }}"
               export WORKER_DNS_SERVER="{{ properties["workerDnsServer"] }}"
 
               # Run the startup installation script.

@@ -55,6 +55,9 @@ _() {
     # https://concourse-ci.org/concourse-worker.html#configuring-runtimes
     WORKER_RUNTIME=${WORKER_RUNTIME:-""}
 
+    # Concourse worker tag https://concourse-ci.org/concourse-worker.html#tags-and-team-workers
+    WORKER_TAG=${WORKER_TAG:-""}
+
     # DNS server to use for Concourse worker
     # The bahavior depend of the RUNTIME used, make sure to read about it in ansible-concourse Ansible role.
     WORKER_DNS_SERVER=${WORKER_DNS_SERVER:-""}
@@ -204,7 +207,7 @@ _() {
     timeout 300 bash -c "while pgrep apt > /dev/null; do sleep 1; done"
 
     apt-get update
-    apt-get install -yqq --no-install-recommends libssl-dev libffi-dev python3-dev python3-setuptools python3-pip git curl jq cargo gnupg2
+    apt-get install -yqq --no-install-recommends libssl-dev libffi-dev python3-dev python3-setuptools python3-pip git curl jq cargo gnupg2 file
 
     cd /opt/
     # Remove potential existing file, in case you want to re-run the setup script on the same instance
@@ -267,6 +270,10 @@ EOF
     # Override worker runtime only if specified. If not using the default one from the stack located into ansible/default.yml
     if [ -n "$WORKER_RUNTIME" ]; then
         echo "concourse_worker_runtime: $WORKER_RUNTIME" >> "${ENV}-worker.yml"
+    fi
+    # Override worker tag only if specified. If not using the default one from the stack located into ansible/default.yml
+    if [ -n "$WORKER_TAG" ]; then
+        echo "concourse_worker_tag: $WORKER_TAG" >> "${ENV}-worker.yml"
     fi
 
     ansible-galaxy install -r requirements.yml --force --roles-path=/etc/ansible/roles
