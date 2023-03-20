@@ -26,6 +26,7 @@ config:
   default:
     name: 'Classic Kubernetes'
     description: 'For on-premises style Kubernetes clusters.'
+    cloud_provider: kubernetes
     pipeline:
       pipeline:
         path: 'pipeline/pipeline.yml'
@@ -35,6 +36,7 @@ config:
   default_terraform:
     name: 'Classic Kubernetes + Terraform'
     description: 'For on-premises style Kubernetes clusters + terraform code.'
+    cloud_provider: kubernetes
     pipeline:
       pipeline:
         path: 'pipeline/pipeline-terraform.yml'
@@ -44,6 +46,7 @@ config:
   eks:
     name: 'Amazon EKS'
     description: 'For AWS Elastic Kubernetes Service clusters.'
+    cloud_provider: aws
     pipeline:
       pipeline:
         path: 'pipeline/pipeline-eks.yml'
@@ -53,6 +56,7 @@ config:
   eks_terraform:
     name: 'Amazon EKS + Terraform'
     description: 'For AWS Elastic Kubernetes Service clusters + terraform code.'
+    cloud_provider: aws
     pipeline:
       pipeline:
         path: 'pipeline/pipeline-eks-terraform.yml'
@@ -62,6 +66,7 @@ config:
   gke:
     name: 'Google GKE'
     description: 'For Google Kubernetes Engine clusters.'
+    cloud_provider: gcp
     pipeline:
       pipeline:
         path: 'pipeline/pipeline-gke.yml'
@@ -71,6 +76,7 @@ config:
   gke_terraform:
     name: 'Google GKE + Terraform'
     description: 'For Google Kubernetes Engine clusters + terraform code.'
+    cloud_provider: gcp
     pipeline:
       pipeline:
         path: 'pipeline/pipeline-gke-terraform.yml'
