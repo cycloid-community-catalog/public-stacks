@@ -1,5 +1,5 @@
 version: "2"
-name: Test stack RP
+name: Test stack RP edited
 canonical: test_stack_rp
 author: robert_parkin
 status: private
@@ -8,6 +8,7 @@ image: ""
 keywords:
 - test
 - provider:azure
+template: false
 technologies: []
 dependencies: []
 config:
