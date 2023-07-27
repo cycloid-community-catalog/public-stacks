@@ -17,8 +17,11 @@ usage()
     exit 1
 }
 
-if [ -z "$TEAM_ID" ] ||
-[ -z "$WORKER_KEY" ]; then
+if [ -n "$TEAM_ID" ]; then
+export CONCOURSE_TEAM=$TEAM_ID
+fi
+
+if [ -z "$WORKER_KEY" ]; then
 usage
 fi
 
@@ -30,7 +33,6 @@ echo "  * address - ${SCHEDULER_HOST}:${SCHEDULER_PORT}"
 echo "  * team - ${TEAM_ID}"
 echo "  * public key - ${TSA_PUBLIC_KEY}"
 exec /usr/local/concourse/bin/concourse worker \
-  --team $TEAM_ID \
   --tsa-host "$SCHEDULER_HOST:$SCHEDULER_PORT" \
   --tsa-public-key /usr/local/concourse/host_key.pub \
   --tsa-worker-private-key /usr/local/concourse/worker_key \
