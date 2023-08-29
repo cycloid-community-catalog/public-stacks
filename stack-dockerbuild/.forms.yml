@@ -3,20 +3,20 @@ default:
   pipeline:
     Registry:
       - name: "Image Name"
-        description: "Name of the repository image. If using AWS ECR you only need the repository name, not the full URI e.g. `alpine` not `012345678910.dkr.ecr.us-east-1.amazonaws.com/alpine`."
+        description: "Name of the repository image. If using AWS ECR you only need the repository name, not the full URI e.g. `alpine` not `012345678910.dkr.ecr.us-east-1.amazonaws.com/alpine`. And for GCP Artifact Registry use `gcr.io/project/repo`"
         key: registry_image_name
         type: string
         default: "myuser/imagename"
         widget: simple_text
         required: true
       - name: "Username"
-        description: "Username for regular image repository, otherwise leave it as a empty string."
+        description: "Username for regular image repository, otherwise leave it as a empty string. (For GCP Artifact Registry use '_json_key'"
         key: registry_username
         type: string
         default: ""
         widget: cy_cred
       - name: "Password"
-        description: "Password for regular image repository, otherwise leave it as a empty string."
+        description: "Password for regular image repository, otherwise leave it as a empty string.(For GCP Artifact Registry use a json service account eg '((mygcp.json_key))' )"
         key: registry_password
         type: string
         default: ""

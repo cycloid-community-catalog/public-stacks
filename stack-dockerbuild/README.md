@@ -52,12 +52,12 @@ Currently, Cycloid console doesn't support yet switching between different pipel
 |`project`|Name of the project.|`-`|`($ project $)`|`True`|
 |`registry_extra_tags`|Additional tags to put on the builded image. Separate each tag with a space.|`string`|`'tag1 tag2'`|`False`|
 |`registry_image_name`|Name of the repository image. If using AWS ECR you only need the repository name, not the full URI e.g. `alpine` not `012345678910.dkr.ecr.us-east-1.amazonaws.com/alpine`.|`string`|`myuser/imagename`|`True`|
-|`registry_password`|Password for regular image repository, otherwise leave it as a empty string.|`string`|`secret`|`False`|
+|`registry_password`|Password for regular image repository, otherwise leave it as a empty string. (For GCP Artifact Registry use a json service account)|`string`|`secret`|`False`|
 |`registry_tag`|tag to put on the builded image (eg latest).|`string`|`($ environment $)`|`True`|
 |`registry_tag_commit_id`|Add additionnal tag using short commit id|`bool`|`false`|`False`|
 |`registry_tag_custom_script`|Add additional tags using a `.ci/tag_custom_script.sh` shell script.|`bool`|`false`|`False`|
 |`registry_tag_describe_ref`|Add additional tag using git describe ref: `<latest annoted git tag>-<the number of commit since the tag>-g<short_ref>` (eg. `v1.6.2-1-g13dfd7b`).|`bool`|`false`|`False`|
-|`registry_username`|Username for regular image repository, otherwise leave it as a empty string.|`string`|`myuser`|`False`|
+|`registry_username`|Username for regular image repository, otherwise leave it as a empty string. (For GCP Artifact Registry use `_json_key`|`string`|`myuser`|`False`|
 |`stack_git_branch`|Branch to use on the public stack git repository|`-`|`master`|`True`|
 
 ***github-pr***
@@ -108,10 +108,10 @@ Currently, Cycloid console doesn't support yet switching between different pipel
 |`project`|Name of the project.|`-`|`($ project $)`|`True`|
 |`registry_extra_tags`|Additional tags to put on the builded image. Separate each tag with a space.|`string`|`'tag1 tag2'`|`False`|
 |`registry_image_name`|Name of the repository image. If using AWS ECR you only need the repository name, not the full URI e.g. `alpine` not `012345678910.dkr.ecr.us-east-1.amazonaws.com/alpine`.|`string`|`myuser/imagename`|`True`|
-|`registry_password`|Password for regular image repository, otherwise leave it as a empty string.|`string`|`secret`|`False`|
+|`registry_password`|Password for regular image repository, otherwise leave it as a empty string (For GCP Artifact Registry use a json service account).|`string`|`secret`|`False`|
 |`registry_tag`|tag to put on the builded image (eg latest).|`string`|`($ environment $)`|`True`|
 |`registry_tag_commit_id`|Add additionnal tag using short commit id|`bool`|`false`|`False`|
 |`registry_tag_custom_script`|Add additional tags using a `.ci/tag_custom_script.sh` shell script.|`bool`|`false`|`False`|
 |`registry_tag_described_ref`|Add additional tag using git describe ref: `<latest annoted git tag>-<the number of commit since the tag>-g<short_ref>` (eg. `v1.6.2-1-g13dfd7b`).|`bool`|`false`|`False`|
-|`registry_username`|Username for regular image repository, otherwise leave it as a empty string.|`string`|`myuser`|`False`|
+|`registry_username`|Username for regular image repository, otherwise leave it as a empty string. (For GCP Artifact Registry use `_json_key`|`string`|`myuser`|`False`|
 |`stack_git_branch`|Branch to use on the public stack git repository|`-`|`master`|`True`|
