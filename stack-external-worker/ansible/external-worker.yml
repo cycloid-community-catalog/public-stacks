@@ -92,6 +92,7 @@
   roles:
     - role: cycloid.telegraf
       ignore_errors: true
+      when: install_telegraf|bool
       tags:
         - telegraf
 

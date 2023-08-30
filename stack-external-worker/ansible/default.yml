@@ -1,5 +1,6 @@
 ---
 
+install_telegraf: false
 # If "nodevice", root device is used. (no dedicated volume)
 var_lib_device: "nodevice"
 # if true, search to use /dev/xvdg or /dev/local0. If not found keep the var_lib_device

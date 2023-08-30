@@ -206,8 +206,6 @@ _() {
     # This is mostly the case with agent like waagent on Azure.
     timeout 300 bash -c "while pgrep apt > /dev/null; do sleep 1; done"
 
-    apt-get update
-    apt-get install -yqq --no-install-recommends libssl-dev libffi-dev python3-dev python3-setuptools python3-pip git curl jq cargo gnupg2 file
 
     cd /opt/
     # Remove potential existing file, in case you want to re-run the setup script on the same instance
@@ -215,9 +213,21 @@ _() {
     git clone -b ${STACK_BRANCH} https://github.com/cycloid-community-catalog/stack-external-worker
     cd stack-external-worker/ansible
 
-    python3 -m pip install -U pip
-    python3 -m pip install -r requirements.txt
-    python3 -m pip install ansible==2.9.*
+    apt-get update
+    DEBIAN_VERSION=$(lsb_release -r | awk '{print $2}')
+    if [ "$DEBIAN_VERSION" -lt "12" ]; then
+      # Debian 11 and older
+      apt-get install -yqq --no-install-recommends libssl-dev libffi-dev python3-dev python3-setuptools python3-pip git curl jq cargo gnupg2 file
+      python3 -m pip install -U pip
+      python3 -m pip install -r requirements.txt
+      python3 -m pip install ansible==2.9.*
+    else
+      # Debian 12 and later
+      apt-get install -yqq --no-install-recommends libssl-dev libffi-dev python3-dev python3-setuptools python3-apt git curl jq cargo gnupg2 file pipx
+      pipx install ansible==8.3.* --system-site-packages                                                                                                                                                              |
+      pipx runpip ansible install -r requirements.txt                                                                                                                                                                 |
+      export PATH="$PATH:$(pipx environment --value PIPX_BIN_DIR)"
+    fi
 
     # Get WORKER_KEY from Vault
     if [[ -z "${WORKER_KEY}" ]] && [[ -n "${VAULT_SECRET_ID}" && -n "${VAULT_ROLE_ID}" ]] ; then
