@@ -207,7 +207,7 @@ _() {
     timeout 300 bash -c "while pgrep apt > /dev/null; do sleep 1; done"
 
     apt-get update
-    DEBIAN_VERSION=$(lsb_release -r | awk '{print $2}')
+    DEBIAN_VERSION=$(lsb_release -r -s)
     if [ "$DEBIAN_VERSION" -lt "12" ]; then
       # Debian 11 and older
       apt-get install -yqq --no-install-recommends libssl-dev libffi-dev python3-dev python3-setuptools python3-pip git curl jq cargo gnupg2 file

@@ -319,36 +319,60 @@ Mappings:
 # export regions="us-east-1 us-west-2 us-west-1 eu-west-1 eu-west-2 eu-west-3 eu-central-1 ap-northeast-1 ap-northeast-2 ap-northeast-3 ap-southeast-1 ap-southeast-2 ap-south-1 us-east-2 ca-central-1 sa-east-1 cn-north-1 cn-northwest-1"
 # for region in $regions; do image=$(aws --region $region ec2 describe-images --owners 136693071363 --filters "Name=name,Values=debian-10-amd64-*" "Name=architecture,Values=x86_64" "Name=virtualization-type,Values=hvm" |  jq -r '.Images[] | "\(.CreationDate) \(.ImageId)"' | sort | awk 'END{print $2}'); echo -e "    $region:\n      image: $image"; done
   AWSRegionArch2AMI:
-    us-east-1:
-      image: ami-074f8bbb689b1c1a0
-    us-west-2:
-      image: ami-037d8e9c16af6ba15
-    us-west-1:
-      image: ami-044715e247a1dff39
-    eu-west-1:
-      image: ami-0ee256407f6444c24
-    eu-west-2:
-      image: ami-02d2130d8f8299c33
-    eu-west-3:
-      image: ami-088c0417fba33e664
-    eu-central-1:
-      image: ami-0b0feb0b7d24e609b
+    af-south-1:
+      image: ami-0370107745023e48d
+    ap-east-1:
+      image: ami-046541c4402c105a6
     ap-northeast-1:
-      image: ami-0e7829836e1c3c1a5
+      image: ami-0deffe25fb08894f5
     ap-northeast-2:
-      image: ami-0b60de4acbf435baa
-    ap-southeast-1:
-      image: ami-058d0c716b141e11e
-    ap-southeast-2:
-      image: ami-0cbafed06289003c2
+      image: ami-097243fad67b35a40
+    ap-northeast-3:
+      image: ami-03ad2f651aaddff3a
     ap-south-1:
-      image: ami-0496fcf4c5571c7de
-    us-east-2:
-      image: ami-0690ae3b805e0a8cc
+      image: ami-0361008010558ea2d
+    ap-south-2:
+      image: ami-00f8b7c6e6b6710cf
+    ap-southeast-1:
+      image: ami-07bf64b7ca62c96ee
+    ap-southeast-2:
+      image: ami-0cc8e61f3957442b8
+    ap-southeast-3:
+      image: ami-0924d71cdf3f43a92
+    ap-southeast-4:
+      image: ami-0d7cef1b0906286fe
     ca-central-1:
-      image: ami-01ab4b3a77119fa1a
+      image: ami-0cfe1aac5d0b881ff
+    eu-central-1:
+      image: ami-0042e6537994c4181
+    eu-central-2:
+      image: ami-030bde30e6bd401a8
+    eu-north-1:
+      image: ami-00347e40213620217
+    eu-south-1:
+      image: ami-056b2c53da5ae730e
+    eu-south-2:
+      image: ami-0a8dd9eafd4b32b6f
+    eu-west-1:
+      image: ami-04620cb5b85309067
+    eu-west-2:
+      image: ami-0315c69b482426e70
+    eu-west-3:
+      image: ami-0dcc6ef9e7a6e70f2
+    me-central-1:
+      image: ami-0a78fb1a991dee28d
+    me-south-1:
+      image: ami-0a769022ac70dde33
     sa-east-1:
-      image: ami-0bedea1dce860d4a2
+      image: ami-027ba68d27297f530
+    us-east-1:
+      image: ami-01e8fbda99c153c6b
+    us-east-2:
+      image: ami-0ef27e70f95b439e8
+    us-west-1:
+      image: ami-09d529cbaf5cc7e6f
+    us-west-2:
+      image: ami-0acfc42b227d0b719
 
 Conditions:
   EnabledScheduling: !Equals [!Ref ScheduledWorkersEnabled, 'true']
