@@ -132,9 +132,9 @@ k8s_wait_ready_selector: ''
 #+ How many seconds should the concourse kubernetes resource wait for the label selector.
 k8s_wait_ready_seconds: 60
 
-#. k8s_version (required): '1.16'
+#. k8s_version (required): '1.24'
 #+ Kubernetes version for the kubernetes concourse resource.
-k8s_version: '1.16'
+k8s_version: '1.24'
 
 
 #
