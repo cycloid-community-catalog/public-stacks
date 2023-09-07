@@ -12,7 +12,7 @@ data "template_file" "user_data_front" {
     signal_resource_id = "Fronts${var.env}"
     rds_address        = try(aws_db_instance.application[0].address, "")
     rds_port           = try(aws_db_instance.application[0].port, "")
-    rds_database       = try(aws_db_instance.application[0].name, "")
+    rds_database       = try(aws_db_instance.application[0].db_name, "")
     rds_username       = try(aws_db_instance.application[0].username, "")
     s3_medias          = try(aws_s3_bucket.medias[0].id, "")
     elasticache_address = element(
