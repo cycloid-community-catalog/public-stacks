@@ -78,7 +78,7 @@ output "rds_port" {
 }
 
 output "rds_database" {
-  value = try(aws_db_instance.application[0].name, "")
+  value = try(aws_db_instance.application[0].db_name, "")
 }
 
 output "rds_username" {
