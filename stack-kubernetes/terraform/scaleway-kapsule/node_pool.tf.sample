@@ -1,0 +1,112 @@
+#
+# Create additionnal Kapsule node pools to an existing  cluster.
+#
+# Config module is used to generate special datas shared with other modules like cluster_name
+module "config" {
+  #####################################
+  # Do not modify the following lines #
+  source = "./module-config"
+
+  project  = var.project
+  env      = var.env
+  customer = var.customer
+
+  #####################################
+
+  cluster_name = var.cluster_name
+}
+
+# You can duplicate this module to create mutiple Kapsule node pools.
+# Make sure to change the module name and the `node_pool_name` field accordingly.
+module "node_pool" {
+  #####################################
+  # Do not modify the following lines #
+  source = "./module-node-pool"
+
+  project  = var.project
+  env      = var.env
+  customer = var.customer
+
+  #####################################
+
+  ###
+  # General
+  ###
+
+  #. extra_tags (optional): []
+  #+ Dict of extra tags to add on aws resources. format [ "foo=bar" ].
+  extra_tags = []
+  ###
+  # Nodes
+  ###
+
+  #. node_pool_name (optional): standard
+  #+ Node group given name.
+  node_pool_name = "standard"
+
+  #. node_type (optional): GP1-XS
+  #+ Type of instance to use for node servers.
+  node_type = "GP1-XS"
+
+  #. node_count (optional): 1
+  #+ Desired number of node servers.
+  node_count = "1"
+
+  #. enable_autoscaling (optional): false
+  #+ Enables the autoscaling feature for this pool. Important: When enabled, an update of the size will not be taken into account.
+  enable_autoscaling = false
+
+  #. node_autoscaling_min_size (optional): 1
+  #+ The minimum size of the pool, used by the autoscaling feature.
+  node_autoscaling_min_size = 1
+
+  #. node_autoscaling_max_size (optional): 10
+  #+ The maximum size of the pool, used by the autoscaling feature.
+  node_autoscaling_max_size = 10
+
+  #. enable_autohealing (optional): true
+  #+ Enables the autohealing feature for this pool.
+  enable_autohealing = true
+
+  #. container_runtime (optional): docker
+  #+ The container runtime of the pool. Important: Updates to this field will recreate a new resource.
+
+  #. placement_group_id (optional): ""
+  #+ The placement group the nodes of the pool will be attached to. Important: Updates to this field will recreate a new resource.
+  placement_group_id = ""
+
+  ## To add placement group, create a separate file in the /config branch for the stack
+  ## Containing the following resource
+  # resource "scaleway_instance_placement_group" "($ environment $)" {
+  #  name        = var.placement_group_name
+  #  policy_type = "max_availability"
+  #  policy_mode = "optional"
+  #  zone        = local.scw_zone
+  # }
+
+  #. wait_for_pool_ready (optional): true
+  #+ Whether to wait for the pool to be ready.
+
+  ###
+  # Required 
+  ###
+
+  cluster_id   = data.terraform_remote_state.kubernetes-infra.outputs.cluster_id
+  cluster_name = module.config.cluster_name
+  scw_region   = var.scw_region
+  scw_zone     = local.scw_zone
+}
+
+# Update this external terraform remote state reference to the one declaring the Kapsule cluster.
+#data "terraform_remote_state" "kubernetes-infra" {
+#  backend = "s3"
+#  config  = {
+#    bucket   = "($ organization_canonical $)-terraform-remote-state"
+#    key      = "($ project $)/infra/($ project $)-infra.tfstate"
+#    region   = var.scw_region
+#    endpoint = "https://s3.${var.scw_region}.scw.cloud"
+#
+#    skip_credentials_validation = true
+#    skip_region_validation      = true
+#  }
+#}

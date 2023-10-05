@@ -1,0 +1,55 @@
+---
+# Configuration of the Cycloid stack
+version: '2'
+name: 'Cycloid hello world'
+canonical: 'stack-hello-world'
+status: 'public'
+description: |
+  Hello world stack which deploy small components depending of the cloud provider.
+keywords:
+  - 'demo'
+  - 'lambda'
+  - 'provider:aws'
+  - 'cloudfunctions'
+  - 'provider:gcp'
+author: 'Cycloid'
+image: |
+  https://raw.githubusercontent.com/cycloid-community-catalog/stack-hello-world/master/icon.png
+technologies:
+  - technology: AWS Lambda
+    version: n/a
+  - technology: GCP Cloud Functions
+    version: n/a
+
+config:
+  aws:
+    name: 'AWS'
+    description: 'AWS variant using lambdas.'
+    # Configuration of the CI pipeline
+    pipeline:
+      pipeline:
+        path: 'pipeline/pipeline-aws.yml'
+      variables:
+        path: 'pipeline/variables-aws.sample.yml'
+        destination: '($ project $)/pipeline/variables-aws-($ environment $).yml'
+    # Configuration of terraform
+    terraform:
+      aws:
+        path: 'terraform-aws/main.tf.sample'
+        destination: '($ project $)/terraform/($ environment $)/main.tf'
+
+  gcp:
+    name: 'GCP'
+    description: 'GCP variant using CloudFunctions.'
+    # Configuration of the CI pipeline
+    pipeline:
+      pipeline:
+        path: 'pipeline/pipeline-gcp.yml'
+      variables:
+        path: 'pipeline/variables-gcp.sample.yml'
+        destination: '($ project $)/pipeline/variables-gcp-($ environment $).yml'
+    # Configuration of terraform
+    terraform:
+      gcp:
+        path: 'terraform-gcp/main.tf.sample'
+        destination: '($ project $)/terraform/($ environment $)/main.tf'

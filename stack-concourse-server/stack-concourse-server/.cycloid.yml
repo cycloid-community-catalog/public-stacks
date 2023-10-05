@@ -1,0 +1,41 @@
+version: "2"
+name: Concourse Server
+canonical: stack-concourse-server
+author: Cycloid
+status: private
+description: Used to deploy a Concourse server (web+atc) on Amazon EC2 instance behind
+  an ALB load balancer, using PostgreSQL RDS database
+image: https://raw.githubusercontent.com/cycloid-community-catalog/stack-concourse-server/master/icon.png
+keywords:
+- concourse
+- server
+- ui
+- atc
+- postgresql
+- cycloid
+technologies:
+- technology: Debian
+  version: 9.x
+- technology: Concourse
+  version: 3.14.x
+- technology: PostgreSQL
+  version: 9.5.x
+dependencies: []
+config:
+  default:
+    ansible:
+      concourse-server:
+        destination: ($ project $)/ansible/environments/($ environment $)-concourse-server.yml
+        path: ansible/environments/concourse-server.yml.sample
+    description: ""
+    name: default
+    pipeline:
+      pipeline:
+        path: pipeline/pipeline.yml
+      variables:
+        destination: ($ project $)/pipeline/variables-($ environment $).yml
+        path: pipeline/variables.sample.yml
+    terraform:
+      concourse-server:
+        destination: ($ project $)/terraform/($ environment $)/concourse-server.tf
+        path: terraform/concourse-server.tf.sample

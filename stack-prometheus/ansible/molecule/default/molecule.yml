@@ -1,0 +1,69 @@
+---
+dependency:
+  name: galaxy
+  options:
+    # vvv: True
+    role-file: requirements.yml
+driver:
+  name: docker
+lint:
+  name: yamllint
+  # https://yamllint.readthedocs.io/en/latest/configuration.html#ignoring-paths
+  options:
+    config-data: "{extends: relaxed, rules: {line-length: {max: 200}}}"
+platforms:
+  - name: instance
+    #image: docker:dind
+    image: debian:stretch
+    published_ports:
+      - "9090:9090"
+      - "9093:9093"
+      - "3000:3000"
+    privileged: yes
+    command: "/bin/systemd"
+    groups:
+     - tag_project_prometheus
+     - tag_role_prometheus
+     - tag_project_prometheus
+     - tag_cycloid_io_true
+     - tag_env_test
+
+provisioner:
+  name: ansible
+  env:
+    MOLECULE_DEBUG: "true"
+    #ANSIBLE_KEEP_REMOTE_FILES: "1"
+  lint:
+    name: ansible-lint
+  playbooks:
+    converge: ../../prometheus.yml
+  options:
+    # vault-password-file: ../../.vault-password
+    extra-vars:
+      env=test
+      project=prometheus
+      customer=cycloid
+      grafana_admin_password=admin
+    #skip-tags: deploy
+    # vvv: "True"
+
+scenario:
+  name: default
+  # Override test sequence
+  test_sequence:
+  #- lint
+  - destroy
+  - dependency
+  - syntax
+  - create
+  - prepare
+  - converge
+  #- idempotence
+  #- side_effect
+  - verify
+  - destroy
+
+verifier:
+  name: testinfra
+  lint:
+    name: flake8

@@ -1,0 +1,210 @@
+---
+default:
+  pipeline:
+    Terraform:
+      - name: "AWS access key"
+        description: "Amazon AWS access key for Terraform."
+        key: aws_access_key
+        widget: cy_cred
+        type: string
+        default: "((aws.access_key))"
+      - name: "AWS secret key"
+        description: "Amazon AWS secret key for Terraform."
+        key: aws_secret_key
+        widget: cy_cred
+        type: string
+        default: "((aws.secret_key))"
+      - name: "Amazon AWS region"
+        description: "Amazon AWS region to use for Terraform."
+        key: aws_default_region
+        widget: auto_complete
+        type: string
+        values: ["eu-north-1","ap-south-1","eu-west-3","eu-west-2","eu-west-1","ap-northeast-2","ap-northeast-1","sa-east-1","ca-central-1","ap-southeast-1","ap-southeast-2","eu-central-1","us-east-1","us-east-2","us-west-1","us-west-2"]
+        default: eu-west-1
+      - name: "Terraform storage bucket"
+        description: "AWS S3 bucket name to store terraform remote state file."
+        key: terraform_storage_bucket_name
+        widget: simple_text
+        type: string
+        default: ($ organization_canonical $)-terraform-remote-state
+      - name: "Aws RDS password"
+        description: "Password used for your rds. Set 'empty' if you dont use databases."
+        key: rds_password
+        widget: simple_text
+        type: string
+        default: ((custom_rds_password))
+    Ansible:
+      - name: "Ansible vault password"
+        description: "Password used by ansible vault to decrypt your vaulted files."
+        key: ansible_vault_password
+        widget: cy_cred
+        type: string
+        default: "((custom_ansible_vault_password))"
+      - name: "Bastion URL"
+        description: "bastion URL used by ansible to connect on AWS EC2 instances."
+        key: bastion_url
+        widget: simple_text
+        type: string
+        default: "user@bastion.server.com"
+      - name: "Bastion SSH key"
+        description: "Bastion SSH private key used by ansible to connect on AWS EC2 instances and the bastion itself."
+        key: bastion_private_key_pair
+        widget: cy_cred
+        type: string
+        default: "((ssh_bastion.ssh_key))"
+      - name: "Grafana adpin password"
+        description: "Define Grafana admin account password."
+        key: grafana_admin_password
+        widget: cy_cred
+        type: string
+        default: "((custom_grafana_admin_password))"
+    Repos:
+      - name: "Config repository"
+        key: config_git_repository
+        type: string
+        widget: cy_crs
+        description: "Git repository URL containing the config of the stack."
+        default: "git@github.com:MyUser/config.git"
+        required: true
+      - name: "Config git key"
+        description: "SSH key pair to fetch the config Git repository."
+        key: config_git_private_key
+        type: string
+        widget: cy_cred
+        default: "((ssh_config.ssh_key))"
+        required: true
+      - name: "Config branch"
+        description: "Branch of the config Git repository."
+        key: config_git_branch
+        widget: cy_branch
+        type: string
+        description: "The branch used by the config repository"
+        source: config_git_repository
+        default: "config"
+        required: true
+    Cycloid:
+      - name: "Stack branch"
+        description: "Branch to use on the public stack Git repository."
+        key: stack_git_branch
+        widget: simple_text
+        type: string
+        default: master
+      - name: "Ansible version"
+        description: "Ansible version used in packer and cycloid-toolkit ansible runner."
+        key: ansible_version
+        widget: simple_text
+        type: string
+        default: "2.9"
+  terraform:
+    application:
+      - name: "Extra AWS tags"
+        description: "Dict of extra tags to add on aws resources."
+        key: extra_tags
+        widget: text_area
+        type: map
+        default: {}
+      - name: "Instance type"
+        description: "Amazon EC2 instance type for Prometheus server."
+        key: prometheus_type
+        widget: auto_complete
+        type: string
+        default: "t3.small"
+        values:
+            - "t3.micro"
+            - "t3.small"
+            - "t3.medium"
+            - "t3.large"
+      - name: "Prometheus disk size"
+        unit: Go
+        description: "Disk size for the Prometheus server."
+        key: prometheus_disk_size
+        widget: slider_range
+        type: integer
+        default: 60
+        values:
+            - 10
+            - 250
+    database:
+      - name: "Create RDS database"
+        description: "create a rds database generaly used for grafana. **false** will not create the database."
+        key: create_rds_database
+        widget: switch
+        type: boolean
+        default: true
+      - name: "RDS type"
+        description: "AWS Instance type of the RDS database."
+        key: rds_type
+        widget: auto_complete
+        type: string
+        default: "db.t3.small"
+        values:
+            - "db.t3.micro"
+            - "db.t3.small"
+            - "db.t3.medium"
+            - "db.t3.large"
+            - "db.t3.xlarge"
+            - "db.t3.2xlarge"
+      - name: "RDS disk size"
+        unit: Go
+        description: "Size in Go of the RDS database."
+        key: rds_disk_size
+        widget: slider_range
+        type: integer
+        default: 10
+        values:
+            - 10
+            - 250
+      - name: "RDS database"
+        description: "Name of the RDS database."
+        key: rds_database
+        widget: simple_text
+        type: string
+        default: "grafana"
+      - name: "RDS username"
+        description: "User name of the RDS database."
+        key: rds_username
+        widget: simple_text
+        type: string
+        default: "grafana"
+      - name: "Private subnets IDs"
+        description: "Amazon subnets IDs on which create each components. Used when create_rds_database is true."
+        key: private_subnets_ids
+        widget: text_area
+        type: array
+        default: []
+    network:
+      - name: "Aws VPC ID"
+        description: "Amazon VPC id on which create each components."
+        key: vpc_id
+        widget: simple_text
+        type: string
+        required: true
+        default: "${data.terraform_remote_state.infrastructure.outputs.infra_vpc_id}"
+      - name: "Keypair name"
+        description: "SSH keypair name to use to deploy EC2 instances."
+        key: keypair_name
+        widget: simple_text
+        type: string
+        default: "${data.terraform_remote_state.infrastructure.outputs.keypair_name}"
+      - name: "Bastion allow security group"
+        description: "Amazon source security group ID which will be allowed to connect on fronts port 22 (ssh)."
+        key: bastion_sg_allow
+        widget: simple_text
+        type: string
+        default: "${data.terraform_remote_state.infrastructure.outputs.infra_bastion_sg_allow}"
+      - name: "Public subnets IDs"
+        description: "Amazon subnets IDs on which create each components."
+        key: public_subnets_ids
+        widget: simple_text
+        type: string
+        default: "${data.terraform_remote_state.infrastructure.outputs.infra_public_subnets}"
+      - name: "Enable HTTPS"
+        description: "Open or not the HTTPS port on the EC2 instance."
+        key: enable_https
+        widget: switch
+        type: boolean
+        default: false
+
+
+
+

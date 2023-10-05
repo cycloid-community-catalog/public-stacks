@@ -1,0 +1,220 @@
+---
+version: "2"
+use_cases:
+- name: default
+  sections:
+  - name: Azure Virtual Desktop
+    groups:
+    - name: Application Group
+      technologies: [terraform]
+      vars:
+      - name: "Application Group Type"
+        description: "The type of Virtual Desktop Application Group. Valid options are RemoteApp or Desktop application groups."
+        key: app_group_type
+        widget: dropdown
+        type: string
+        default: "Desktop"
+        values:
+        - "Desktop"
+        - "RemoteApp"
+        required: true
+    - name: Host Pool Type
+      technologies: [terraform]
+      vars:
+      - name: "Host Pool Type"
+        description: "The type of the Virtual Desktop Host Pool. Valid options are Personal or Pooled. Changing the type forces a new resource to be created."
+        key: host_pool_type
+        widget: dropdown
+        type: string
+        default: "Personal"
+        values:
+        - "Personal"
+        - "Pooled"
+        required: true
+      - name: "Expiration Date"
+        description: "A valid RFC3339Time for the expiration of the token (between 1 hour and 30 days from now). For example: 2022-01-01T23:40:52Z"
+        key: host_pool_expiration_date
+        widget: simple_text
+        type: string
+        default: ""
+        required: true
+    - name: Host Pool
+      technologies: [terraform]
+      condition: "host_pool_type==Pooled"
+      vars:
+      - name: "Load Balancer Type"
+        description: "BreadthFirst load balancing distributes new user sessions across all available session hosts in the host pool. DepthFirst load balancing distributes new user sessions to an available session host with the highest number of connections but has not reached its maximum session limit threshold."
+        key: host_pool_lb_type
+        widget: dropdown
+        type: string
+        default: "DepthFirst"
+        values:
+        - "DepthFirst"
+        - "BreadthFirst"
+        required: true
+      - name: "Maximum Concurrent Sessions"
+        unit: Sessions
+        description: "Maximum number of users that have concurrent sessions on a session host. Should only be set if the type of your Virtual Desktop Host Pool is Pooled."
+        key: host_pool_max_sessions
+        widget: slider_range
+        type: integer
+        default: 16
+        values:
+            - 0
+            - 500
+        required: true
+    - name: Resource Group
+      technologies: [terraform]
+      vars:
+      - name: "Resource group name"
+        description: "The name of the existing resource group where the resources will be deployed."
+        key: rg_name
+        widget: simple_text
+        type: string
+        default: ""
+        required: true
+
+  - name: Azure Cloud Provider
+    groups:
+    - name: Access Configuration
+      technologies: [pipeline]
+      vars:
+      - name: "Azure subscription ID"
+        description: "Azure subscription ID for Terraform."
+        key: azure_subscription_id
+        widget: cy_cred
+        type: string
+        default: "((azure.subscription_id))"
+        required: true
+      - name: "Azure tenant ID"
+        description: "Azure tenant ID for Terraform."
+        key: azure_tenant_id
+        widget: cy_cred
+        type: string
+        default: "((azure.tenant_id))"
+        required: true
+      - name: "Azure client ID"
+        description: "Azure client ID for Terraform."
+        key: azure_client_id
+        widget: cy_cred
+        type: string
+        default: "((azure.client_id))"
+        required: true
+      - name: "Azure client secret"
+        description: "Azure client secret for Terraform."
+        key: azure_client_secret
+        widget: cy_cred
+        type: string
+        default: "((azure.client_secret))"
+        required: true
+    - name: Terraform remote state file
+      technologies: [pipeline]
+      vars:
+      - name: "Terraform Azure Resource Group"
+        description: "Azure Resource Group of the Storage Account to use to store terraform remote state file."
+        key: terraform_resource_group_name
+        widget: simple_text
+        type: string
+        default: ($ organization_canonical $)-terraform
+        required: true
+      - name: "Terraform Azure Storage Account name"
+        description: "Azure Storage Account name to use to store terraform remote state file."
+        key: terraform_storage_account_name
+        widget: cy_cred
+        type: string
+        default: ((azure_storage.account_name))
+        required: true
+      - name: "Terraform Azure Storage Account key"
+        description: "Azure Storage Account key to use to store terraform remote state file."
+        key: terraform_storage_access_key
+        widget: cy_cred
+        type: string
+        default: ((azure_storage.access_key))
+        required: true
+      - name: "Terraform Azure Storage container name"
+        description: "Azure Storage container name to store terraform remote state file."
+        key: terraform_storage_container_name
+        widget: simple_text
+        type: string
+        default: ($ organization_canonical $)
+        required: true
+      - name: "Terraform Azure Storage container path"
+        description: "Azure Storage container path to store terraform remote state file."
+        key: terraform_storage_container_path
+        widget: simple_text
+        type: string
+        default: ($ project $)/($ environment $)
+        required: true
+
+  - name: Git Repositories
+    groups:
+    - name: Stack Git Repository
+      technologies: [pipeline]
+      vars:
+      - name: "URI"
+        key: stack_git_repository
+        type: string
+        widget: cy_scs
+        description: "Git repository URI containing the stack service catalog automation."
+        default: ""
+        required: true
+      - name: "SSH key"
+        description: "SSH key pair to fetch the stack Git repository."
+        key: stack_git_private_key
+        type: string
+        widget: cy_cred
+        default: "((git.ssh_key))"
+        required: true
+      - name: "Branch"
+        description: "Branch of the stack Git repository."
+        key: stack_git_branch
+        widget: cy_branch
+        type: string
+        source: stack_git_repository
+        default: "stacks"
+        required: true
+    - name: Config Git Repository
+      technologies: [pipeline]
+      vars:
+      - name: "URI"
+        key: config_git_repository
+        type: string
+        widget: cy_crs
+        description: "Git repository URI containing the config of the stack for each project environment."
+        default: ""
+        required: true
+      - name: "SSH key"
+        description: "SSH key pair to fetch the config Git repository."
+        key: config_git_private_key
+        type: string
+        widget: cy_cred
+        default: "((git.ssh_key))"
+        required: true
+      - name: "Branch"
+        description: "Branch of the config Git repository."
+        key: config_git_branch
+        widget: cy_branch
+        type: string
+        source: config_git_repository
+        default: "config"
+        required: true
+
+  - name: Cycloid Platform
+    groups:
+    - name: Cycloid API
+      technologies: [pipeline]
+      vars:
+      - name: "Cycloid API URL"
+        description: "Cycloid API URL. Leave the default value unless your are running an on premises Cycloid platform."
+        key: cycloid_api_url
+        widget: simple_text
+        type: string
+        default: "https://http-api.cycloid.io"
+        required: true
+      - name: "Cycloid API key"
+        description: "API key to grant access to Cycloid API."
+        key: cycloid_api_key
+        widget: cy_cred
+        type: string
+        default: "((cycloid-api-key.key))"
+        required: true

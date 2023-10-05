@@ -1,0 +1,90 @@
+resources:
+  - name: every-24h
+    type: time
+    icon: timer
+    source:
+      interval: 24h
+
+jobs:
+- name: check
+  build_logs_to_retain: 3
+  plan:
+  - get: every-24h
+    trigger: true
+  - task: check
+    config:
+        platform: linux
+        image_resource:
+            type: registry-image
+            source:
+              repository: cycloid/cycloid-toolkit
+              tag: latest
+        run:
+          path: /bin/bash
+          args:
+          - -exc
+          - |
+            cy login --org "$ORG" --api-key "$CY_API_KEY"
+
+            # Get project list
+            cy project --org "$ORG" list -o json | jq > projects
+            set +x
+            for PROJECT in $(jq -r '.[].canonical' projects); do
+
+                # Filter out excluded projects
+                IGNORE=$(echo $EXCLUDES | jq -r   'any(. == "'$PROJECT'")')
+                if [[ "$IGNORE" == "true" ]]; then
+                  echo "### [SKIP] Project: "$PROJECT
+                  continue
+                fi
+
+                echo "### Project: "$PROJECT
+                for ENV in $(jq -r '.[] | select( .canonical == "'$PROJECT'") | .environments[].canonical' projects); do
+                    echo " - "$ENV
+
+                    # Check if pipeline is synced
+                    IS_SYNCED=$(cy pipeline synced --org "$ORG" --project $PROJECT --env $ENV -o json 2>/dev/null | jq -r '[.[]] | all(. == null)')
+
+                    # If not synced prepare project report content in HTML format
+                    if [[ "$IS_SYNCED" == "false" ]]; then
+                      echo "<li>Project: ${PROJECT}, env: ${ENV}</li>" >> report/issues
+                    fi
+                done
+            done
+        outputs:
+          - name: report
+        params:
+          CY_API_URL: ((cycloid_api_url))
+          CY_API_KEY: ((cycloid_api_key))
+          ORG: ((organization))
+          EXCLUDES: ((exclude_projects))
+
+  - task: report
+    config:
+        platform: linux
+        image_resource:
+            type: registry-image
+            source:
+              repository: cycloid/cycloid-toolkit
+              tag: latest
+        run:
+          path: /bin/bash
+          args:
+          - -ec
+          - |
+            cy login --org "$ORG" --api-key "$CY_API_KEY"
+
+            # Format Cycloid event message in HTML format
+            echo "Here is the list of pipelines that have to be updated using their respective stack template:</br>" > final_report
+            echo "<ul>" >> final_report
+            cat report/issues >> final_report
+            echo "</ul>" >> final_report
+
+            # Send Cycloid event
+            cy event create --org "$ORG" --title "Pipeline synced report" --message-file final_report --severity crit --tag type=report
+        inputs:
+          - name: report
+        params:
+          CY_API_URL: ((cycloid_api_url))
+          CY_API_KEY: ((cycloid_api_key))
+          ORG: ((organization))

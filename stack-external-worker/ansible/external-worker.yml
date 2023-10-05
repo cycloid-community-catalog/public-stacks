@@ -1,0 +1,216 @@
+---
+
+#
+# Molecule test
+#
+
+- name: Install depends
+  hosts: instance
+  gather_facts: no
+  tasks:
+    - name: "Create a localhost group to match 'hosts: localhost' instead of the real localhost"
+      add_host:
+        name: "{{ inventory_hostname }}"
+        ansible_host: "instance"
+        groups:
+          - localhost
+
+#
+# Playbook
+#
+
+- hosts: localhost
+  connection: local
+  become: yes
+
+  vars:
+    # See telegraf inputs for more plugings https://github.com/influxdata/telegraf/tree/master/plugins/inputs
+    # Like https://github.com/influxdata/telegraf/tree/master/plugins/inputs/net_response for tcp port checks
+    telegraf_plugins_extra:
+      linux_sysctl_fs:
+      conntrack:
+
+  vars_files:
+    - "default.yml"
+    - [ "{{ env }}-worker.yml", "empty.yml" ]
+
+  pre_tasks:
+    - name: Install package dependencies
+      package:
+        name:
+          - gnupg
+        state: present
+
+    - name: Found local disk
+      find:
+        paths: /dev
+        file_type: any
+        patterns: "local0,xvdg,vdb"
+      register: dev_files
+      when: use_local_device|bool
+      tags:
+        - notforbuild
+
+    - name: Set local device name
+      set_fact:
+        var_lib_device: "{{ dev_files.files[0].path }}"
+      no_log: True
+      when: use_local_device|bool and dev_files.files
+      tags:
+        - notforbuild
+
+    - name: If no dedicated device (nodevice) specified, use ext4 (overlay) options for concourse worker
+      set_fact:
+        fs_volume_type: "ext4"
+      when: var_lib_device == "nodevice"
+      tags:
+        - notforbuild
+
+    - name: Get information about dedicated device
+      when: var_lib_device != "nodevice"
+      block:
+        # Symlink are defined for nvme and systemd mount doesnt accept it
+        - name: Get the real name of device, not symlink
+          command: "readlink -f {{ var_lib_device }}"
+          register: real_device
+          tags:
+            - notforbuild
+
+        - name: Set real name of device
+          set_fact:
+            var_lib_device: "{{ real_device.stdout }}"
+          tags:
+            - notforbuild
+
+        - name: Get systemd mount name
+          command: "systemd-escape -p --suffix=mount '{{ concourse_work_dir }}'"
+          register: systemd_mount_name
+          check_mode: no
+          tags:
+            - notforbuild
+
+  roles:
+    - role: cycloid.telegraf
+      ignore_errors: true
+      when: install_telegraf|bool
+      tags:
+        - telegraf
+
+    - role: cycloid.ebs-automatic-nvme-mapping
+      tags:
+        - nvme
+
+    # Create var-lib.mount
+    - role: cycloid.systemd
+      systemd_type: mount
+      systemd_mount_type: "{{ fs_volume_type }}"
+      systemd_mount_device: "{{ var_lib_device }}"
+      systemd_mount_mountpoint: "{{ concourse_work_dir }}"
+      systemd_mount_options: "{{ fs_volume_options[fs_volume_type]['fs_mount_options'] }}"
+      when: var_lib_device != "nodevice"
+      tags:
+        - notforbuild
+
+    - role: cycloid.systemd
+      systemd_type: dropin
+      systemd_dropin_service_name: "concourse-worker-cleaner"
+      systemd_dropin_name: storage
+      systemd_dropin_priority: "01"
+      systemd_dropin_content:
+        - "[Unit]"
+        - "After={{ systemd_mount_name.stdout }}"
+        - "Requires={{ systemd_mount_name.stdout }}"
+      when: var_lib_device != "nodevice" and concourse_service_worker_cleaner_enabled is defined and concourse_service_worker_cleaner_enabled
+      tags:
+        - notforbuild
+
+    - role: cycloid.systemd
+      systemd_type: dropin
+      systemd_dropin_service_name: "concourse-worker"
+      systemd_dropin_name: storage
+      systemd_dropin_priority: "01"
+      systemd_dropin_content:
+        - "[Unit]"
+        - "After={{ systemd_mount_name.stdout }}"
+        - "Requires={{ systemd_mount_name.stdout }}"
+      when: var_lib_device != "nodevice"
+      tags:
+        - notforbuild
+
+    - role: cycloid.systemd
+      systemd_type: dropin
+      systemd_dropin_service_name: "concourse-worker"
+      systemd_dropin_name: memorylimit
+      systemd_dropin_priority: "02"
+      systemd_dropin_content:
+        - "[Service]"
+        - "MemoryLimit={{ (ansible_memtotal_mb * 0.9) | int | abs }}M"
+      tags:
+        - notforbuild
+
+    - role: cycloid.concourse
+      tags:
+        - concourse
+
+  tasks:
+    # jq used by user-data to send cloudformation signal
+    - name: Install jq for user-data signal
+      apt:
+        name: jq
+        state: present
+
+    - name: Install btrfs tools
+      apt:
+        name: btrfs-progs
+        state: present
+      when: fs_volume_type == "btrfs"
+
+    - name: Adding sysctl config
+      lineinfile:
+        path: /etc/sysctl.d/99-net.conf
+        regexp: "^{{ item.name }}="
+        line: "{{ item.name }}={{ item.value }}"
+        owner: root
+        create: yes
+        group: root
+        mode: 0644
+      with_items: "{{ sysctl_configs }}"
+
+    # Ensure worker is started and configured at first boot
+    - name: configure worker service | concourse
+      service:
+        name: concourse-worker
+        enabled: yes
+      tags:
+        - notforbuild
+    - name: restart concourse worker
+      service:
+        name: concourse-worker
+        state: restarted
+        enabled: yes
+      tags:
+        - notforbuild
+
+    # If cleaner is enabled make sure it will be run at next startup
+    - name: configure worker cleaner service | concourse
+      service:
+        name: concourse-worker-cleaner
+        enabled: "{{ concourse_service_worker_cleaner_enabled }}"
+      tags:
+        - notforbuild
+
+    # If watchdog is enabled, configure and start it
+    - name: configure worker watchdog service | concourse
+      service:
+        name: concourse-worker-watchdog
+        enabled: "{{ concourse_service_watchdog_enabled }}"
+      tags:
+        - notforbuild
+    - name: start concourse worker-watchdog
+      service:
+        name: concourse-worker-watchdog
+        state: started
+        enabled: yes
+      tags:
+        - notforbuild
+      when: concourse_service_watchdog_enabled

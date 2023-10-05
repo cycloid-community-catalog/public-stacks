@@ -1,0 +1,9 @@
+extends: relaxed
+
+ignore: |
+  .env/
+  .cache/
+
+rules:
+  line-length:
+    max: 200

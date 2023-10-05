@@ -1,0 +1,75 @@
+---
+dependency:
+  name: galaxy
+  options:
+    vvv: True
+    role-file: requirements.yml
+driver:
+  name: docker
+lint:
+  name: yamllint
+  options:
+    config-data: "{extends: relaxed, rules: {line-length: {max: 300}}}"
+platforms:
+  - name: mysql
+    image: mysql:5
+    env:
+      MYSQL_USER: magento
+      MYSQL_PASSWORD: s3cr3t
+      MYSQL_DATABASE: magento
+      MYSQL_ROOT_PASSWORD: r00t_s3cr3t
+    command: mysqld
+  - name: redis
+    image: redis
+    command: redis-server
+  - name: instance
+    image: debian:stretch
+    command: "/bin/systemd"
+    privileged: yes
+    published_ports:
+      - "80:80"
+    groups:
+      - tag_role_front
+      - tag_project_magento
+      - tag_engine_cycloid_io
+      - tag_cycloid_io_true
+      - tag_env_test
+    links:
+      - mysql:mysql
+      - redis:redis
+
+provisioner:
+  name: ansible
+  env:
+    MOLECULE_DEBUG: "true"
+  lint:
+    name: ansible-lint
+  playbooks:
+    converge: ../../magento.yml
+  options:
+    #vault-password-file: ../../.vault-password
+    extra-vars:
+      env: test
+      project: magento
+    #skip-tags: deploy
+    #vvv: "True"
+
+scenario:
+  name: default
+  # Override test sequence
+  test_sequence:
+    - lint
+    - destroy
+    - dependency
+    - syntax
+    - create
+    - prepare
+    - converge
+    #- idempotence
+    #- side_effect
+    - verify
+    - destroy
+verifier:
+  name: testinfra
+  lint:
+    name: flake8

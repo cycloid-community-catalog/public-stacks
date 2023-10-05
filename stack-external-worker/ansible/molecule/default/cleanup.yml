@@ -1,0 +1,10 @@
+---
+- name: Remove Concourse requirements
+  hosts: localhost
+  connection: local
+  gather_facts: no
+  tasks:
+    - name: delete molecule test directory
+      file:
+        path: /tmp/molecule_test
+        state: absent

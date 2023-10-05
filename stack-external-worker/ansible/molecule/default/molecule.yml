@@ -1,0 +1,120 @@
+---
+dependency:
+  name: galaxy
+  options:
+    # vvv: True
+    role-file: requirements.yml
+
+driver:
+  name: docker
+
+lint: |
+  set -e
+  export ANSIBLE_ROLES_PATH=~/.cache/molecule/ansible/default/roles:~/.ansible/roles:/usr/share/ansible/roles:/etc/ansible/roles
+  yamllint .
+  ansible-lint --offline
+  flake8
+
+platforms:
+  - name: psql
+    image: postgres:12-alpine
+    networks:
+      - name: molecule
+        aliases:
+          - psql
+    published_ports:
+      - "5432:5432"
+    command: "docker-entrypoint.sh postgres"
+    env:
+      POSTGRES_PASSWORD: concourse
+      POSTGRES_USER: super
+      POSTGRES_DB: concourse
+
+  - name: concourse-web
+    image: concourse/concourse:7.8.3
+    volumes:
+      - "/tmp/molecule_test:/concourse-keys:ro"
+    networks:
+      - name: molecule
+        aliases:
+          - concourse-web
+    links:
+      - "psql:psql"
+    command: "web"
+    published_ports:
+      - "2222:2222"
+      - "8080:8080"
+    env:
+      CONCOURSE_ADD_LOCAL_USER: concourse:concourse
+      CONCOURSE_MAIN_TEAM_LOCAL_USER: concourse
+      CONCOURSE_BIND_PORT: "8080"
+      CONCOURSE_EXTERNAL_URL: "http://localhost:8080"
+      CONCOURSE_POSTGRES_HOST: psql
+      CONCOURSE_POSTGRES_USER: super
+      CONCOURSE_POSTGRES_PASSWORD: concourse
+      CONCOURSE_POSTGRES_DATABASE: concourse
+      CONCOURSE_CLUSTER_NAME: dev
+
+  - name: instance
+    image: debian:stretch
+    volumes:
+      - "/tmp/molecule_test:/mnt/:ro"
+    published_ports:
+      - "9100:9100"
+    privileged: yes
+    command: "/bin/systemd"
+    links:
+      - "concourse-web:concourse-web"
+    groups:
+      - tag_project_external-worker
+      - tag_role_worker
+      - tag_cycloid_io_true
+      - tag_env_test
+
+provisioner:
+  name: ansible
+  # log: True
+  env:
+    MOLECULE_DEBUG: "true"
+    #ANSIBLE_KEEP_REMOTE_FILES: "1"
+  playbooks:
+    converge: ../../external-worker.yml
+  ansible_args:
+    - -e env=test
+    - -e project=external-worker
+    - -e customer=cycloid
+    - -e role=worker
+    - -e var_lib_device=/dev/xvdf
+  inventory:
+    group_vars:
+      localhost:
+        concourse_tsa_host: concourse-web
+        concourse_version: "7.8.3"
+        systemd_mount_device: 'LABEL=ephemeral0'
+        concourse_tsa_public_key: "{{lookup('file', '/tmp/molecule_test/tsa_host_key.pub')}}"
+        concourse_tsa_worker_key: "{{lookup('file', '/tmp/molecule_test/worker_key')}}"
+  options:
+    connection: ""
+    # vault-password-file: ../../.vault-password
+    # skip-tags: molecule-notest
+
+scenario:
+  name: default
+  # Override test sequence
+  test_sequence:
+    - dependency
+    - lint
+    - cleanup
+    - destroy
+    - syntax
+    - create
+    - prepare
+    - converge
+    #- idempotence
+    #- side_effect
+    - verify
+    - cleanup
+    - destroy
+
+verifier:
+  name: testinfra

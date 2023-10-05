@@ -1,0 +1,35 @@
+version: "2"
+name: Amazon requirements
+canonical: infra-amazon-req
+author: Cycloid
+status: private
+description: Create optionally an S3 bucket for terraform, IAM user as admin and codecommit
+  repository
+image: https://raw.githubusercontent.com/cycloid-community-catalog/infra-amazon-req/master/icon.png
+keywords:
+- s3
+- iam
+- codecommit
+- aws
+technologies:
+- technology: S3
+  version: n/a
+- technology: Codecommit
+  version: n/a
+- technology: IAM
+  version: n/a
+dependencies: []
+config:
+  default:
+    description: Default pipeline usecase
+    name: Default
+    pipeline:
+      pipeline:
+        path: pipeline/req.yml
+      variables:
+        destination: ($ project $)/pipeline/variables-($ environment $).yml
+        path: pipeline/variables.yml.sample
+    terraform:
+      req:
+        destination: ($ project $)/terraform/($ environment $)/req.tf
+        path: terraform/req.tf.sample

@@ -1,0 +1,51 @@
+---
+
+#
+# Prometheus
+#
+- hosts: tag_role_prometheus:&tag_project_{{project}}:&tag_cycloid_io_true:&tag_env_{{ env }}
+  become: yes
+  serial: 50%
+
+  vars_files:
+    - "environments/default_prometheus.yml"
+    - "environments/{{env}}-prometheus.yml"
+
+  pre_tasks:
+
+    - name: "Create SSL directory"
+      file:
+        path: "{{ certificates_dest }}"
+        state: directory
+      when: use_ssl | bool
+
+    - name: "Install SSL certificates"
+      copy:
+        src: "{{ item }}"
+        dest: "{{ certificates_dest }}"
+        mode: 0600
+      with_fileglob:
+        - "{{ certificates_src }}"
+      when: use_ssl | bool
+
+  roles:
+    # Install docker
+    - role: geerlingguy.docker
+      tags:
+        - docker
+
+    # Install prometheus, alertmanager and grafana
+    - role: cycloid.prometheus
+      path: /opt/prometheus
+      tags:
+        - prometheus
+
+    # Monitoring client part
+    - role: cycloid.telegraf
+      tags:
+        - telegraf
+
+    # Install nginx
+    - role: jdauphant.nginx
+      tags:
+        - nginx

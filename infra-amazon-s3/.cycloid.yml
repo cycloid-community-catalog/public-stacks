@@ -1,0 +1,39 @@
+---
+version: '2'
+# Configuration of the Cycloid stack
+name: 'Amazon S3 Bucket'
+canonical: 'infra-amazon-s3'
+status: 'public'
+description: |
+  This infrastructure will deploy a S3 bucket on AWS.
+keywords:
+  - 's3'
+  - 'iam'
+  - 'terraform'
+  - 'provider:aws'
+author: 'Cycloid'
+image: |
+  https://raw.githubusercontent.com/cycloid-community-catalog/infra-amazon-s3/master/icon.png
+technologies:
+  - technology: Amazon s3
+    version: n/a
+  - technology: terraform
+    version: n/a
+
+config:
+  default:
+    name: 'Default'
+    description: 'Default pipeline usecase'
+    # Configuration of the CI pipeline
+    pipeline:
+      pipeline:
+        path: 'pipeline/pipeline.yml'
+      variables:
+        path: 'pipeline/variables.sample.yml'
+        destination: '($ project $)/pipeline/variables-($ environment $).yml'
+
+    # Configuration of terraform to setup the infrastructure
+    terraform:
+      s3:
+        path: 'terraform/s3.tf.sample'
+        destination: '($ project $)/terraform/($ environment $)/s3.tf'

@@ -1,0 +1,71 @@
+---
+# Configuration of the Cycloid stack
+version: '2'
+name: 'VMware VM'
+canonical: 'stack-vmware'
+description: This stack deploys a VMware virtual machine with a selected operating system.
+author: 'Cycloid'
+image: 'https://cycloid-demo-stacks-logo.s3.eu-west-1.amazonaws.com/vmware.png'
+status: 'public'
+keywords:
+- VMware
+- vCenter
+- vSphere
+- ESXi
+- provider:vmware
+technologies:
+- technology: VMware
+- technology: ESXi
+  version: "7"
+- technology: vCenter
+  version: "7"
+
+config:
+  vcenter-template:
+    name: 'Clone a VM from a template using vCenter'
+    description: 'Deploys a VMware virtual machine by cloning a VM template using vCenter'
+    cloud_provider: vmware
+    # Pipeline and variable configuration for the vCenter-template pipeline use case
+    pipeline:
+      pipeline:
+        path: 'pipeline/pipeline.yml'
+      variables:
+        path: 'pipeline/variables-vcenter-template.sample.yml'
+        destination: '($ project $)/pipeline/($ environment $)/variables.yml'
+    # Configuration of terraform (leave .sample extension to prevent terraform executing the sample file)
+    terraform:
+      main:
+        path: 'terraform/vcenter-template/main.tf.sample'
+        destination: '($ project $)/terraform/($ environment $)/main.tf'
+  vcenter-iso:
+    name: 'Bootstrap a VM from an ISO using vCenter'
+    description: 'Bootstraps a VMware virtual machine using an OS file using vCenter'
+    cloud_provider: vmware
+    # Pipeline and variable configuration for the vCenter-iso pipeline use case
+    pipeline:
+      pipeline:
+        path: 'pipeline/pipeline.yml'
+      variables:
+        path: 'pipeline/variables-vcenter-iso.sample.yml'
+        destination: '($ project $)/pipeline/($ environment $)/variables.yml'
+    # Configuration of terraform (leave .sample extension to prevent terraform executing the sample file)
+    terraform:
+      main:
+        path: 'terraform/vcenter-iso/main.tf.sample'
+        destination: '($ project $)/terraform/($ environment $)/main.tf'
+  esxi-iso:
+    name: 'Bootstrap a VM from an ISO using ESXi'
+    description: 'Bootstraps a VMware virtual machine using an OS file using ESXi'
+    cloud_provider: vmware
+    # Pipeline and variable configuration for the esxi-iso pipeline use case
+    pipeline:
+      pipeline:
+        path: 'pipeline/pipeline.yml'
+      variables:
+        path: 'pipeline/variables-esxi-iso.sample.yml'
+        destination: '($ project $)/pipeline/($ environment $)/variables.yml'
+    # Configuration of terraform (leave .sample extension to prevent terraform executing the sample file)
+    terraform:
+      main:
+        path: 'terraform/esxi-iso/main.tf.sample'
+        destination: '($ project $)/terraform/($ environment $)/main.tf'

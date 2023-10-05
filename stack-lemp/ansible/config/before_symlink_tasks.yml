@@ -1,0 +1,8 @@
+# Example
+#- name: localcmd needed
+#  shell: php localcmd.php
+#  args:
+#    chdir: "{{ ansistrano_release_path.stdout }}"
+#  run_once: true
+#  become: yes
+#  become_user: "{{ ansistrano_user }}"

@@ -1,0 +1,30 @@
+{
+  "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "numberOfWorkers": {
+      "value": 1
+    },
+    "teamID": {
+      "value": "CYCLOID-TEAM-ID"
+    },
+    "workerKey": {
+      "value": "CYCLOID-WORKER-KEY-CREDENTIAL"
+    },
+    "vmSize": {
+      "value": "Standard_B1s"
+    },
+    "virtualNetworkName": {
+      "value": "VIRTUAL-NETWORK-NAME"
+    },
+    "subnetName": {
+      "value": "SUBNET-NAME"
+    },
+    "authenticationType": {
+      "value": "sshPublicKey"
+    },
+    "adminPasswordOrKey": {
+      "value": "GEN-SSH-PUB-KEY"
+    }
+  }
+}

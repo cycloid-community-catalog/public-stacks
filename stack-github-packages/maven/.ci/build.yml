@@ -1,0 +1,68 @@
+---
+platform: linux
+
+image_resource:
+  type: registry-image
+  source:
+    repository: openjdk
+    tag: 8-jdk-alpine
+
+inputs:
+  - name: merged-stack
+
+outputs:
+  - name: image
+
+caches:
+  - path: /root/.m2/repository
+
+run:
+  path: /bin/sh
+  args:
+    - '-exc'
+    - |
+      apk add --quiet --no-progress maven
+      mvn --version
+      mkdir ${HOME}/.m2
+      cat > ${HOME}/.m2/settings.xml << EOF
+      <settings xmlns="http://maven.apache.org/SETTINGS/1.0.0"
+          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+          xsi:schemaLocation="http://maven.apache.org/SETTINGS/1.0.0
+                              http://maven.apache.org/xsd/settings-1.0.0.xsd">
+
+          <activeProfiles>
+            <activeProfile>github</activeProfile>
+          </activeProfiles>
+
+          <profiles>
+            <profile>
+              <id>github</id>
+              <repositories>
+                <repository>
+                  <id>central</id>
+                  <url>https://repo1.maven.org/maven2</url>
+                  <releases><enabled>true</enabled></releases>
+                  <snapshots><enabled>true</enabled></snapshots>
+                </repository>
+                <repository>
+                  <id>github</id>
+                  <name>GitHub Apache Maven Packages</name>
+                  <url>${REGISTRY}</url>
+                  <releases><enabled>true</enabled></releases>
+                  <snapshots><enabled>true</enabled></snapshots>
+                </repository>
+              </repositories>
+            </profile>
+          </profiles>
+
+          <servers>
+            <server>
+              <id>github</id>
+              <username>${USERNAME}</username>
+              <password>${TOKEN}</password>
+            </server>
+          </servers>
+        </settings>
+      EOF
+      cd merged-stack/
+      mvn -q deploy

@@ -1,0 +1,25 @@
+---
+# Configuration of the Cycloid stack
+name: 'Go tests'
+canonical: 'stack-golang'
+status: 'public'
+description: |
+    This stack will allow you to run golang tests
+keywords:
+  - 'golang'
+  - 'tests'
+author: 'Cycloid'
+image: |
+    https://raw.githubusercontent.com/cycloid-community-catalog/stack-golang/master/icon.jpg
+technologies:
+  - technology: golang
+    version: n/a
+
+config:
+  # Configuration of the CI pipeline
+  pipeline:
+    pipeline:
+      path: 'pipeline/pipeline.yml'
+    variables:
+      path: 'pipeline/variables.sample.yml'
+      destination: '($ project $)/pipeline/variables-($ environment $).yml'

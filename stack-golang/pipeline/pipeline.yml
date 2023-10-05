@@ -1,0 +1,284 @@
+shared:
+  # Params: pull request params
+  - &pull-request-params
+    base_context: cycloid-ci
+    context: ((ci_context))
+    target_url: https://console.cycloid.io/organizations/((customer))/projects/((project))/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_ID
+    description: 'cycloid-ci build %s'
+
+  # Params: report github status params
+  - &report-github-status-params
+    commit: ((branch))
+    context: cycloid-ci/((ci_context))
+    target_url: https://console.cycloid.io/organizations/((customer))/projects/((project))/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_ID
+
+  - &slack-alert
+    author_link: ((slack_author_link))
+    author_name: ((slack_author_name))
+    title_link: https://console.cycloid.io/organizations/((customer))/projects/((project))/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_ID
+    fields:
+      - short: true
+        title: Project
+        value: ((project))
+      - short: true
+        title: Environment
+        value: ((env))
+
+  # Task : run unit tests
+  - &run-unit-tests
+    args:
+    - '-ec'
+    - |
+      export GOPATH=${PWD}/go
+      cd code
+      ((script))
+
+groups:
+- name: overview
+  jobs:
+    - test-pr
+    - test-((branch))
+    - publish-docker-image-((branch))
+- name: pull-request
+  jobs:
+    - test-pr
+- name: ship
+  jobs:
+    - test-((branch))
+    - publish-docker-image-((branch))
+
+resource_types:
+- name: pull-request
+  type: docker-image
+  source:
+    repository: teliaoss/github-pr-resource
+    tag: v0.15.0
+
+- name: report-github-status
+  type: docker-image
+  source:
+    # Use cycloid one because of https://github.com/dpb587/github-status-resource/pull/2
+    # repository: dpb587/github-status-resource
+    # tag: master
+    # repository: cycloid/github-status-resource
+    repository: cycloid/github-status-resource
+
+- name: slack-notification
+  type: docker-image
+  source:
+    repository: cfcommunity/slack-notification-resource
+    tag: latest
+
+- name: cycloid-events
+  type: docker-image
+  source:
+    repository: cycloid/cycloid-events-resource
+    tag: latest
+  privileged: false
+
+resources:
+  - name: report-status-((branch))
+    type: report-github-status
+    source:
+      access_token: ((git_access_token))
+      branch: ((branch))
+      repository: ((git_repository_name))
+
+  - name: pull-request
+    type: pull-request
+    source:
+      access_token: ((github_access_token.data))
+      repository: ((git_repository_name))
+
+  - name: git_repo-((branch))
+    type: git
+    source:
+      uri: ((git_repository))
+      branch: ((branch))
+      private_key: ((git_private_key))
+
+  - name: ((project))-docker-image
+    type: docker-image
+    source:
+      username: ((docker_hub_username))
+      password: ((docker_hub_password))
+      repository: ((docker_hub_repository))
+
+  - name: slack-alert
+    type: slack-notification
+    source:
+      url: ((slack_webhook_url))
+
+  - name: cycloid-events
+    type: cycloid-events
+    source:
+      api_login: ((cycloid_bot_account_login))
+      api_password: ((cycloid_bot_account_password))
+      api_url: 'https://http-api.cycloid.io'
+      icon: fa-code-branch
+      organization: ((customer))
+      severity: info
+      type: Custom
+      tags:
+        - key: project
+          value: ((project))
+        - key: env
+          value: ((env))
+
+  - name: golang-image
+    type: docker-image
+    source:
+      repository: ((docker_image))
+      tag: ((docker_image_tag))
+
+  - name: alpine-image
+    type: docker-image
+    source:
+      repository: alpine
+
+jobs:
+  - name: test-pr
+    max_in_flight: 1
+    build_logs_to_retain: 10
+    serial: true
+    plan:
+      - get: pull-request
+        resource: pull-request
+        trigger: true
+        version: every
+
+      - put: pull-request
+        params:
+          <<: *pull-request-params
+          path: pull-request
+          status: pending
+
+      - task: unit-tests
+        privileged: true
+        config:
+          platform: linux
+          image_resource:
+            type: docker-image
+            source:
+              repository: ((docker_image))
+              tag: ((docker_image_tag))
+          run:
+            path: /bin/bash
+            <<: *run-unit-tests
+          inputs:
+            - name: pull-request
+              path: code
+          caches:
+            - path: ((go_path_cache))
+        on_failure:
+          put: pull-request
+          params:
+            <<: *pull-request-params
+            path: pull-request
+            status: failure
+        on_success:
+          put: pull-request
+          params:
+            <<: *pull-request-params
+            path: pull-request
+            status: success
+
+  - name: test-((branch))
+    build_logs_to_retain: 10
+    max_in_flight: 1
+    plan:
+      - get: ((branch))
+        resource: git_repo-((branch))
+        trigger: true
+      - task: unit-tests
+        privileged: true
+        config:
+          platform: linux
+          image_resource:
+            type: docker-image
+            source:
+              repository: ((docker_image))
+              tag: ((docker_image_tag))
+          run:
+            path: /bin/bash
+            <<: *run-unit-tests
+          inputs:
+            - name: ((branch))
+              path: code
+          caches:
+            - path: ((go_path_cache))
+        on_success:
+          try:
+            put: report-status-((branch))
+            params:
+              <<: *report-github-status-params
+              state: success
+        on_failure:
+          try:
+            put: report-status-((branch))
+            params:
+              <<: *report-github-status-params
+              state: failure
+
+  - name: publish-docker-image-((branch))
+    build_logs_to_retain: 20
+    max_in_flight: 1
+    serial: true
+    plan:
+      - do:
+          - get: ((branch))
+            resource: git_repo-((branch))
+            trigger: true
+            passed: [ test-((branch)) ]
+          - get: golang
+            resource: golang-image
+            params:
+              save: true
+          - get: alpine
+            resource: alpine-image
+            params:
+              save: true
+          - put: ((project))-docker-image
+            params:
+              load_bases:
+                - golang
+                - alpine
+              build: ((branch))
+              tag_as_latest: true
+        on_failure:
+          do:
+            - put: slack-alert
+              params:
+                attachments:
+                  - <<: *slack-alert
+                    color: danger
+                    fallback: 'end - BUILD and PUBLISH of ((project)) image [FAIL]'
+                    title: '[FAIL]'
+            - put: cycloid-events
+              params:
+                severity: critical
+                message: |
+                        A new build image of ((project)) has failed on ((env)) environment
+                        </br>
+                        <ul>
+                        <li><em><a href="https://console.cycloid.io/organizations/((customer))/projects/((project))/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_ID">Build link</a></em></li>
+                        </ul>
+                title: Fail build image of ((project)) on ((env)) environment
+        on_success:
+          do:
+          - put: slack-alert
+            params:
+              attachments:
+                - <<: *slack-alert
+                  color: good
+                  fallback: 'end - BUILD and PUBLISH of ((project)) image [SUCCESS]'
+                  title: '[SUCCESS]'
+          - put: cycloid-events
+            params:
+              message: |
+                      A new build image of ((project)) has been done on ((env)) environment
+                      </br>
+                      <ul>
+                      <li><em><a href="https://console.cycloid.io/organizations/((customer))/projects/((project))/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_ID">Build link</a></em></li>
+                      </ul>
+              title: Success build image of ((project)) on ((env)) environment

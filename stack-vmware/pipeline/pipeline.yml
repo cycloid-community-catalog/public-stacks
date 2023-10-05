@@ -1,0 +1,188 @@
+# YAML anchors
+shared:
+# Task : sync and merge with rsync 2 rep. Used to merge stack and config
+- &merge-stack-and-config
+  platform: linux
+  image_resource:
+    type: docker-image
+    source:
+      repository: cycloid/cycloid-toolkit
+      tag: latest
+  run:
+    path: /usr/bin/merge-stack-and-config
+  outputs:
+  - name: merged-stack
+    path: "merged-stack"
+
+
+resource_types:
+- name: terraform
+  type: docker-image
+  source:
+    repository: ljfranklin/terraform-resource
+    tag: ((terraform_version))
+
+resources:
+- name: tfstate
+  type: terraform
+  icon: terraform
+  source:
+    env_name: ((env))
+    backend_type: s3
+    backend_config:
+      bucket: ((terraform_storage_bucket_name))
+      key: ((project))-((env)).tfstate
+      workspace_key_prefix: ((project))
+      region: ((aws_region))
+      access_key: ((aws_access_key))
+      secret_key: ((aws_secret_key))
+    vars:
+      vsphere_user: ((vsphere_user))
+      vsphere_password: ((vsphere_password))
+      vsphere_server: ((vsphere_server))
+      env: ((env))
+      project: ((project))
+      customer: ((customer))
+    env:
+      AWS_ACCESS_KEY_ID: ((aws_access_key))
+      AWS_DEFAULT_REGION: ((aws_region))
+      AWS_SECRET_ACCESS_KEY: ((aws_secret_key))
+
+# The Terraform stack (will be merged with the config)
+- name: git_stack-terraform
+  type: git
+  icon: git
+  source:
+    uri: ((stack_git_repository))
+    branch: ((stack_git_branch))
+    private_key: ((config_git_private_key))
+    paths:
+      - ((stack_terraform_path))/*
+
+# The Terraform config (will be merged with the stack)
+- name: git_config-terraform
+  type: git
+  icon: git
+  source:
+    uri: ((config_git_repository))
+    branch: ((config_git_branch))
+    private_key: ((config_git_private_key))
+    paths:
+      - ((config_terraform_path))/*
+
+groups:
+- name: overview
+  jobs:
+    - terraform-plan
+    - terraform-apply
+    
+- name: destroy
+  jobs:
+    - terraform-destroy
+
+
+jobs:
+  # Merge and trigger a plan whenever there is a commit in Terraform stack or config
+  - name: terraform-plan
+    serial: true
+    max_in_flight: 1
+    build_logs_to_retain: 10
+    plan:
+      - in_parallel:
+        - get: git_stack-terraform
+          trigger: true
+
+        - get: git_config-terraform
+          trigger: true
+
+      - task: merge-stack-and-config
+        config:
+          <<: *merge-stack-and-config
+          inputs:
+          - name: git_config-terraform
+            path: "config"
+          - name: git_stack-terraform
+            path: "stack"
+        params:
+          CONFIG_PATH: ((config_terraform_path))
+          STACK_PATH: ((stack_terraform_path))
+
+      - put: tfstate
+        params:
+          plan_only: true
+          terraform_source: merged-stack/
+
+  # Merge and trigger an apply whenever there is a terraform plan passed successfully
+  - name: terraform-apply
+    serial: true
+    max_in_flight: 1
+    build_logs_to_retain: 10
+    plan:
+      - in_parallel:
+        - get: git_stack-terraform
+          passed:
+            - terraform-plan
+
+        - get: git_config-terraform
+          passed:
+            - terraform-plan
+
+        - get: tfstate
+          trigger: true
+          passed:
+            - terraform-plan
+
+      - task: merge-stack-and-config
+        config:
+          <<: *merge-stack-and-config
+          inputs:
+          - name: git_config-terraform
+            path: "config"
+          - name: git_stack-terraform
+            path: "stack"
+        params:
+          CONFIG_PATH: ((config_terraform_path))
+          STACK_PATH: ((stack_terraform_path))
+
+      - put: tfstate
+        params:
+          plan_run: true
+          terraform_source: merged-stack/
+
+
+  # Destroy the demo infrastructure after its creation (after a timer and every hour)
+  - name: terraform-destroy
+    max_in_flight: 1
+    build_logs_to_retain: 10
+    plan:
+      - in_parallel:
+        - get: git_stack-terraform
+          passed:
+            - terraform-plan
+
+        - get: git_config-terraform
+          passed:
+            - terraform-plan
+
+        - get: tfstate
+          passed:
+            - terraform-apply
+
+      - task: merge-stack-and-config
+        config:
+          <<: *merge-stack-and-config
+          inputs:
+          - name: git_config-terraform
+            path: "config"
+          - name: git_stack-terraform
+            path: "stack"
+        params:
+          CONFIG_PATH: ((config_terraform_path))
+          STACK_PATH: ((stack_terraform_path))
+
+      - put: tfstate
+        params:
+          action: destroy
+          terraform_source: merged-stack/
+        get_params:
+          action: destroy

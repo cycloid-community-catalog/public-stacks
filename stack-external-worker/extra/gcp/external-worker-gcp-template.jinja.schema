@@ -1,0 +1,115 @@
+info:
+  title: Cycloid workers
+  author: Cycloid.io
+  description: |
+    Deploy external workers pool for Cycloid.io.
+    Using a Debian image based IGM running in a region.
+    This templates creates:
+    + Instance Template
+    + Instance Group Manager
+    + Autoscaler
+  version: 1.0
+
+imports:
+- path: external-worker-gcp-template.jinja
+
+required:
+- workerKey
+- teamId
+
+properties:
+  teamId:
+    description: Cycloid CI team ID
+    type: string
+  workerKey:
+    Description: Cycloid CI worker private key. Base64 encoded
+    Type: string
+  schedulerApiAddress:
+    description: "Scheduler API url: Cycloid CI scheduler http api address (On-premises)"
+    type: string
+    default: https://scheduler.cycloid.io
+  schedulerHost:
+    description: "Scheduler host: Cycloid CI scheduler host address (On-premises)"
+    type: string
+    default: scheduler.cycloid.io
+  schedulerPort:
+    description: "Scheduler port: Cycloid CI scheduler port (On-premises)"
+    type: integer
+    default: 32223
+  tsaPublicKey:
+    description: "Scheduler TSA public key: Cycloid CI scheduler public key (On-premises)"
+    type: string
+    default: "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQC+To6R1hDAO00Xrt8q5Md38J9dh+aMIbV2GTqQkFcKwVAB6czbPPcitPWZ7y3Bw1dKMC8R7DGRAt01yWlkYo/voRp5prqKMc/uzkObhHNy42eJgZlStKU1IMw/fx0Rx+6Y3NClCCOecx415dkAH+PFudKosq4pFB9KjfOp3tMHqirMSF7dsbM3910gcPBL2NFHkOZ4cNfeSztXEg9wy4SExX3CHiUyLiShpwXa+C2f6IPdOJt+9ueXQIL0hcMmd12PRL5UU6/e5U5kldM4EWiJoohVbfoA1CRFF9QwJt6H3IiZPmd3sWqIVVy6Vssn5okjYLRwCwEd8+wd8tI6OnNb"
+
+  region:
+    type: string
+    default: "europe-west1"
+    description: Region in which to deploy the workers
+  numberOfWorkers:
+    type: integer
+    description: Number of Cycloid CI workers
+    default: 1
+  instanceType:
+    type: string
+    default: "n1-standard-4"
+    description: GCP compute instance type used for Cycloid worker
+  preemptible:
+    type: boolean
+    default: false
+    description: Enable preemptible instance type. Warning enabling this could make some jobs fail if the instance is killed.
+
+  minNumberOfWorkers:
+    description: Minimum number of Cycloid CI workers
+    type: integer
+    default: 1
+  maxNumberOfWorkers:
+    description: Maximum number of Cycloid CI workers
+    type: integer
+    default: 2
+  organizationTag:
+    type: string
+    description: Name of the Cycloid Organization, used as GCP label
+  projectTag:
+    type: string
+    default: "cycloid-ci-workers"
+    description: Name of the project, used as GCP label
+  environmentTag:
+    type: string
+    default: "prod"
+    description: Name of the environment, used as GCP label
+  roleTag:
+    type: string
+    default: "workers"
+    description: Name for the worker role, used as GCP label
+  diskType:
+    type: string
+    default: "pd-standard"
+    description: Type of the disk used for worker instances
+  volumeSize:
+    description: Size of the EBS volume for Cycloid CI worker
+    type: integer
+    default: 150
+  stackBranch:
+    description: Git branch of the external-worker stack to use (Advanced).
+    type: string
+    default: master
+  workerVersion:
+    description: Force a specific worker version. Default it will use the version exposed by the scheduler, https://scheduler_api_address/api/v1/info
+    type: string
+    default: ""
+  workerRuntime:
+    description: Change the default worker container runtimes https://concourse-ci.org/concourse-worker.html#configuring-runtimes
+    type: string
+    default: ""
+  workerTag:
+    description: Specify a TAG for worker https://concourse-ci.org/concourse-worker.html#tags-and-team-workers
+    type: string
+    default: ""
+  workerDnsServer:
+    description: "Override DNS server or add additionals one depending of the worker runtime specified. ex '1.1.1.1,8.8.8.8'"
+    type: string
+    default: ""
+  debugMode:
+    description: Enable of disable debug mode. Debug will ensure the worker keep running even if the initial setub boot script is failing.
+    type: boolean
+    default: false

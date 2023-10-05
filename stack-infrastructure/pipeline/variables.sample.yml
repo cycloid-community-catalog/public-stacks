@@ -1,0 +1,76 @@
+#
+# Terraform
+#
+
+# Amazon access to use to run terraform. Usually admin account to be able to create Amazon services.
+
+#. aws_access_key (required): ((aws.access_key))
+#+ Amazon AWS access key for Terraform. see value format [Here](https://docs.cycloid.io/advanced-guide/integrate-and-use-cycloid-credentials-manager.html#vault-in-the-pipeline)
+aws_access_key: ((aws.access_key))
+
+#. aws_secret_key (required): ((aws.secret_key))
+#+ Amazon AWS secret key for Terraform. see value format [Here](https://docs.cycloid.io/advanced-guide/integrate-and-use-cycloid-credentials-manager.html#vault-in-the-pipeline)
+aws_secret_key: ((aws.secret_key))
+
+#. aws_default_region (required): eu-west-1
+#+ Amazon AWS region to use for Terraform.
+aws_default_region: eu-west-1
+
+#. terraform_storage_bucket_name (required): ($ organization_canonical $)-terraform-remote-state
+#+ AWS S3 bucket name to store terraform remote state file.
+terraform_storage_bucket_name: ($ organization_canonical $)-terraform-remote-state
+
+#
+# Ansible
+#
+
+#. ansible_vault_password (required): ((custom_ansible_vault_password))
+#+ Password used by ansible vault to decrypt your vaulted files.
+ansible_vault_password: ((custom_ansible_vault_password))
+
+#. bastion_keypair (required): ((ssh_bastion.ssh_key))
+#+ bastion SSH private key used by ansible to connect on aws ec2 instances and the bastion itself.
+bastion_keypair: ((ssh_bastion.ssh_key))
+
+
+#
+# Repos
+#
+
+#. config_git_repository (required): ssh://myUserId@git-codecommit.eu-west-1.amazonaws.com/v1/repos/myRepo
+#+ Git repository url containing the config of the stack.
+config_git_repository: ssh://myUserId@git-codecommit.eu-west-1.amazonaws.com/v1/repos/myRepo
+
+#. config_git_branch (required): config
+#+ Branch of the config git repository.
+config_git_branch: config
+
+#. config_git_private_key (required): ((ssh_config_ro.ssh_key))
+#+ SSH key pair to fetch the config git repository.
+config_git_private_key: ((ssh_config_ro.ssh_key))
+
+
+#. stack_git_repository (required): https://github.com/cycloid-community-catalog/stack-infrastructure
+#+ Url to the git repository containing infrastructure stack source code.
+stack_git_repository: https://github.com/cycloid-community-catalog/stack-infrastructure
+
+#. stack_git_branch (required): master
+#+ Git branch of the stack source code.
+stack_git_branch: master
+
+
+#
+# Default variables that shouldn't be changed except if needed
+#
+
+#. env (required): ($ environment $)
+#+ Name of the project's environment.
+env: ($ environment $)
+
+#. project (required): ($ project $)
+#+ Name of the project.
+project: ($ project $)
+
+#. customer (required): ($ organization_canonical $)
+#+ Name of the Cycloid Organization, used as customer variable name.
+customer: ($ organization_canonical $)

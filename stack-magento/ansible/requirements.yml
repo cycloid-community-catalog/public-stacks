@@ -1,0 +1,25 @@
+---
+- src: https://github.com/cycloidio/ansible-php
+  version: master
+  name: cycloid.php
+  scm: git
+
+- src: https://github.com/jdauphant/ansible-role-nginx.git
+  name: jdauphant.nginx
+  scm: git
+
+- src: https://github.com/cycloidio/ansible-deployment
+  version: master
+  name: cycloid.deployment
+  scm: git
+
+- src: https://github.com/cycloidio/ansible-fluentd
+  version: master
+  name: cycloid.fluentd
+  scm: git
+
+# FIXME : Remove this if we don't use EFS
+# - src: git@github.com:cycloidio/ansible-systemd
+#   version: master
+#   name: cycloid.systemd
+#   scm: git

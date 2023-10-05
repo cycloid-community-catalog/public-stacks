@@ -1,0 +1,16 @@
+---
+
+- name: Install depends
+  hosts: all
+  gather_facts: no
+  tasks:
+    - name: install apt depends
+      apt:
+        name: "{{ packages }}"
+        state: present
+      vars:
+        packages:
+        - net-tools
+        - lsb-release
+        - curl
+        - procps

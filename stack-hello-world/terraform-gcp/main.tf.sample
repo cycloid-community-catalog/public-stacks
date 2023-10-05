@@ -1,0 +1,12 @@
+module "cloud-function" {
+
+  #####################################
+  # Do not modify the following lines #
+  source = "module-cloud-function"
+
+  project  = "${var.project}"
+  env      = "${var.env}"
+  customer = "${var.customer}"
+  #####################################
+
+}

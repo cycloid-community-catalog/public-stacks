@@ -1,0 +1,15 @@
+---
+- name: stop concourse web
+  service:
+    name: concourse-web
+    state: stopped
+  become: yes
+
+- name: restart concourse web
+  service:
+    name: concourse-web
+    state: restarted
+    enabled: yes
+  become: yes
+  become_user: root
+

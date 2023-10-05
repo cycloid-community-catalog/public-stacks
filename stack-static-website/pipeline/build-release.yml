@@ -1,0 +1,25 @@
+---
+platform: linux
+image_resource:
+  type: docker-image
+  source:
+    repository: cycloid/cycloid-toolkit
+    tag: latest
+run:
+  path: /bin/bash
+  args:
+  - -xec
+  - |
+    DIR=${PWD}
+
+    echo "### Build release"
+    cd ${DIR}/code
+    ls
+
+    cp -a ${DIR}/code/* ${DIR}/release/
+params:
+inputs:
+- name: git-website
+  path: code
+outputs:
+- name: release

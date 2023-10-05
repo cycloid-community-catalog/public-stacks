@@ -1,0 +1,136 @@
+---
+default:
+  pipeline:
+    Terraform:
+      - name: "AWS access key"
+        description: "Amazon AWS access key for Terraform."
+        key: aws_access_key
+        widget: cy_cred
+        type: string
+        default: "((aws.access_key))"
+      - name: "AWS secret key"
+        description: "Amazon AWS secret key for Terraform."
+        key: aws_secret_key
+        widget: cy_cred
+        type: string
+        default: "((aws.secret_key))"
+      - name: "Amazon AWS region"
+        description: "Amazon AWS region to use for Terraform."
+        key: aws_default_region
+        widget: auto_complete
+        type: string
+        values: ["eu-north-1","ap-south-1","eu-west-3","eu-west-2","eu-west-1","ap-northeast-2","ap-northeast-1","sa-east-1","ca-central-1","ap-southeast-1","ap-southeast-2","eu-central-1","us-east-1","us-east-2","us-west-1","us-west-2"]
+        default: eu-west-1
+      - name: "Terraform storage bucket"
+        description: "AWS S3 bucket name to store terraform remote state file."
+        key: terraform_storage_bucket_name
+        widget: simple_text
+        type: string
+        default: ($ organization_canonical $)-terraform-remote-state
+    Repos:
+      - name: "Config repository"
+        key: config_git_repository
+        type: string
+        widget: cy_crs
+        description: "Git repository URL containing the config of the stack."
+        default: "git@github.com:MyUser/config.git"
+        required: true
+      - name: "Config git key"
+        description: "SSH key pair to fetch the config Git repository."
+        key: config_git_private_key
+        type: string
+        widget: cy_cred
+        default: "((ssh_config.ssh_key))"
+        required: true
+      - name: "Config branch"
+        description: "Branch of the config Git repository."
+        key: config_git_branch
+        widget: cy_branch
+        type: string
+        description: "The branch used by the config repository"
+        source: config_git_repository
+        default: "config"
+        required: true
+    Cycloid:
+      - name: "Stack branch"
+        description: "Branch to use on the public stack Git repository."
+        key: stack_git_branch
+        widget: simple_text
+        type: string
+        default: master
+
+  terraform:
+    network:
+      - name: "Aws VPC ID"
+        description: "Amazon VPC id on which create each components."
+        key: vpc_id
+        widget: simple_text
+        type: string
+        required: true
+      - name: "Subnets IDs"
+        description: "Amazon subnets IDs on which create each components."
+        key: private_subnets_ids
+        widget: text_area
+        type: array
+        default:
+            - subnet-id1
+            - subnet-id2
+        required: true
+      - name: "Extra AWS tags"
+        description: "Dict of extra tags to add on aws resources."
+        key: extra_tags
+        widget: text_area
+        type: map
+        default: {}
+      - name: "Allowed security group"
+        description: "Amazon source security group ID which will be allowed to connect on fronts port 22 (ssh)."
+        key: allowed_secgroup
+        widget: simple_text
+        type: string
+        default: ""
+    application:
+      - name: "Elasticsearch volume size"
+        unit: Go
+        description: "The size of EBS volumes attached to data nodes."
+        key: es_volume_size
+        widget: slider_range
+        type: integer
+        default: 15
+        values:
+            - 10
+            - 250
+      - name: "Elasticsearch zone awareness enabled"
+        description: "Indicates whether zone awareness is enabled."
+        key: es_zone_awareness_enabled
+        widget: switch
+        type: boolean
+        default: false
+      - name: "Elasticsearch version"
+        description: "The version of Elasticsearch to deploy."
+        key: es_version
+        widget: simple_text
+        type: string
+        default: "7.1"
+      - name: "Instance type"
+        description: "Instance type of data nodes in the cluster."
+        key: es_instance_type
+        widget: auto_complete
+        type: string
+        default: "t2.small.elasticsearch"
+        values:
+            - "t2.small.elasticsearch"
+            - "t2.medium.elasticsearch"
+            - "t2.large.elasticsearch"
+            - "t2.xlarge.elasticsearch"
+      - name: "Number of instances"
+        description: "Number of instances in the cluster."
+        key: es_instance_count
+        widget: number
+        type: integer
+        default: 1
+      - name: "Automated snapshot start hour"
+        description: "Hour during which the service takes an automated daily snapshot of the indices in the domain"
+        key: es_automated_snapshot_start_hour
+        widget: number
+        type: integer
+        default: 23

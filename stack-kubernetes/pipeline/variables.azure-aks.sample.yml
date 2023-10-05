@@ -1,0 +1,112 @@
+#
+# Terraform
+#
+
+# Azure access to use to run terraform.
+
+#. azure_subscription_id (required): ((azure_admin.subscription_id))
+#+ Azure subscription ID to use for Terraform.
+azure_subscription_id: ((azure_admin.subscription_id))
+
+#. azure_tenant_id (required): ((azure_admin.tenant_id))
+#+ Azure tenant ID to use for Terraform.
+azure_tenant_id: ((azure_admin.tenant_id))
+
+#. azure_client_id (required): ((azure_admin.client_id))
+#+ Azure client ID to use for Terraform.
+azure_client_id: ((azure_admin.client_id))
+
+#. azure_client_secret (required): ((azure_admin.client_secret))
+#+ Azure client secret to use for Terraform.
+azure_client_secret: ((azure_admin.client_secret))
+
+#. azure_env (required): public
+#+ Azure environment to use for Terraform. Can be either `public`, `usgovernment`, `german` or `china`.
+azure_env: "public"
+
+#. azure_location (required): West Europe
+#+ Azure location to use for terraform. 
+azure_location: "West Europe"
+
+# AKS
+# The cluster needs a Service Principal that you can create with the following Azure CLI command:
+# `az ad sp create-for-rbac --name ($ project $)-($ environment $)`
+# Then create a `custom_($ project $)-($ environment $)-sp` Cycloid custom Credential
+# with two fields `client_id` and `client_secret` referencing the newly created Service Principal.
+
+#. aks_service_principal_client_id (required): ((custom_($ project $)-($ environment $)-sp.client_id))
+#+ The Client ID for the Service Principal used by the AKS cluster.
+aks_service_principal_client_id: ((custom_($ project $)-($ environment $)-sp.client_id))
+
+#. aks_service_principal_client_secret (required): ((custom_($ project $)-($ environment $)-sp.client_secret))
+#+ The Client Secret for the Service Principal used by the AKS cluster.
+aks_service_principal_client_secret: ((custom_($ project $)-($ environment $)-sp.client_secret))
+
+# Azure access to store terraform remote state file.
+
+#. terraform_resource_group_name (required): ($ organization_canonical $)-terraform
+#+ Azure Resource Group of the Storage Account to use to store terraform remote state file.
+terraform_resource_group_name: ($ organization_canonical $)-terraform
+
+#. terraform_storage_account_name (required): ((azure_storage_aks.account_name))
+#+ Azure Storage Account name to use to store terraform remote state file.
+terraform_storage_account_name: ((azure_storage_aks.account_name))
+
+#. terraform_storage_account_key (required): ((azure_storage_aks.access_key))
+#+ Azure Storage Account key to use to store terraform remote state file.
+terraform_storage_access_key: ((azure_storage_aks.access_key))
+
+#. terraform_storage_container_name (required): ($ organization_canonical $)
+#+ Azure Storage container name to store terraform remote state file.
+terraform_storage_container_name: ($ organization_canonical $)
+
+#. terraform_storage_container_path (required): ($ project $)/($ environment $)
+#+ Azure Storage container path to store terraform remote state file.
+terraform_storage_container_path: ($ project $)/($ environment $)
+
+
+#
+# Repos
+#
+
+#. config_git_repository (required): git@github.com:MyUser/config-aks.git
+#+ Git repository URL containing the config of the stack.
+config_git_repository: git@github.com:MyUser/config-aks.git
+
+#. config_git_branch (required): master
+#+ Branch of the config Git repository.
+config_git_branch: master
+
+#. config_git_private_key (required): ((ssh_config.ssh_key))
+#+ SSH key pair to fetch the config Git repository.
+config_git_private_key: ((ssh_config.ssh_key))
+
+
+#
+# Default variables that shouldn't be changed except if needed
+#
+
+#. env (required): ($ environment $)
+#+ Name of the project's environment.
+env: ($ environment $)
+
+#. project (required): ($ project $)
+#+ Name of the project.
+project: ($ project $)
+
+#. customer (required): ($ organization_canonical $)
+#+ Name of the Cycloid Organization, used as customer variable name.
+customer: ($ organization_canonical $)
+organization: ($ organization_canonical $)
+
+#. stack_git_branch (required): master
+#+ Branch to use on the public stack Git repository
+stack_git_branch: master
+
+#. config_terraform_path (required): ($ project $)/terraform/($ environment $)
+#+ Path of Terraform files in the config git repository
+config_terraform_path: ($ project $)/terraform/($ environment $)
+
+#. terraform_version (required): '1.0.4'
+#+ terraform version used to execute your code.
+terraform_version: '1.0.4'

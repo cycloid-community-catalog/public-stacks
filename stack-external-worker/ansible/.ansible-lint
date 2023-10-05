@@ -1,0 +1,6 @@
+exclude_paths:
+- .env/
+- .cache/
+
+warn_list: # or 'skip_list' to silence them completely
+- no-handler # Tasks that run when changed should likely be handlers

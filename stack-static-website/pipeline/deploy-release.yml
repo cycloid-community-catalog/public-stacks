@@ -1,0 +1,24 @@
+---
+platform: linux
+image_resource:
+  type: docker-image
+  source:
+    repository: cycloid/cycloid-toolkit
+    tag: latest
+run:
+  path: /bin/bash
+  args:
+  - -xec
+  - |
+    DIR=${PWD}
+
+    BUCKET=$(jq -r .s3_id tfstate/metadata)
+    echo "### Deploy release"
+    cd ${DIR}/release/
+    aws s3 cp --cache-control public,max-age=${MAX_AGE} . s3://$BUCKET/ --recursive --quiet
+params:
+  MAX_AGE: 2628000
+
+inputs:
+- name: release
+- name: tfstate

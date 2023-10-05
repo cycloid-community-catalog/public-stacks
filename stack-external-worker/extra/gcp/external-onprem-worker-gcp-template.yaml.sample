@@ -1,0 +1,18 @@
+imports:
+- path: https://raw.githubusercontent.com/cycloid-community-catalog/stack-external-worker/master/extra/gcp/external-worker-gcp-template.jinja
+
+resources:
+- name: cycloid-gcp-worker
+  type: external-worker-gcp-template.jinja
+  properties:
+    volumeSize: 150
+    numberOfWorkers: 1
+    organizationTag: ${CYCLOID_ORG}
+    teamId: ${CYCLOID_TEAM}
+    projectTag: ${CYCLOID_WORKER_NAME}
+    workerKey: ${CYCLOID_WORKER_KEY}
+    instanceType: n1-standard-4
+    schedulerApiAddress: ${CYCLOID_SCHEDULER_API_ADDRESS}
+    schedulerHost: ${CYCLOID_SCHEDULER_HOST}
+    schedulerPort: ${CYCLOID_SCHEDULER_PORT}
+    tsaPublicKey: ${CYCLOID_SCHEDULER_PUB_KEY}

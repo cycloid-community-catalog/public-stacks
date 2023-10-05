@@ -1,0 +1,293 @@
+
+# Config module is used to generate special datas shared with other modules like cluster_name
+module "config" {
+  #####################################
+  # Do not modify the following lines #
+  source = "./module-config"
+
+  project  = var.project
+  env      = var.env
+  customer = var.customer
+
+  #####################################
+  azure_location = var.azure_location
+  cluster_name = var.cluster_name
+  resource_group_name = var.resource_group_name
+}
+
+# By default this stack will create a dedicated network for the AKS Cluster
+# as the default pod networking will be using this VPC.
+#
+# If you want to manage the network used by the AKS Cluster elsewhere, comment
+# the following `network` module and change all `module.vpc.` references to
+# the matching required informations from your own setup.
+#
+module "vpc" {
+  #####################################
+  # Do not modify the following lines #
+  source = "./module-vpc"
+
+  project  = var.project
+  env      = var.env
+  customer = var.customer
+  #####################################
+
+  ###
+  # General
+  ###
+
+  #. extra_tags (optional): {}
+  #+ Dict of extra tags to add on aws resources. format { "foo" = "bar" }.
+
+  ###
+  # Networking
+  ###
+
+  #. address_space (optional): 10.8.0.0/16
+  #+ The virtual network address space.
+  address_space = "10.8.0.0/14"
+
+  #. subnets (optional, list): {"nodes" = "10.8.0.0/16", "pods"  = "10.9.0.0/16", "loadbalancers" = "10.11.0.0/16",}
+  #+ The private subnets for the VPC.
+  subnets = {
+    "nodes" = "10.8.0.0/16",
+    "pods"  = "10.9.0.0/16",
+    # Azure don't like Terraform to create the service subnet used by AKS so we should skip it
+    # "services" = "10.10.0.0/16",
+    "loadbalancers" = "10.11.0.0/16",
+  }
+
+  #. ssh_allowed_ips (optional): ["*"]
+  #+ Allow Inbound IP CIDRs to access the instances via SSH.
+
+  ###
+  # Required (should probably not be touched)
+  ###
+
+  resource_group_name = module.config.azurerm_resource_group_name
+  location            = module.config.azurerm_resource_group_location
+
+  depends_on = [
+    module.config,
+  ]
+}
+
+module "aks" {
+  #####################################
+  # Do not modify the following lines #
+  source = "./module-aks"
+
+  project  = var.project
+  env      = var.env
+  customer = var.customer
+  #####################################
+
+  ###
+  # General
+  ###
+
+  #. extra_tags (optional): {}
+  #+ Dict of extra tags to add on aws resources. format { "foo" = "bar" }.
+
+  ###
+  # Networking
+  ###
+
+  #. network_plugin (optional): azure
+  #+ AKS cluster network plugin to use, can be either `azure` or `kubenet`.
+
+  #. network_policy_plugin (optional): azure
+  #+ AKS cluster network policy plugin to use, can be either `azure` or `calico`. `azure` only available with `network_plugin = azure`.
+
+  #. network_pod_cidr (optional): 10.9.0.0/16
+  #+ AKS cluster pod CIDR to use, required if `network_plugin = kubenet`.
+  network_pod_cidr = "10.9.0.0/16"
+
+  #. network_service_cidr (optional): 10.10.0.0/16
+  #+ AKS cluster service CIDR to use, required if `network_plugin = azure`.
+  network_service_cidr = "10.10.0.0/16"
+
+  #. network_docker_bridge_cidr (optional): 172.17.0.1/16
+  #+ AKS cluster service CIDR to use, required if `network_plugin = azure`.
+
+  #. network_load_balancer_sku (optional): basic
+  #+ AKS cluster load balancer SKU, can be either `basic` or `standard`.
+
+  ###
+  # Control plane
+  ###
+
+  #. cluster_version (optional): null
+  #+ AKS Cluster version to use, defaults to the latest recommended but no auto-upgrade.
+
+  #. cluster_allowed_ips (optional): []
+  #+ Allow Inbound IP CIDRs to access the Kubernetes API.
+
+  #. node_admin_username (optional): cycloid
+  #+ AKS node admin username for SSH connection.
+
+  #. node_ssh_key (optional): ""
+  #+ AKS node admin SSH key for SSH connection.
+
+  #. enable_pod_security_policy (optional): false
+  #+ Should be `true` to enable Pod Security Policies. Pod Security Policies needs to be enabled via the Azure CLI. @see https://github.com/Azure/AKS/blob/master/previews.md#kubernetes-pod-security-policies-
+
+  #. enable_rbac (optional): true
+  #+ Should be `true` to enable Role Based Access Control.
+
+  #. rbac_use_active_directory (optional): false
+  #+ Should be `true` to enable Role Based Access Control with an Azure Active Directory.
+
+  #. rbac_client_app_id (optional): ""
+  #+ The Client ID of an Azure Active Directory Application for Role Based Access Control.
+
+  #. rbac_server_app_id (optional): ""
+  #+ The Server ID of an Azure Active Directory Application for Role Based Access Control.
+
+  #. rbac_client_app_secret (optional): ""
+  #+ The Server Secret of an Azure Active Directory Application for Role Based Access Control.
+
+  #. enable_oms_agent (optional): true
+  #+ Should be `true` to enable OMS agent for log analytics.
+
+  #. log_analytics_workspace_sku (optional): PerGB2018
+  #+ The Log Analytics workspace SKU to use if `enable_oms_agent = true`.
+
+  #. log_retention_in_days (optional): 30
+  #+ The Log Analytics retention in days to use if `enable_oms_agent = true`.
+
+  #. enable_kube_dashboard (optional): false
+  #+ Should be `true` to enable the Kubernetes Dashboard.
+
+  ###
+  # Default Nodes Pool
+  ###
+
+  #. node_pool_name (optional): default
+  #+ AKS default nodes pool given name.
+  node_pool_name = "default"
+
+  #. node_pool_type (optional): Linux
+  #+ AKS default nodes pool type, can be either `AvailabilitySet` or `VirtualMachineScaleSets`.
+
+  #. node_availability_zones (optional): []
+  #+ To use specific Azure Availability Zones for the default nodes pool. @see https://docs.microsoft.com/en-us/azure/availability-zones/az-overview
+
+  #. node_network_subnet_id (required):
+  #+ Network subnet ID that should be used by AKS default nodes.
+  node_network_subnet_id = module.vpc.vnet_subnet_ids["nodes"]
+
+  #. node_enable_public_ip (optional): false
+  #+ Should be true if public IPs should be associated to AKS default nodes.
+
+  #. node_size (optional): Standard_DS2_v2
+  #+ AKS default nodes virtualmachine size.
+  node_size = "Standard_DS2_v2"
+
+  #. node_count (optional): 1
+  #+ AKS default nodes desired count.
+  node_count = "1"
+
+  #. node_enable_auto_scaling (optional): true
+  #+ Enable auto scaling of AKS default nodes.
+
+  #. node_min_count (optional): 1
+  #+ AKS default nodes auto scaling minimum count.
+
+  #. node_max_count (optional): 10
+  #+ AKS default nodes auto scaling group maximum count.
+
+  #. node_disk_size (optional): 60
+  #+ AKS default nodes root disk size.
+
+  #. node_max_pods (optional): 250
+  #+ Maximum number of pods per AKS default node (can't be more than 250).
+
+  #. node_taints (optional): []
+  #+ AKS nodes taints to setup.
+
+  ###
+  # Required (should probably not be touched)
+  ###
+
+  resource_group_name             = module.config.azurerm_resource_group_name
+  location                        = module.config.azurerm_resource_group_location
+  cluster_name                    = module.config.cluster_name
+  service_principal_client_id     = var.aks_service_principal_client_id
+  service_principal_client_secret = var.aks_service_principal_client_secret
+
+  depends_on = [
+    module.config,
+  ]
+}
+
+# You can duplicate this module to create mutiple AKS node groups.
+# Make sure to change the `node_group_name` field accordingly.
+# module "aks-node" {
+#   #####################################
+#   # Do not modify the following lines #
+#   source = "./module-aks-node"
+
+#   project  = var.project
+#   env      = var.env
+#   customer = var.customer
+#   #####################################
+
+#   ###
+#   # Networking
+#   ###
+
+#   #. network_subnet_id (required):
+#   #+ Network subnet ID that should be used by AKS nodes.
+#   network_subnet_id = module.vpc.vnet_subnet_ids["nodes"]
+
+#   #. enable_node_public_ip (optional): false
+#   #+ Should be true if public IPs should be associated to AKS nodes.
+
+#   ###
+#   # Nodes
+#   ###
+
+#   #. node_pool_name (optional): standard
+#   #+ AKS nodes pool given name.
+#   node_pool_name = "standard"
+
+#   #. node_availability_zones (optional): []
+#   #+ To use specific Azure Availability Zones for the nodes pool. @see https://docs.microsoft.com/en-us/azure/availability-zones/az-overview
+
+#   #. node_size (optional): Standard_DS2_v2
+#   #+ AKS nodes virtualmachine size.
+#   node_size = "Standard_DS2_v2"
+
+#   #. node_count (optional): 1
+#   #+ AKS nodes desired count.
+#   node_count = "1"
+
+#   #. enable_auto_scaling (optional): true
+#   #+ Enable auto scaling of AKS nodes.
+
+#   #. node_min_count (optional): 1
+#   #+ AKS nodes auto scaling minimum count.
+
+#   #. node_max_count (optional): 10
+#   #+ AKS nodes auto scaling group maximum count.
+
+#   #. node_disk_size (optional): 60
+#   #+ AKS nodes root disk size.
+
+#   #. node_os_type (optional): Linux
+#   #+ AKS nodes OS type, can be either `Linux` or `Windows`. Windows pool nodes needs to be enabled via the Azure CLI. @see https://github.com/Azure/AKS/blob/master/previews.md#windows-worker-nodes-
+
+#   #. node_max_pods (optional): 250
+#   #+ Maximum number of pods per AKS node (can't be more than 250).
+
+#   #. node_taints (optional): []
+#   #+ AKS nodes taints to setup.
+
+#   ###
+#   # Required (should probably not be touched)
+#   ###
+
+#   cluster_name = module.aks.cluster_name
+#   cluster_id   = module.aks.cluster_id
+# }

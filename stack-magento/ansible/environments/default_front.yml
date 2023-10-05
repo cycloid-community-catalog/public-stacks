@@ -1,0 +1,357 @@
+magento_backend_frontname: admin
+magento_admin_firstname: admin
+magento_admin_lastname: admin
+magento_admin_email: root@example-cycloid.com
+magento_admin_user: admin
+magento_admin_password: "{{ lookup('env','MAGENTO_ADMIN_PASSWORD') | default('4Bigs3cr3t', true) }}"
+
+# FIXME The following variables are sent by the pipeline. They are some 'external' variables.
+# Should we use env var to differenciate them ?
+# For now output variables by terraform are in group_vars/all.
+# Sould we put also those variables inside ? or give them as ansible -e or migrate all as env var ?
+
+# Variable given by the pipeline
+ansistrano_s3_bucket: "{{ lookup('env','MAGENTO_DEPLOY_BUCKET_NAME') | default('magento-deploy', true) }}"
+ansistrano_s3_object: "{{ lookup('env','MAGENTO_DEPLOY_BUCKET_OBJECT_PATH') | default('magento/{{ env }}/magento-{{ env }}.tar.gz') }}"
+ansistrano_s3_region: "{{ lookup('env','MAGENTO_DEPLOY_BUCKET_REGION') | default('eu-west-1', true) }}"
+ansistrano_s3_aws_access_key: "{{ lookup('env','AWS_ACCESS_KEY_ID') | default(omit) }}"
+ansistrano_s3_aws_secret_key: "{{ lookup('env','AWS_SECRET_ACCESS_KEY') | default(omit) }}"
+
+magento_use_secure: 1
+magento_use_secure_admin: 1
+magento_use_rewrites: 1
+magento_crypt_key: "{{ 9999999999999999999999 | random | to_uuid | hash('md5') }}"
+magento_static_content_deploy:
+    - fr_FR
+    - en_US
+magento2_enable_crons: true
+
+# Given by the pipeline exported from terraform
+magento_base_url: "http://{{ elb_front_dns_name | default('localhost', true) }}"
+magento_base_url_secure: "https://{{ elb_front_dns_name | default('localhost', true) }}"
+magento_redis_host: "{{ cache_address | default('redis', true) }}"
+magento_db_host: "{{ rds_address | default('mysql', true) }}"
+magento_db_name: "{{ rds_database | default('magento', true) }}"
+magento_db_user: "{{ rds_username | default('magento', true) }}"
+magento_db_password: "{{ rds_password | default('s3cr3t', true) }}"
+
+ansistrano_before_setup_tasks_file: config/ansistrano_before_setup.yml
+ansistrano_after_symlink_tasks_file: config/ansistrano_after_symlink_tasks.yml
+ansistrano_before_parameters_tasks_file: config/ansistrano_before_parameters_tasks.yml
+ansistrano_parameters_template: env.php.j2
+ansistrano_parameters_destination: app/etc/env.php
+
+# Deployment common vars
+ansistrano_php_fpm_service_name: "php{{ php_version_to_install }}-fpm"
+ansistrano_php_fpm_enabled: true
+ansistrano_group: www-data
+
+ansistrano_user: magento
+ansistrano_keep_releases: 1
+# ansistrano_additional_path: "magento-{{ env }}"
+ansistrano_deploy_to: "/home/{{ ansistrano_user }}/magento"
+ansistrano_current_dir: current
+ansistrano_deploy_via: "s3_unarchive"
+ansistrano_app_name: "magento"
+ansistrano_rolling_elb_enabled: false
+ansistrano_rolling_releases: true
+ansistrano_s3_archive_content: true
+
+# Required by customer-ssh to create user home
+
+ansistrano_shared_paths:
+    - pub/media
+    - pub/sitemaps
+    - var/backups
+    - var/composer_home
+    - var/import
+    - var/importexport
+    - var/import_history
+    - var/session
+    - var/tmp
+
+# FIXME do we want to setup postfix ? Require SES login
+# Postfix unused for now
+
+#postfix_aliases:
+#  - "root: admin@cycloid.io"
+#  - "admin: admin@cycloid.io"
+#  - "{{customer}}: root"
+
+# postfix_basehostname: "{{ customer }}.cycloid.io"
+# sasl_passwd:
+#     username: "sesACCESSKEY"
+#     password: !vault |
+#           $ANSIBLE_VAULT;1.1;AES256
+#           65636162663731373263353765353762363430633065306635623933303163363536353365353230
+#           3966343664626230663038613937316563633835636264630a613435336364656433613535666565
+#           66386138376635613839323862326438313031396635383535656230316333326630313166663438
+#           3536326438636666360a643438306235356535666131633238366533383364366533356665373231
+#           6361
+
+
+# Nginx
+nginx_configs:
+    proxy:
+        - proxy_set_header X-Real-IP  $remote_addr
+        - proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for
+    fastcgi:
+        - fastcgi_buffers 16 16k
+        - fastcgi_buffer_size 32k
+    upstream:
+        - upstream www-data { server "unix:/var/run/php{{ php_version_to_install }}-fpm.sock"; }
+    gzip:
+        - gzip on
+        - gzip_disable msie6
+    aws:
+        - real_ip_header X-Forwarded-For
+        - set_real_ip_from 0.0.0.0/0
+    global:
+        - client_max_body_size 5m
+
+nginx_remove_sites:
+    - default
+
+nginx_sites:
+    00-metrics:
+        - listen 80
+        - server_name 127.0.0.1 127.0.0.2
+        - location /nginx_status {
+            stub_status on;
+            access_log   off;
+            allow 127.0.0.1;
+            allow 127.0.0.2;
+            deny all;
+          }
+        - set $pool "{{ ansistrano_user }}"
+        - if ($arg_pool) {
+            set $pool $arg_pool;
+          }
+        - location ~ "/fpm-(status|ping)" {
+            access_log   off;
+            allow 127.0.0.1;
+            allow 127.0.0.2;
+            deny all;
+            fastcgi_pass $pool;
+            include fastcgi_params;
+            fastcgi_param  SCRIPT_FILENAME $document_root$fastcgi_script_name;
+          }
+    50-magento:
+        - listen 80 default
+        - server_name _
+        - "set $MAGE_ROOT /home/{{ ansistrano_user }}/magento/current/"
+        - root $MAGE_ROOT/pub
+        - set $MAGE_MODE production
+        - access_log /var/log/nginx/magento.access.log
+        - error_log /var/log/nginx/magento.error.log
+        - set $ssl off
+        - if ($http_x_custom_proto = "https") { set $ssl on; }
+        - index index.php
+        - autoindex off
+        - charset UTF-8
+        - error_page 404 403 = /errors/404.php
+
+        - location ~* ^/setup($|/) {
+              root $MAGE_ROOT;
+              location ~ ^/setup/index.php {
+                  fastcgi_pass www-data;
+                  fastcgi_read_timeout 600s;
+                  fastcgi_connect_timeout 600s;
+                  fastcgi_index  index.php;
+                  fastcgi_param  SCRIPT_FILENAME  $document_root$fastcgi_script_name;
+                  fastcgi_param MAGE_MODE $MAGE_MODE;
+                  include        fastcgi_params;
+              }
+              location ~ ^/setup/(?!pub/). { deny all; }
+              location ~ ^/setup/pub/ { add_header X-Frame-Options "SAMEORIGIN"; }
+          }
+
+        - location ~* ^/update($|/) {
+              root $MAGE_ROOT;
+              location ~ ^/update/index.php {
+                  fastcgi_split_path_info ^(/update/index.php)(/.+)$;
+                  fastcgi_pass   www-data;
+                  fastcgi_index  index.php;
+                  fastcgi_param  SCRIPT_FILENAME  $document_root$fastcgi_script_name;
+                  fastcgi_param  PATH_INFO        $fastcgi_path_info;
+                  fastcgi_param MAGE_MODE $MAGE_MODE;
+                  include        fastcgi_params;
+              }
+              location ~ ^/update/(?!pub/). { deny all; }
+              location ~ ^/update/pub/ { add_header X-Frame-Options "SAMEORIGIN"; }
+          }
+
+        - location / {
+              try_files $uri $uri/ /index.php$is_args$args;
+              expires 30d;
+              satisfy any;
+          }
+
+        - location /pub/ {
+              location ~ ^/pub/media/(downloadable|customer|import|theme_customization/.*\.xml) { deny all; }
+              alias $MAGE_ROOT/pub/;
+              add_header X-Frame-Options "SAMEORIGIN";
+          }
+
+        - location /static/ {
+              expires max;
+              location ~ ^/static/version { rewrite ^/static/(version\d*/)?(.*)$ /static/$2 last; }
+
+              location ~* \.(ico|jpg|jpeg|png|gif|svg|js|css|swf|eot|ttf|otf|woff|woff2|json|html)$ {
+                  add_header Cache-Control "public";
+                  add_header X-Frame-Options "SAMEORIGIN";
+                  add_header 'Access-Control-Allow-Origin' '*';
+                  add_header 'Access-Control-Allow-Credentials' 'true';
+                  add_header 'Access-Control-Allow-Methods' 'GET, POST, OPTIONS';
+                  add_header 'Access-Control-Allow-Headers' 'DNT,X-CustomHeader,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type';
+
+                  expires +1y;
+                  if (!-f $request_filename) {
+                      rewrite ^/static/?(.*)$ /static.php?resource=$1 last;
+                  }
+              }
+              location ~* \.(zip|gz|gzip|bz2|csv|xml)$ {
+                  add_header Cache-Control "no-store";
+                  add_header X-Frame-Options "SAMEORIGIN";
+                  expires    off;
+                  if (!-f $request_filename) {
+                     rewrite ^/static/?(.*)$ /static.php?resource=$1 last;
+                  }
+              }
+              if (!-f $request_filename) {
+                  rewrite ^/static/?(.*)$ /static.php?resource=$1 last;
+              }
+              add_header X-Frame-Options "SAMEORIGIN";
+          }
+
+        - location /media/ {
+              try_files $uri $uri/ /get.php$is_args$args;
+              location ~ ^/media/theme_customization/.*\.xml { deny all; }
+              location ~* \.(ico|jpg|jpeg|png|gif|svg|js|css|swf|eot|ttf|otf|woff|woff2)$ {
+                  add_header Cache-Control "public";
+                  add_header X-Frame-Options "SAMEORIGIN";
+                  add_header 'Access-Control-Allow-Origin' '*';
+                  add_header 'Access-Control-Allow-Credentials' 'true';
+                  add_header 'Access-Control-Allow-Methods' 'GET, POST, OPTIONS';
+                  add_header 'Access-Control-Allow-Headers' 'DNT,X-CustomHeader,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type';
+                  expires +1y;
+                  try_files $uri $uri/ /get.php$is_args$args;
+              }
+              location ~* \.(zip|gz|gzip|bz2|csv|xml)$ {
+                  add_header Cache-Control "no-store";
+                  add_header X-Frame-Options "SAMEORIGIN";
+                  expires    off;
+                  try_files $uri $uri/ /get.php$is_args$args;
+              }
+              add_header X-Frame-Options "SAMEORIGIN";
+          }
+
+        - location /media/customer/ { deny all; }
+        - location /media/downloadable/ { deny all; }
+        - location /media/import/ { deny all; }
+
+        - location ~ (index|get|static|report|404|503)\.php$ {
+              try_files $uri =404;
+              fastcgi_pass   www-data;
+              fastcgi_buffers 1024 4k;
+              fastcgi_read_timeout 600s;
+              fastcgi_connect_timeout 600s;
+              fastcgi_index  index.php;
+              fastcgi_param  SCRIPT_FILENAME  $document_root$fastcgi_script_name;
+              fastcgi_param HTTPS $ssl;
+              fastcgi_param HTTP_SCHEME $http_x_custom_proto;
+
+              fastcgi_param MAGE_PROFILER   0;
+              fastcgi_param SERVER_NAME     $host;
+
+              fastcgi_param MAGE_MODE $MAGE_MODE;
+              include        fastcgi_params;
+          }
+
+        - gzip on
+        - gzip_disable "msie6"
+        - gzip_comp_level 6
+        - gzip_min_length 1100
+        - gzip_buffers 16 8k
+        - gzip_proxied any
+        - gzip_types
+            text/plain
+            text/css
+            text/js
+            text/xml
+            text/javascript
+            application/javascript
+            application/x-javascript
+            application/json
+            application/xml
+            application/xml+rss
+            image/svg+xml
+        - gzip_vary on
+
+        - location /. { return 404; }
+        - location ^~ /app/ { deny all; }
+        - location ^~ /lib/ { deny all; }
+        - location ^~ /var/ { deny all; }
+
+# PHP Global 'specify a lot of thing because I'm using php7 with php-fpm
+php_enable_webserver: true
+php_webserver_daemon: nginx
+php_debian_pkg_managed: true
+php_debian_pkg_name:
+    - 'deb https://packages.sury.org/php/ stretch main'
+php_debian_pkg_key: 'https://packages.sury.org/php/apt.gpg'
+php_date_timezone: "Europe/Paris"
+php_version_to_install: "7.1"
+
+# PHP Configuration
+# Average size of a process: ps -ylC php7.0-fpm --sort:rss (result in KB, value below in MB)
+php_average_process_size: 100
+php_max_input_time: "60"
+php_memory_limit: "768M"
+php_max_execution_time: "600"
+php_upload_max_filesize: "256M"
+php_packages:
+    - php{{ php_version_to_install }}
+    - php{{ php_version_to_install }}-mcrypt
+    - php{{ php_version_to_install }}-cli
+    - php{{ php_version_to_install }}-common
+    - php{{ php_version_to_install }}-curl
+    - php{{ php_version_to_install }}-dev
+    - php{{ php_version_to_install }}-fpm
+    - php{{ php_version_to_install }}-gd
+    - php{{ php_version_to_install }}-ssh2
+    - php-pear
+    - php{{ php_version_to_install }}-apcu
+    - php{{ php_version_to_install }}-xsl
+    - php{{ php_version_to_install }}-intl
+    - php{{ php_version_to_install }}-mbstring
+    - php{{ php_version_to_install }}-bcmath
+    - php{{ php_version_to_install }}-zip
+    - libpcre3-dev
+    - php{{ php_version_to_install }}-memcached
+    - php{{ php_version_to_install }}-mysql
+    - php{{ php_version_to_install }}-soap
+    - php{{ php_version_to_install }}-gd
+    - php{{ php_version_to_install }}-xml
+    - php{{ php_version_to_install }}-json
+
+php_fpm_pools:
+    - name: "{{ ansistrano_user }}"
+      user: "{{ ansistrano_user }}"
+      group: www-data
+      listen: /var/run/php{{ php_version_to_install }}-fpm.sock
+      listen.owner: www-data
+      listen.group: www-data
+      slowlog: "{{ php_slowlog_path }}"
+
+cycloid_files_watched:
+    - name: nginx-magento-access
+      path: /var/log/nginx/magento.access.log
+    - name: nginx-magento-error
+      path: /var/log/nginx/magento.error.log
+    - name: magento-debug
+      path: "{{ ansistrano_deploy_to }}/{{ ansistrano_current_dir }}/var/log/debug.log"
+    - name: magento-cron
+      path: "{{ ansistrano_deploy_to }}/{{ ansistrano_current_dir }}/var/log/magento.cron.log"
+    - name: php-fpm
+      path: "/var/log/php{{ php_version_to_install }}-fpm.log"

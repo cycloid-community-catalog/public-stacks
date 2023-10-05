@@ -1,0 +1,854 @@
+---
+aws-eks:
+  pipeline:
+    Terraform:
+      - name: "AWS access key"
+        description: "Amazon AWS access key for Terraform."
+        key: aws_access_key
+        widget: cy_cred
+        type: string
+        default: "((aws.access_key))"
+      - name: "AWS secret key"
+        description: "Amazon AWS secret key for Terraform."
+        key: aws_secret_key
+        widget: cy_cred
+        type: string
+        default: "((aws.secret_key))"
+      - name: "Amazon AWS region"
+        description: "Amazon AWS region to use for Terraform."
+        key: aws_default_region
+        widget: auto_complete
+        type: string
+        values: ["eu-north-1","ap-south-1","eu-west-3","eu-west-2","eu-west-1","ap-northeast-2","ap-northeast-1","sa-east-1","ca-central-1","ap-southeast-1","ap-southeast-2","eu-central-1","us-east-1","us-east-2","us-west-1","us-west-2"]
+        default: eu-west-1
+      - name: "Terraform storage bucket"
+        description: "AWS S3 bucket name to store terraform remote state file."
+        key: terraform_storage_bucket_name
+        widget: simple_text
+        type: string
+        default: ($ organization_canonical $)-terraform-remote-state
+
+    Repos:
+      - name: "Config repository"
+        key: config_git_repository
+        type: string
+        widget: cy_crs
+        description: "Git repository URL containing the config of the stack."
+        default: "git@github.com:MyUser/config-eks.git"
+        required: true
+      - name: "Config git key"
+        description: "SSH key pair to fetch the config Git repository."
+        key: config_git_private_key
+        type: string
+        widget: cy_cred
+        default: "((ssh_config.ssh_key))"
+        required: true
+      - name: "Config branch"
+        key: config_git_branch
+        widget: cy_branch
+        type: string
+        description: "The branch used by the config repository"
+        source: config_git_repository
+        default: "master"
+        required: true
+
+  terraform:
+    config:
+      - name: "Cluster name"
+        description: "EKS Cluster Name."
+        key: module.config.cluster_name
+        widget: simple_text
+        type: string
+        default: "($ project $)-($ environment $)"
+
+    vpc:
+      - name: "VPC CIDR"
+        description: "The CIDR to use to create the VPC."
+        key: module.vpc.vpc_cidr
+        widget: simple_text
+        type: string
+        default: "10.8.0.0/16"
+        required: true
+      - name: "Private subnets"
+        description: "The private subnets cidr for the VPC."
+        key: module.vpc.private_subnets
+        widget: text_area
+        type: array
+        default:
+            - "10.8.0.0/24"
+            - "10.8.2.0/24"
+            - "10.8.4.0/24"
+        required: true
+      - name: "Public subnets"
+        description: "The public subnets cidr for the VPC."
+        key: module.vpc.public_subnets
+        widget: text_area
+        type: array
+        default:
+            - "10.8.1.0/24"
+            - "10.8.3.0/24"
+            - "10.8.5.0/24"
+        required: true
+
+    eks:
+      - name: "Cluster version"
+        description: "The kubernetes cluster version."
+        key: module.eks.cluster_version
+        widget: simple_text
+        type: string
+        default: "1.16"
+        required: true
+      - name: "Kubernetes control plane allowed ips"
+        description: "Allow Inbound IP CIDRs to access the Kubernetes API."
+        key: module.eks.control_plane_allowed_ips
+        widget: text_area
+        type: array
+        default:
+            - "0.0.0.0/0"
+      - name: "AWS IAM role ARN to map as admin"
+        description: "AWS IAM role ARN to map as system:masters within the Kubernetes cluster. By default, a default arbitrary role called 'admin' will be allowed."
+        key: module.eks.eks_admin_iam_role_arn
+        widget: simple_text
+        type: string
+        default: ""
+
+    eks-node:
+      - name: "SSH keypair"
+        description: "Name of an existing AWS SSH keypair to use to deploy EC2 instances."
+        key: module.eks-node.keypair_name
+        widget: simple_text
+        type: string
+        default: "cycloid"
+      - name: "Bastion security group"
+        description: "Additionnal security group ID to assign to servers. Goal is to allow bastion server to connect on nodes port 22 (SSH). Make sure the bastion VPC is peered."
+        key: module.eks-node.bastion_sg_allow
+        widget: simple_text
+        type: string
+        default: ""
+      - name: "Metrics security group"
+        description: "Additionnal security group ID to assign to servers. Goal is to allow monitoring server to query metrics. Make sure the prometheus VPC is peered."
+        key: module.eks-node.metrics_sg_allow
+        widget: simple_text
+        type: string
+        default: ""
+      - name: "Node group given name"
+        description: "Node group given name."
+        key: module.eks-node.node_group_name
+        widget: simple_text
+        type: string
+        default: "standard"
+      - name: "Node type"
+        description: "Type of instance to use for node servers."
+        key: module.eks-node.node_type
+        widget: auto_complete
+        type: string
+        default: "c5.xlarge"
+        required: true
+        values:
+            - "t3.medium"
+            - "t3.large"
+            - "t3.xlarge"
+            - "t3.2xlarge"
+            - "m5.large"
+            - "m5.xlarge"
+            - "m5.2xlarge"
+            - "m5.4xlarge"
+            - "m5.8xlarge"
+            - "m5.12xlarge"
+            - "c3.xlarge"
+            - "c3.large"
+            - "c3.2xlarge"
+            - "c3.4xlarge"
+            - "c5.large"
+            - "c5.xlarge"
+            - "c5.2xlarge"
+            - "c5.4xlarge"
+            - "c5.9xlarge"
+            - "c5.12xlarge"
+      - name: "Node EBS optimized"
+        description: "Whether the Instance is EBS optimized or not, related to the instance type you choose."
+        key: module.eks-node.node_ebs_optimized
+        widget: switch
+        type: boolean
+        default: true
+      - name: "Node desired number"
+        description: "Desired number of node servers."
+        key: module.eks-node.node_count
+        widget: simple_text
+        type: string
+        default: "1"
+        required: true
+      - name: "Min nodes (ASG)"
+        description: "Minimum number of node servers allowed in the Auto Scaling Group."
+        key: module.eks-node.node_asg_min_size
+        widget: number
+        type: integer
+        default: 1
+      - name: "Max nodes (ASG)"
+        description: "Maximum number of node servers allowed in the Auto Scaling Group."
+        key: module.eks-node.node_asg_max_size
+        widget: number
+        type: integer
+        default: 10
+      - name: "Nodes disk size"
+        unit: Go
+        description: "EKS nodes root disk size."
+        key: module.eks-node.node_disk_size
+        widget: slider_range
+        type: integer
+        default: 60
+        values:
+            - 30
+            - 500
+      - name: "Node profile"
+        description: "EKS nodes profile, can be either `ondemand` or `spot`."
+        key: module.eks-node.node_launch_template_profile
+        widget: radios
+        type: string
+        default: "ondemand"
+        values:
+             - "ondemand"
+             - "spot"
+      - name: "Spot instance request type"
+        description: "EKS nodes spot request type when `node_market_type = spot`. Can be either `one-time`, `persistent` or left undefined."
+        key: module.eks-node.node_spot_request_type
+        widget: simple_text
+        type: string
+        default: ""
+      - name: "Spot instance max price"
+        description: "EKS nodes max spot price when `node_market_type = spot`. Undefined by default."
+        key: module.eks-node.node_spot_price
+        widget: simple_text
+        type: string
+        default: ""
+      - name: "Enable Cluster Autoscaler"
+        description: "Should be true to add Cluster Autoscaler ASG tags."
+        key: module.eks-node.node_enable_cluster_autoscaler_tags
+        widget: switch
+        type: boolean
+        default: false
+
+azure-aks:
+  pipeline:
+    Terraform:
+      - name: "Azure Subscription ID"
+        description: "Azure subscription ID to use for Terraform."
+        key: azure_subscription_id
+        widget: cy_cred
+        type: string
+        default: "((azure_admin.subscription_id))"
+      - name: "Azure Tenant ID"
+        description: "Azure Tenant ID to use for Terraform."
+        key: azure_tenant_id
+        widget: cy_cred
+        type: string
+        default: "((azure_admin.tenant_id))"
+      - name: "Azure Client ID"
+        description: "Azure Client ID to use for Terraform."
+        key: azure_client_id
+        widget: cy_cred
+        type: string
+        default: "((azure_admin.client_id))"
+      - name: "Azure Client Secret"
+        description: "Azure Client Secret to use for Terraform."
+        key: azure_client_secret
+        widget: cy_cred
+        type: string
+        default: "((azure_admin.client_secret))"
+      - name: "Azure Location"
+        description: "Azure location to use for Terraform."
+        key: azure_location
+        widget: auto_complete
+        type: string
+        values: ["North Europe","West Europe","France Central","France South"]
+        default: "West Europe"
+      - name: "Azure Resource Group of the Storage Account"
+        description: "Azure Resource Group of the Storage Account to use to store terraform remote state file."
+        key: terraform_resource_group_name
+        widget: simple_text
+        type: string
+        default: ($ organization_canonical $)-terraform
+      - name: "Azure Storage Account name"
+        description: "Azure Storage Account name to use to store terraform remote state file."
+        key: terraform_storage_account_name
+        widget: cy_cred
+        type: string
+        default: ((azure_storage_aks.account_name))
+      - name: "Azure Storage Account key"
+        description: "Azure Storage Account key to use to store terraform remote state file."
+        key: terraform_storage_access_key
+        widget: cy_cred
+        type: string
+        default: ((azure_storage_aks.access_key))
+      - name: "Azure Storage container name"
+        description: "Azure Storage container name to store terraform remote state file."
+        key: terraform_storage_container_name
+        widget: simple_text
+        type: string
+        default: ($ organization_canonical $)
+      - name: "Azure Storage container path"
+        description: "Azure Storage container path to store terraform remote state file."
+        key: terraform_storage_container_path
+        widget: simple_text
+        type: string
+        default: ($ project $)/($ environment $)
+      - name: "Client ID for the Service Principal"
+        description: "Client ID for the Service Principal used by the AKS cluster"
+        key: aks_service_principal_client_id
+        widget: cy_cred
+        type: string
+        default: ((custom_($ project $)-($ environment $)-sp.client_id))
+      - name: "Client Secret for the Service Principal"
+        description: "Client Secret for the Service Principal used by the AKS cluster."
+        key: aks_service_principal_client_secret
+        widget: cy_cred
+        type: string
+        default: ((custom_($ project $)-($ environment $)-sp.client_secret))
+
+
+
+    Repos:
+      - name: "Config repository"
+        description: "Git repository URL containing the config of the stack."
+        key: config_git_repository
+        type: string
+        widget: cy_crs
+        default: "git@github.com:MyUser/config-aks.git"
+        required: true
+      - name: "Config git key"
+        description: "SSH key pair to fetch the config Git repository."
+        key: config_git_private_key
+        type: string
+        widget: cy_cred
+        default: "((ssh_config.ssh_key))"
+        required: true
+      - name: "Config branch"
+        description: "Branch of the config Git repository."
+        key: config_git_branch
+        widget: cy_branch
+        type: string
+        source: config_git_repository
+        default: "master"
+        required: true
+
+  terraform:
+    config:
+      - name: "Resource Group Name"
+        description: "Resource Group Name to use for the AKS Cluster"
+        key: module.config.resource_group_name
+        widget: simple_text
+        type: string
+        default: "($ project $)-($ environment $)-aks"
+      - name: "Cluster name"
+        description: "AKS Cluster name"
+        key: module.config.cluster_name
+        widget: simple_text
+        type: string
+        default: "($ project $)-($ environment $)"
+
+    vpc:
+      - name: "Address Space"
+        description: "The virtual network address space."
+        key: module.vpc.address_space
+        widget: simple_text
+        type: string
+        default: "10.8.0.0/14"
+      - name: "Private subnets"
+        description: "The private subnets cidr for the VPC."
+        key: module.vpc.subnets
+        widget: text_area
+        type: map
+        default:
+          "nodes": "10.8.0.0/16"
+          "pods": "10.9.0.0/16"
+          "loadbalancers": "10.11.0.0/16"
+        # type: raw
+        # default: |+
+        #   "{ "nodes" = "10.8.0.0/16", "pods"  = "10.9.0.0/16", "loadbalancers" = "10.11.0.0/16",}"
+
+    aks:
+      - name: "AKS cluster network plugin"
+        description: "AKS cluster network plugin to use, can be either `azure` or `kubenet`."
+        key: module.aks.network_plugin
+        widget: auto_complete
+        type: string
+        default: "azure"
+        values:
+            - "azure"
+            - "kubenet"
+      - name: "AKS cluster pod CIDR to use"
+        description: "AKS cluster pod CIDR to use, required if `network_plugin = kubenet`."
+        key: module.aks.network_pod_cidr
+        widget: text_area
+        type: string
+        default: "10.9.0.0/16"
+      - name: "AKS cluster pod CIDR to use"
+        description: "AKS cluster service CIDR to use, required if `network_plugin = azure`."
+        key: module.aks.network_service_cidr
+        widget: text_area
+        type: string
+        default: "10.10.0.0/16"
+      - name: "AKS node name"
+        description: "AKS default nodes pool given name."
+        key: module.aks.node_pool_name
+        widget: simple_text
+        type: string
+        default: "default"
+      - name: "Node size"
+        description: "AKS default nodes virtualmachine size."
+        key: module.aks.node_size
+        widget: simple_text
+        type: string
+        default: "Standard_DS2_v2"
+      - name: "Node desired number"
+        description: "AKS default nodes desired count."
+        key: module.aks.node_count
+        widget: simple_text
+        type: string
+        default: "1"
+        required: true
+
+gcp-gke:
+  pipeline:
+    Terraform:
+      - name: "GCP json credentials"
+        description: "GCP JSON for Terraform. See value format [here](https://docs.cycloid.io/advanced-guide/integrate-and-use-cycloid-credentials-manager.html#vault-in-the-pipeline)"
+        key: gcp_credentials_json
+        widget: cy_cred
+        type: string
+        default: "((gcp.json_key))"
+      - name: "GCP Project"
+        description: "Google Cloud Platform project to use for Terraform."
+        key: gcp_project
+        widget: simple_text
+        type: string
+        default: ($ organization_canonical $)
+      - name: "GCP region"
+        description: "Google Cloud Platform region to use for Terraform."
+        key: gcp_region
+        widget: auto_complete
+        type: string
+        values: ["europe-west1","europe-west2","europe-west3","europe-west4","europe-north1","europe-central2"]
+        default: europe-west1
+      - name: "Terraform storage bucket"
+        description: "Google Cloud Storage bucket name to store terraform remote state file."
+        key: terraform_storage_bucket_name
+        widget: simple_text
+        type: string
+        default: ($ organization_canonical $)-terraform-remote-state
+
+    Repos:
+      - name: "Config repository"
+        key: config_git_repository
+        type: string
+        widget: cy_crs
+        description: "Git repository URL containing the config of the stack."
+        default: "git@github.com:MyUser/config-gke.git"
+        required: true
+      - name: "Config git key"
+        description: "SSH key pair to fetch the config Git repository."
+        key: config_git_private_key
+        type: string
+        widget: cy_cred
+        default: "((ssh_config.ssh_key))"
+        required: true
+      - name: "Config branch"
+        description: "Branch of the config Git repository."
+        key: config_git_branch
+        widget: cy_branch
+        type: string
+        source: config_git_repository
+        default: "master"
+        required: true
+
+  terraform:
+    config:
+      - name: "Cluster name"
+        description: "GKE Cluster Name."
+        key: module.config.cluster_name
+        widget: simple_text
+        type: string
+        default: "($ project $)-($ environment $)"
+
+    vpc:
+      - name: "VPC subnet CIDR"
+        description: "The CIDR of the VPC subnet."
+        key: module.vpc.subnet_cidr
+        widget: simple_text
+        type: string
+        default: "10.8.0.0/16"
+      - name: "Pods secondary range CIDR"
+        description: "The CIDR of the pods secondary range."
+        key: module.vpc.pods_cidr
+        widget: simple_text
+        type: string
+        default: "10.9.0.0/16"
+      - name: "Services secondary range CIDR"
+        description: "The CIDR of the services secondary range."
+        key: module.vpc.services_cidr
+        widget: simple_text
+        type: string
+        default: "10.10.0.0/16"
+
+    gke:
+      - name: "Node Pools"
+        description: "GKE Cluster list of maps containing node pools to create."
+        key: module.gke.node_pools
+        widget: text_area
+        type: raw
+        default: |+
+          "[
+            {
+              name         = "my-node-pool"
+              machine_type = "n1-standard-1"
+              image_type   = "COS"
+              auto_repair  = true
+              auto_upgrade = false
+              preemptible  = false
+              autoscaling        = true
+              initial_node_count = 1
+              min_count          = 1
+              max_count          = 1
+              local_ssd_count = 0
+              disk_size_gb    = 100
+              disk_type       = "pd-ssd"
+            },
+          ]"
+
+scaleway-kapsule:
+  pipeline:
+    Terraform:
+      - name: "Scaleway access key"
+        description: "Scaleway access key for Terraform."
+        key: scw_access_key
+        widget: cy_cred
+        type: string
+        default: "((scaleway.access_key))"
+      - name: "Scaleway secret key"
+        description: "Scaleway access key for Terraform."
+        key: scw_secret_key
+        widget: cy_cred
+        type: string
+        default: "((scaleway.secret_key))"
+      - name: "Scaleway organization ID"
+        description: "Scaleway organization ID for Terraform."
+        key: scw_organization_id
+        widget: cy_cred
+        type: string
+        default: "((scaleway.organization_id))"
+      - name: "Scaleway region"
+        description: Scaleway region to use for Terraform."
+        key: scw_default_region
+        widget: auto_complete
+        type: string
+        values: ["fr-par","nl-ams","pl-waw"]
+        default: fr-par
+      - name: "Terraform storage bucket"
+        description: "Object Storage Bucket name to store terraform remote state file."
+        key: terraform_storage_bucket_name
+        widget: simple_text
+        type: string
+        default: ($ organization_canonical $)-terraform-remote-state
+
+    Repos:
+      - name: "Config repository"
+        key: config_git_repository
+        type: string
+        widget: cy_crs
+        description: "Git repository URL containing the config of the stack."
+        default: "git@github.com:MyUser/config-kapsule.git"
+        required: true
+      - name: "Config git key"
+        description: "SSH key pair to fetch the config Git repository."
+        key: config_git_private_key
+        type: string
+        widget: cy_cred
+        default: "((ssh_config.ssh_key))"
+        required: true
+      - name: "Config branch"
+        description: "Branch of the config Git repository."
+        key: config_git_branch
+        widget: cy_branch
+        type: string
+        source: config_git_repository
+        default: "master"
+        required: true
+
+  terraform:
+    config:
+      - name: "Cluster name"
+        description: "Kapsule Cluster Name."
+        key: module.config.cluster_name
+        widget: simple_text
+        type: string
+        default: "($ project $)-($ environment $)"
+
+    kapsule:
+      - name: "Cluster version"
+        description: "Kapsule cluster version."
+        key: module.kapsule.cluster_version
+        widget: simple_text
+        type: string
+        default: "1.19"
+      - name: "Container Network Interface"
+        description: "The Container Network Interface (CNI) for the Kubernetes cluster"
+        key: module.kapsule.cni
+        widget: auto_complete
+        type: string
+        default: "cilium"
+        values:
+            - "cilium"
+            - "calico"
+            - "weave"
+            - "flannel"
+      - name: "Ingress controller"
+        description: "The ingress controller to be deployed on the Kubernetes cluster"
+        key: module.kapsule.ingress
+        widget: auto_complete
+        type: string
+        default: "nginx"
+        values:
+            - "nginx"
+            - "traefik"
+            - "traefik2"
+            - "none"
+      - name: "Enable Kubernetes Dashboard"
+        description: "Enables the Kubernetes dashboard for the Kubernetes cluster."
+        key: module.kapsule.enable_dashboard
+        widget: switch
+        type: boolean
+        default: true
+      - name: "Kubernetes auto upgrade"
+        description: "Set to `true` to enable Kubernetes patch version auto upgrades."
+        key: module.kapsule.auto_upgrade
+        widget: switch
+        type: boolean
+        default: true
+      - name: "Maintenance window day"
+        description: "The day of the auto upgrade maintenance window"
+        key: module.kapsule.maintenance_window_day
+        widget: auto_complete
+        type: string
+        default: "tuesday"
+        values:
+            - "any"
+            - "monday"
+            - "tuesday"
+            - "wednesday"
+            - "thursday"
+            - "friday"
+            - "saturday"
+            - "sunday"
+      - name: "Maintenance window start hour"
+        description: "The start hour (UTC) of the 2-hour auto upgrade maintenance window (`0` to `23`)."
+        key: module.kapsule.maintenance_window_start_hour
+        widget: slider_range
+        type: integer
+        default: 5
+        values:
+            - 0
+            - 23
+
+    node-pool:
+      - name: "Node pool name"
+        description: "Kapsule node group given name."
+        key: module.node_pool.node_pool_name
+        widget: simple_text
+        type: string
+        default: "standard"
+      - name: "Node type"
+        description: "Type of instance to use for node servers."
+        key: module.node_pool.node_type
+        widget: auto_complete
+        type: string
+        default: "GP1-XS"
+        required: true
+        values:
+            - "GP1-XS"
+            - "GP1-S"
+            - "GP1-M"
+            - "GP1-L"
+            - "GP1-XL"
+      - name: "Node desired number"
+        description: "Desired number of node servers."
+        key: module.node_pool.node_count
+        widget: number
+        type: integer
+        default: 1
+        required: true
+      - name: "Enable auto scaling"
+        description: "Enables the autoscaling feature for this pool."
+        key: module.node_pool.enable_autoscaling
+        widget: switch
+        type: boolean
+        default: false
+      - name: "Minimum pool size"
+        description: "The minimum size of the pool, used by the autoscaling feature."
+        key: module.node_pool.node_autoscaling_min_size
+        widget: number
+        type: integer
+        default: 1
+      - name: "Maximum pool sizer"
+        description: " The maximum size of the pool, used by the autoscaling feature."
+        key: module.node_pool.node_autoscaling_max_size
+        widget: number
+        type: integer
+        default: 10
+      - name: "Enable auto healing"
+        description: "Enables the autohealing feature for this pool."
+        key: module.node_pool.enable_autohealing
+        widget: switch
+        type: boolean
+        default: true
+      - name: "Placement group ID"
+        description: "The placement group the nodes of the pool will be attached to."
+        key: module.node_pool.placement_group_id
+        widget: simple_text
+        type: string
+        default: ""
+      - name: "Extra tags"
+        description: "Dict of extra tags to add on the pool."
+        key: module.node_pool.extra_tags
+        widget: text_area
+        type: raw
+        default: "[]"
+
+scaleway-nodes:
+  pipeline:
+    Terraform:
+      - name: "Scaleway access key"
+        description: "Scaleway access key for Terraform."
+        key: scw_access_key
+        widget: cy_cred
+        type: string
+        default: "((scaleway.access_key))"
+      - name: "Scaleway secret key"
+        description: "Scaleway access key for Terraform."
+        key: scw_secret_key
+        widget: cy_cred
+        type: string
+        default: "((scaleway.secret_key))"
+      - name: "Scaleway organization ID"
+        description: "Scaleway organization ID for Terraform."
+        key: scw_organization_id
+        widget: cy_cred
+        type: string
+        default: "((scaleway.organization_id))"
+      - name: "Scaleway region"
+        description: Scaleway region to use for Terraform."
+        key: scw_default_region
+        widget: auto_complete
+        type: string
+        values: ["fr-par","nl-ams","pl-waw"]
+        default: fr-par
+      - name: "Terraform storage bucket"
+        description: "Object Storage Bucket name to store terraform remote state file."
+        key: terraform_storage_bucket_name
+        widget: simple_text
+        type: string
+        default: ($ organization_canonical $)-terraform-remote-state
+
+    Repos:
+      - name: "Config repository"
+        key: config_git_repository
+        type: string
+        widget: cy_crs
+        description: "Git repository URL containing the config of the stack."
+        default: "git@github.com:MyUser/config-kapsule.git"
+        required: true
+      - name: "Config git key"
+        description: "SSH key pair to fetch the config Git repository."
+        key: config_git_private_key
+        type: string
+        widget: cy_cred
+        default: "((ssh_config.ssh_key))"
+        required: true
+      - name: "Config branch"
+        description: "Branch of the config Git repository."
+        key: config_git_branch
+        widget: cy_branch
+        type: string
+        source: config_git_repository
+        default: "master"
+        required: true
+
+  terraform:
+    config:
+      - name: "Cluster name"
+        description: "Kapsule Cluster Name."
+        key: module.config.cluster_name
+        widget: simple_text
+        type: string
+        default: "($ project $)-($ environment $)"
+
+    node-pool:
+      - name: "Kubernetes cluster id"
+        description: "The Kubernetes id the nodes of the pool will be attached to."
+        key: module.node_pool.cluster_id
+        widget: simple_text
+        type: string
+        default: "data.terraform_remote_state.kubernetes-infra.outputs.cluster_id"
+      - name: "Node pool name"
+        description: "Kapsule node group given name."
+        key: module.node_pool.node_pool_name
+        widget: simple_text
+        type: string
+        default: "standard"
+      - name: "Node type"
+        description: "Type of instance to use for node servers."
+        key: module.node_pool.node_type
+        widget: auto_complete
+        type: string
+        default: "GP1-XS"
+        required: true
+        values:
+            - "GP1-XS"
+            - "GP1-S"
+            - "GP1-M"
+            - "GP1-L"
+            - "GP1-XL"
+      - name: "Node desired number"
+        description: "Desired number of node servers."
+        key: module.node_pool.node_count
+        widget: number
+        type: integer
+        default: 1
+        required: true
+      - name: "Enable auto scaling"
+        description: "Enables the autoscaling feature for this pool."
+        key: module.node_pool.enable_autoscaling
+        widget: switch
+        type: boolean
+        default: false
+      - name: "Minimum pool size"
+        description: "The minimum size of the pool, used by the autoscaling feature."
+        key: module.node_pool.node_autoscaling_min_size
+        widget: number
+        type: integer
+        default: 1
+      - name: "Maximum pool sizer"
+        description: " The maximum size of the pool, used by the autoscaling feature."
+        key: module.node_pool.node_autoscaling_max_size
+        widget: number
+        type: integer
+        default: 10
+      - name: "Enable auto healing"
+        description: "Enables the autohealing feature for this pool."
+        key: module.node_pool.enable_autohealing
+        widget: switch
+        type: boolean
+        default: true
+      - name: "Placement group ID"
+        description: "The placement group the nodes of the pool will be attached to."
+        key: module.node_pool.placement_group_id
+        widget: simple_text
+        type: string
+        default: ""
+      - name: "Extra tags"
+        description: "Dict of extra tags to add on the pool."
+        key: module.node_pool.extra_tags
+        widget: text_area
+        type: raw
+        default: "[]"
+
+

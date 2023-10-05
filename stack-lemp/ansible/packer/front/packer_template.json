@@ -1,0 +1,109 @@
+{
+  "builders": [
+        {
+           "type": "amazon-ebs",
+           "region": "{{ user `aws_region`}}",
+           "source_ami_filter": {
+             "filters": {
+               "architecture": "x86_64",
+               "virtualization-type": "hvm",
+               "name": "debian-11-amd64-*",
+               "root-device-type": "ebs"
+             },
+             "owners": ["379101102735", "136693071363", "125523088429", "099720109477"],
+             "most_recent": true
+           },
+           "instance_type": "{{user `packer_instance_type`}}",
+           "ami_name": "{{user `customer`}}_{{user `project`}}_{{user `role`}}_{{user `env`}}_{{timestamp}}",
+           "ssh_username": "admin",
+           "run_tags": {
+               "Name": "{{user `customer`}}_{{user `project`}}_{{user `role`}}_{{user `env`}}-{{timestamp}}",
+               "client": "{{user `customer`}}",
+               "env": "{{user `env`}}",
+               "project": "{{user `project`}}",
+               "role": "{{user `role`}}",
+               "cycloid.io": "true",
+               "packer_build": "true",
+               "monitoring-discovery": "false"
+           },
+           "tags": {
+               "Name": "{{user `customer`}}_{{user `project`}}_{{user `role`}}_{{user `env`}}-{{timestamp}}",
+               "client": "{{user `customer`}}",
+               "env": "{{user `env`}}",
+               "project": "{{user `project`}}",
+               "role": "{{user `role`}}",
+               "cycloid.io": "true"
+          }
+       }
+  ],
+
+  "provisioners": [
+    {
+        "type": "file",
+        "source": "first-boot.yml.tpl",
+        "destination": "/tmp/first-boot.yml.tpl"
+    },
+    {
+        "type": "file",
+        "source": "user-data.sh.tpl",
+        "destination": "/tmp/user-data.sh.tpl"
+    },
+    {
+        "type": "shell",
+        "inline": [
+            "echo 'Waiting for cloudinit to be done... Can take up to 300 sec'",
+            "# Due to https://github.com/mitchellh/packer/issues/41 wait cloud init",
+            "for i in $(seq 1 300); do [ -f /var/lib/cloud/instance/boot-finished ] && break || sleep 1; done",
+            "echo '{{user `public_key`}}' > /home/admin/.ssh/authorized_keys",
+            "if [ -z '{{user `vault_password`}}' ]; then echo 'fake' > /home/admin/.vault-password; else echo '{{user `vault_password`}}' > /home/admin/.vault-password; fi",
+            "sudo apt-get update -qq > /dev/null",
+            "sudo apt-get upgrade -yqq > /dev/null ",
+            "sudo apt-get install -yqq build-essential libssl-dev libffi-dev python3-dev python3-pip python3-venv git curl jq > /dev/null",
+            "sudo apt-get install -yqq python3-pip",
+            "sudo python3 -m pip install --upgrade pip",
+            "sudo python3 -m pip install cryptography --upgrade",
+            "sudo python3 -m pip install -q ansible=={{user `ansible_version`}}",
+            "echo 'Host *' >> /home/admin/.ssh/config",
+            "echo 'StrictHostKeyChecking no' >> /home/admin/.ssh/config",
+            "# wait aws role attach to the instance",
+            "sleep 60"
+        ]
+    },
+    {
+        "type": "ansible-local",
+        "command": "ANSIBLE_STDOUT_CALLBACK=actionable ANSIBLE_FORCE_COLOR=1 PYTHONUNBUFFERED=1 ansible-playbook",
+        "playbook_file": "local.yml",
+        "extra_arguments": [
+           "-e 'env={{user `env`}}'",
+           "-e 'project={{user `project`}}'",
+           "-e 'client={{user `customer`}}'",
+           "-e 'role={{user `role`}}'",
+           "-e 'aws_access_key_id={{user `aws_access_key_id`}}'",
+           "-e 'aws_secret_access_key={{user `aws_secret_access_key`}}'"
+        ],
+        "inventory_groups": "{{user `inventory_groups`}}"
+    },
+    {
+        "type": "ansible-local",
+        "command": "ANSIBLE_STDOUT_CALLBACK=actionable ANSIBLE_FORCE_COLOR=1 PYTHONUNBUFFERED=1 ansible-playbook",
+        "galaxy_file": "../../requirements.yml",
+        "playbook_file": "../../lemp.yml",
+        "playbook_dir": "../../",
+        "staging_directory": "/home/admin/{{user `customer`}}",
+        "group_vars": "../../group_vars/",
+        "extra_arguments": [
+           "-e 'env={{user `env`}}'",
+           "-e 'ec2_tag_env={{user `env`}}'",
+           "-e 'ec2_tag_project={{user `project`}}'",
+           "-e 'ec2_tag_client={{user `customer`}}'",
+           "-e 'ec2_tag_role={{user `role`}}'",
+           "-e 'customer={{user `customer`}}'",
+           "-e 'role={{user `role`}}'",
+           "-e 'project={{user `project`}}'",
+           "--skip-tags='{{user `skip_tags`}}'",
+           "--vault-password-file /home/admin/.vault-password"
+        ],
+        "inventory_groups": "{{user `inventory_groups`}}"
+    }
+  ]
+}

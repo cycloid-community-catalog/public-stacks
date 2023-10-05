@@ -1,0 +1,84 @@
+# In this file you could override any variables present in default_front.yaml file
+
+#. nginx_sites (optional, dict): <metric and application vhost>
+#+ Contain NGINX vhosts to create on front servers. A default application and metrics vhosts are already provided.
+
+#. cycloid_files_watched (optional; dict): <Default log files watched>
+#+ Provide log files you want to export to Cycloid logs.
+
+#. php_version_to_install: 7.2
+#+ PHP-FPM version to install.
+
+
+# NGINX
+
+# If you want to define a htaccess in the default application
+# Create the basic auth file
+#nginx_auth_basic_files:
+#  cycloid:
+#    - cycloid:foohtpasswdline
+
+#If you need extra directive to add in the default application vhost. Example basic auth, https redirect ...
+#nginx_vhost_extra_directive: |
+#    satisfy any;
+#    allow 127.0.0.1;
+#    allow 127.0.0.2;
+#    auth_basic "Resctricted";
+#    auth_basic_user_file auth_basic/cycloid;
+#    if ($ssl != "on") { rewrite ^(.*)$ https://$server_name$1 permanent; }
+
+# Application
+
+# If you are not using the environments variables, you can use a jinja template with ansible local variables to configure your database ...
+# Get a settings template from the remote git
+#ansistrano_fetch_remote_templates:
+#  - dest: /tmp/wp-config.php.j2
+#    src: "{{ansistrano_release_path.stdout}}/wp-config.php.j2"
+
+# Then use this fetched template to configure the application
+#ansistrano_parameters_templates:
+#  - src: /tmp/wp-config.php.j2
+#    dest: "{{ansistrano_release_path.stdout}}/wp-config.php"
+
+# Crons
+
+# If you need a cron on fronts servers
+#crons:
+#  - name: php cron.php
+#    job: "php {{ ansistrano_deploy_to }}{{ ansistrano_user }}/{{ ansistrano_current_dir }}/cron.php 2>&1 >> {{ ansistrano_deploy_to }}{{ ansistrano_user }}/{{ ansistrano_current_dir }}/cron.log"
+#    minute: "*"
+#    hour: "*"
+#    day: "*"
+#    month: "*"
+#    weekday: "*"
+#    user: "{{ ansistrano_user }}"
+#    state: present
+
+
+# Logs
+
+# If you need extra logs file to send to cloudwatch. For example local application logs
+# extra_cycloid_files_watched:
+#  - name: application
+#    path: "{{ ansistrano_deploy_to }}{{ ansistrano_user }}/{{ ansistrano_current_dir }}/*.log"
+
+
+#
+# telegraf / monitoring
+#
+
+# Install telegraf ? (default false)
+# telegraf_install: true
+
+# See telegraf inputs for more plugings https://github.com/influxdata/telegraf/tree/master/plugins/inputs
+# Like https://github.com/influxdata/telegraf/tree/master/plugins/inputs/net_response for tcp port checks
+
+# telegraf_plugins_extra:
+#   linux_sysctl_fs:
+#   conntrack:
+#   nginx:
+#     config:
+#         - urls = ["http://localhost/nginx_status"]
+#   phpfpm:
+#     config:
+#         - urls = ["http://localhost/fpm-status"]
