@@ -2,7 +2,7 @@
 # Configuration of the Cycloid stack
 name: 'ses'
 canonical: 'ses'
-status: 'public'
+status: 'private'
 description: |
   Simple Email Service stack will create an SES iam user and optionally a Redis or SQS queue if needed to manage bounced emails.
 keywords:
