@@ -3,7 +3,7 @@ version: '2'
 # Configuration of the Cycloid stack
 name: 'Prometheus'
 canonical: 'stack-prometheus'
-status: 'public'
+status: 'private'
 description: |
   Deploy a standalone Prometheus stack with Docker components on Aws EC2 server.
   Contain Alertmanager, Grafana and Prometheus.
