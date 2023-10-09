@@ -3,7 +3,7 @@ version: '2'
 # Configuration of the Cycloid stack
 name: 'Lemp'
 canonical: 'stack-lemp'
-status: 'public'
+status: 'private'
 description: |
   Used to deploy a php application on X Amazon EC2 instances behind an ALB load balancer (Linux, Nginx, MySQL, PHP, etc.).
 keywords:
