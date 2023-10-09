@@ -3,7 +3,7 @@
 version: '2'
 name: 'kubernetes'
 canonical: 'stack-kubernetes'
-status: 'public'
+status: 'private'
 description: |
   This stack allows to deploy a chosen kubernetes managed service in one of the available providers.
 keywords:
