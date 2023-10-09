@@ -2,7 +2,7 @@
 # Configuration of the Cycloid stack
 name: 'Cycloid Infrastructure'
 canonical: 'stack-infrastructure'
-status: 'public'
+status: 'private'
 description: |
   This stack will create Amazon vpc, a bastion ec2 server and various components you might require to deploy other stacks in production.
   This stack is currently a bundle of common usecase of our customers.
