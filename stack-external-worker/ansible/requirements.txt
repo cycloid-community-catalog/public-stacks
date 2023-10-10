@@ -1,3 +1,0 @@
-wheel
-cryptography>=1.6
-jinja2>2.8

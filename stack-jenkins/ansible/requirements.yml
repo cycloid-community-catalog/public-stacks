@@ -1,9 +1,0 @@
----
-- src: https://github.com/geerlingguy/ansible-role-docker
-  version: 2.5.3
-  name: geerlingguy.docker
-  scm: git
-- src: https://github.com/mhutter/ansible-docker-systemd-service
-  version: v2.1.0
-  name: mhutter.docker-systemd-service
-  scm: git
