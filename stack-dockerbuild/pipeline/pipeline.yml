@@ -24,7 +24,7 @@ shared:
         printf "%s " "${tags[@]}" | xargs > merged-stack/.ci/TAGS
 
         if [ -n "$BUILD_ARGS" ] && [[ "$BUILD_ARGS" != "null" ]]; then
-          python -c "import json, os, yaml; print('\n'.join([ '%s=%s' % (k,v) for k, v in json.loads(os.environ['BUILD_ARGS'].replace('\\n','\\\\\\\n')).items()]))" >> merged-stack/.ci/build_args_file
+          python -c "import json, os, yaml; print('\n'.join([ '%s=%s' % (k,v) for k, v in json.loads(os.environ['BUILD_ARGS'].replace('\\n','\\\\\\\n')).items()]))" | tee -a merged-stack/.ci/build_args_file
         fi
     outputs:
       - name: merged-stack
