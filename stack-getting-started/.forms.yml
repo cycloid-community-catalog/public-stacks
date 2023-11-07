@@ -1,14 +1,5 @@
 version: "2"
 use_cases:
-- name: cycloid-common
-  sections:
-  # This section exist, so groups will be checked
-  - name: pipeline
-    groups:
-    # Group exist but the variable 'three' doesn't so it will be added
-    - name: Stack
-      technologies: [pipeline]
-      vars:
 - name: aws
   sections:
   - name: Global

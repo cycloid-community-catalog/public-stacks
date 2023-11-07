@@ -72,9 +72,9 @@ resources:
 - name: git_config
   type: git
   source:
-    uri: ((git_repository))
-    branch: ((config_git_branch))
-    private_key: ((git_ssh_key))
+    uri: ($ cr_url $)
+    branch: ($ cr_branch $)
+    private_key: ((($ cr_cred_path $).ssh_key))
     paths:
       - ((project))/terraform/((env))/*
 
