@@ -44,12 +44,12 @@ resources:
   type: terraform
   icon: terraform
   source:
-    env_name: ((env))
-    backend_type: gcs
     backend_config:
-      bucket: ((terraform_storage_bucket_name))
-      prefix: ((project))/((env))
-      credentials: ((gcp_credentials_json))
+      address: '($ api_url $)/inventory?jwt=($ inventory_jwt $)'
+      ## skip_cert_verification needs to be enabled when using self signed certificates.
+      # skip_cert_verification: true
+    backend_type: http
+    env_name: default
     vars:
       gcp_project: ((gcp_project))
       gcp_zone: ((gcp_zone))

@@ -44,13 +44,12 @@ resources:
   type: terraform
   icon: terraform
   source:
-    env_name: ((env))
-    backend_type: azurerm
     backend_config:
-      container_name: ((terraform_storage_container_name))
-      key: ((terraform_storage_container_path))/((project))-((env)).tfstate
-      storage_account_name: ((terraform_storage_account_name))
-      access_key: ((terraform_storage_access_key))
+      address: '($ api_url $)/inventory?jwt=($ inventory_jwt $)'
+      ## skip_cert_verification needs to be enabled when using self signed certificates.
+      # skip_cert_verification: true
+    backend_type: http
+    env_name: default
     vars:
       azure_resource_group_name: ((azure_resource_group_name))
       azure_location: ((azure_location))

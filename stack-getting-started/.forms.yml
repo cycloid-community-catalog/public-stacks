@@ -46,21 +46,6 @@ use_cases:
             - aws
         type: string
         default: "((aws_step-by-step.secret_key))"
-    - name: Terraform
-      technologies: [pipeline]
-      vars:
-      - name: "AWS S3 bucket name"
-        description: "Name of the AWS S3 bucket used to store Terraform tfstate file"
-        key: terraform_storage_bucket_name
-        widget: simple_text
-        type: string
-        default: "($ organization_canonical $)-terraform-remote-state"
-      - name: "AWS S3 bucket path"
-        description: "The path in the AWS S3 bucket used to store Terraform tfstate file"
-        key: terraform_storage_bucket_path
-        widget: simple_text
-        type: string
-        default: "($ project $)"
 - name: gcp
   sections:
   - name: Global
@@ -103,21 +88,6 @@ use_cases:
             - gcp
         type: string
         default: "((gcp_step-by-step.json_key))"
-    - name: Terraform
-      technologies: [pipeline]
-      vars:
-      - name: "GCP object storage bucket name"
-        description: "Name of the GCP object storage bucket used to store Terraform tfstate file"
-        key: terraform_storage_bucket_name
-        widget: simple_text
-        type: string
-        default: "($ organization_canonical $)-terraform-remote-state"
-      - name: "GCP object storage bucket path"
-        description: "The path in the GCP object storage bucket path used to store Terraform tfstate file"
-        key: terraform_storage_bucket_path
-        widget: simple_text
-        type: string
-        default: "($ project $)"
 - name: azure
   sections:
   - name: Global
@@ -178,36 +148,3 @@ use_cases:
             - azure
         type: string
         default: "((azure_step-by-step))"
-    - name: Terraform
-      technologies: [pipeline]
-      vars:
-      - name: "Terraform Azure storage account name"
-        description: "Azure account storage used to store Terraform tfstate file"
-        key: terraform_storage_account_name
-        widget: cy_cred
-        widget_config:
-          cred_types:
-            - azure_storage
-        type: string
-        default: "((azure_storage_step-by-step.account_name))"
-      - name: "Terraform Azure storage access key"
-        description: "Azure storage access key used to store Terraform tfstate file"
-        key: terraform_storage_access_key
-        widget: cy_cred
-        widget_config:
-          cred_types:
-            - azure_storage
-        type: string
-        default: "((azure_storage_step-by-step.access_key))"
-      - name: "Azure storage container name"
-        description: "Azure storage container name used to store Terraform tfstate file"
-        key: terraform_storage_container_name
-        widget: simple_text
-        type: string
-        default: "cycloid-demo"
-      - name: "Azure storage container path"
-        description: "Azure storage container path used to store Terraform tfstate file"
-        key: terraform_storage_container_path
-        widget: simple_text
-        type: string
-        default: "($ project $)/($ environment $)"

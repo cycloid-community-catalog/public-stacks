@@ -43,15 +43,12 @@ resources:
 - name: tfstate
   type: terraform
   source:
-    env_name: ((env))
-    backend_type: s3
     backend_config:
-      bucket: ((terraform_storage_bucket_name))
-      key: terraform.tfstate
-      workspace_key_prefix: ((project))
-      region: ((aws_default_region))
-      access_key: ((aws_access_key))
-      secret_key: ((aws_secret_key))
+      address: '($ api_url $)/inventory?jwt=($ inventory_jwt $)'
+      ## skip_cert_verification needs to be enabled when using self signed certificates.
+      # skip_cert_verification: true
+    backend_type: http
+    env_name: default
     vars:
       access_key: ((aws_access_key))
       secret_key: ((aws_secret_key))
