@@ -57,7 +57,7 @@ use_cases:
         description: "The type of instance you want to create"
         key: instance_type
         widget: slider_list
-        type: string
+        type: map
         values:
         - label: n1-std-1
           value: n1-standard-1
