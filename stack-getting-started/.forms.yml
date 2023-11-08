@@ -59,7 +59,6 @@ use_cases:
         widget: slider_list
         type: string
         values:
-        values:
         - label: n1-std-1
           value: n1-standard-1
         - label: n1-std-2
