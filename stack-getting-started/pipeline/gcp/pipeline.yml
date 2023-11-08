@@ -55,7 +55,7 @@ resources:
       gcp_zone: ((gcp_zone))
       env: ((env))
       project: ((project))
-      customer: ((customer))
+      organization: ((org))
     env:
       GOOGLE_PROJECT: ((gcp_project))
       GOOGLE_ZONE: ((gcp_zone))

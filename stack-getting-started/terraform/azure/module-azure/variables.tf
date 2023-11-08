@@ -7,7 +7,7 @@ variable "env" {
   default = "demo"
 }
 
-variable "customer" {
+variable "organization" {
   default = "cycloid"
 }
 

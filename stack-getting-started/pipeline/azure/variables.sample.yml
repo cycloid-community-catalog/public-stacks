@@ -1,5 +1,5 @@
 env: ($ environment $)
 project: ($ project $)
-customer: ($ organization_canonical $)
+org: ($ organization_canonical $)
 
 stack_git_branch: master

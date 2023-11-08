@@ -1,5 +1,5 @@
 resource "aws_security_group" "front" {
-  name        = "${var.customer}-${var.project}-${var.env}"
+  name        = "${var.organization}-${var.project}-${var.env}"
   description = "Front ${var.env} for ${var.project}"
 
   egress {
@@ -29,8 +29,8 @@ resource "random_string" "password" {
 }
 
 resource "aws_instance" "front" {
-  ami                         = data.aws_ami.debian.id
-  user_data                   =  templatefile("${path.module}/userdata.sh.tpl", {
+  ami = data.aws_ami.debian.id
+  user_data = templatefile("${path.module}/userdata.sh.tpl", {
     password = random_string.password.result
   })
   associate_public_ip_address = true
@@ -38,7 +38,6 @@ resource "aws_instance" "front" {
   vpc_security_group_ids      = [aws_security_group.front.id]
 
   tags = {
-    Name         = "${var.customer}-${var.project}-front-${var.env}"
-    "cycloid.io" = "true"
+    Name = "${var.organization}-${var.project}-front-${var.env}"
   }
 }

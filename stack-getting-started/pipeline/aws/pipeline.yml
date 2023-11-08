@@ -55,7 +55,7 @@ resources:
       aws_region: ((aws_default_region))
       env: ((env))
       project: ((project))
-      customer: ((customer))
+      organization: ((org))
 
 # The Terraform stack (will be merged with the config)
 - name: git_stack

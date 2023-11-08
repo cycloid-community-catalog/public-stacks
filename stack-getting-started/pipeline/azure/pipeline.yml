@@ -57,7 +57,7 @@ resources:
       azure_cred: ((azure_cred))
       env: ((env))
       project: ((project))
-      customer: ((customer))
+      organization: ((org))
 
 # The Terraform stack (will be merged with the config)
 - name: git_stack

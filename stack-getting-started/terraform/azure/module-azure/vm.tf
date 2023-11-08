@@ -1,5 +1,5 @@
 resource "azurerm_public_ip" "main" {
-  name                = "${var.customer}-${var.project}-${var.env}-ip"
+  name                = "${var.organization}-${var.project}-${var.env}-ip"
   resource_group_name = var.resource_group_name
   location            = var.azure_location
   allocation_method   = "Static"
@@ -7,17 +7,20 @@ resource "azurerm_public_ip" "main" {
   tags = {
     environment  = var.env
     "cycloid.io" = "true"
+    env          = var.env
+    project      = var.project
+    organization = var.organization
   }
 
 }
 
 resource "azurerm_network_interface" "main" {
-  name                = "${var.customer}-${var.project}-${var.env}-nic"
+  name                = "${var.organization}-${var.project}-${var.env}-nic"
   location            = var.azure_location
   resource_group_name = var.resource_group_name
 
   ip_configuration {
-    name                          = "${var.customer}-${var.project}-front-${var.env}"
+    name                          = "${var.organization}-${var.project}-front-${var.env}"
     subnet_id                     = var.subnet_id
     private_ip_address_allocation = "Dynamic"
     public_ip_address_id          = azurerm_public_ip.main.id
@@ -28,9 +31,7 @@ resource "azurerm_network_interface" "main" {
     "cycloid.io" = "true"
     env          = var.env
     project      = var.project
-    customer     = var.customer
-    organization = var.customer
-
+    organization = var.organization
   }
 
 }
@@ -55,7 +56,7 @@ resource "random_string" "password" {
 }
 
 resource "azurerm_virtual_machine" "main" {
-  name                  = "${var.customer}-${var.project}-${var.env}"
+  name                  = "${var.organization}-${var.project}-${var.env}"
   location              = var.azure_location
   resource_group_name   = var.resource_group_name
   network_interface_ids = [azurerm_network_interface.main.id]
@@ -72,7 +73,7 @@ resource "azurerm_virtual_machine" "main" {
   }
 
   storage_os_disk {
-    name              = "${var.customer}-${var.project}-${var.env}-os-disk"
+    name              = "${var.organization}-${var.project}-${var.env}-os-disk"
     caching           = "ReadWrite"
     create_option     = "FromImage"
     managed_disk_type = "Standard_LRS"
@@ -91,7 +92,6 @@ resource "azurerm_virtual_machine" "main" {
     "cycloid.io" = "true"
     env          = var.env
     project      = var.project
-    customer     = var.customer
-    organization = var.customer
+    organization = var.organization
   }
 }

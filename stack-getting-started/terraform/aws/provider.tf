@@ -1,4 +1,4 @@
-variable "customer" {}
+variable "organization" {}
 variable "project" {}
 variable "env" {}
 
@@ -12,8 +12,7 @@ provider "aws" {
       "cycloid.io" = "true"
       env          = var.env
       project      = var.project
-      customer     = var.customer
-      organization = var.customer
+      organization = var.organization
     }
   }
 }

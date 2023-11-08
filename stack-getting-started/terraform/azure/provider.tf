@@ -1,4 +1,4 @@
-variable "customer" {}
+variable "organization" {}
 variable "project" {}
 variable "env" {}
 

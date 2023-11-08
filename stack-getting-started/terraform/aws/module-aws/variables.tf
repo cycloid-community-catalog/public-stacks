@@ -1,7 +1,7 @@
 data "aws_region" "current" {}
 
 variable "env" {}
-variable "customer" {}
+variable "organization" {}
 
 variable "keypair_name" {
   default = "demo"

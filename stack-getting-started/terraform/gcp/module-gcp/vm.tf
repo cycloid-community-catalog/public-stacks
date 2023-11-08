@@ -19,22 +19,22 @@ data "template_file" "user_data" {
 }
 
 resource "google_compute_firewall" "default" {
-  name    = "${var.customer}-${var.project}-front-${var.env}-http"
+  name    = "${var.organization}-${var.project}-front-${var.env}-http"
   network = "default"
   allow {
     protocol = "tcp"
     ports    = ["22"]
   }
 
-  target_tags = ["${var.customer}-${var.project}-front-${var.env}-http"]
+  target_tags = ["${var.organization}-${var.project}-front-${var.env}-http"]
 }
 
 resource "google_compute_instance" "main" {
-  name         = "${var.customer}-${var.project}-front-${var.env}"
+  name         = "${var.organization}-${var.project}-front-${var.env}"
   machine_type = var.instance_type
   zone         = var.gcp_zone
 
-  tags = ["${var.customer}-${var.project}-front-${var.env}-http"]
+  tags = ["${var.organization}-${var.project}-front-${var.env}-http"]
 
   boot_disk {
     initialize_params {
@@ -50,20 +50,11 @@ resource "google_compute_instance" "main" {
     }
   }
 
-  metadata = {
-    cycloidio    = "true"
-    env          = var.env
-    project      = var.project
-    customer     = var.customer
-    organization = var.customer
-  }
-
   labels = {
     cycloidio    = "true"
     env          = var.env
     project      = var.project
-    customer     = var.customer
-    organization = var.customer
+    organization = var.organization
   }
 
 
