@@ -10,7 +10,7 @@ This stack offer on multi cloud provider to create a default compute instance.
 
 # Requirements
 
-In order to run this task you need to configure a Terraform remote backend in your Cycloid organization settings.
+In order to run this task you need to configure a **Terraform remote backend in your Cycloid organization settings**.
 Then a couple elements are required within the infrastructure depending of the cloud provider you choose:
 
   * **AWS**

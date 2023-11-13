@@ -42,6 +42,7 @@ resource_types:
 resources:
 - name: tfstate
   type: terraform
+  icon: terraform
   source:
     backend_config:
       address: '($ api_url $)/inventory?jwt=($ inventory_jwt $)'
