@@ -58,6 +58,7 @@ resources:
       env: ((env))
       project: ((project))
       customer: ((customer))
+      os_admin_password: ((os_admin_password))
 
 # The Terraform stack (will be merged with the config)
 - name: git_stack-terraform

@@ -25,7 +25,7 @@ azure_client_secret: ((azure_admin.client_secret))
 azure_env: "public"
 
 #. azure_location (required): West Europe
-#+ Azure location to use for terraform. 
+#+ Azure location to use for terraform.
 azure_location: "West Europe"
 
 # Azure access to store terraform remote state file.
@@ -50,22 +50,21 @@ terraform_storage_container_name: ($ organization_canonical $)
 #+ Azure Storage container path to store terraform remote state file.
 terraform_storage_container_path: ($ project $)/($ environment $)
 
-
 #
 # Repos
 #
 
 #. config_git_repository (required): git@github.com:MyUser/config-aks.git
 #+ Git repository URL containing the config of the stack.
-config_git_repository: git@github.com:MyUser/config-aks.git
+config_git_repository: ($ cr_url $)
 
 #. config_git_branch (required): master
 #+ Branch of the config Git repository.
-config_git_branch: master
+config_git_branch: ($ cr_branch $)
 
 #. config_git_private_key (required): ((ssh_config.ssh_key))
 #+ SSH key pair to fetch the config Git repository.
-config_git_private_key: ((ssh_config.ssh_key))
+config_git_private_key: ((($ cr_cred_path $).ssh_key))
 
 
 #

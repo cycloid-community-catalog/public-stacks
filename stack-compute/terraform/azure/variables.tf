@@ -37,3 +37,7 @@ variable "azure_location" {
   description = "Azure location to use."
   default     = "West Europe"
 }
+
+variable "os_admin_password" {
+  default = "Defaultpassword1-"
+}

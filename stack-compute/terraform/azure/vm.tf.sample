@@ -7,7 +7,7 @@ module "vm" {
   env      = var.env
   customer = var.customer
 
-  ##################################### 
+  #####################################
 
   ###
   # Network interface
@@ -49,7 +49,7 @@ module "vm" {
   #+ A description of the default rule.
   security_rule_description = "Enable SSH inbound traffic."
 
-  #. security_rule_priority (required, integer): 
+  #. security_rule_priority (required, integer):
   #+ Specifies the priority of the default rule.
   security_rule_priority = 1001
 
@@ -128,7 +128,7 @@ module "vm" {
 
   #. os_admin_password (required, string):
   #+ The password associated with the local admin account. Must be [6-72] and contain uppercase + lowercase + number + special caracter
-  os_admin_password = "MyPassWordToChange_2021"
+  os_admin_password = var.os_admin_password
 
   #. disable_linux_password_authentification (required, boolean):
   #+ Specifies whether password authentication should be disabled.
@@ -197,7 +197,7 @@ module "vm" {
 #resource "azurerm_virtual_machine_data_disk_attachment" "vm_attach" {
 #  managed_disk_id    = azurerm_managed_disk.extra.id
 #  virtual_machine_id = azurerm_virtual_machine.example.id
-#  lun                = "10"         # (Required) - The Logical Unit Number of the Data Disk, which needs to be unique within the Virtual Machine. 
+#  lun                = "10"         # (Required) - The Logical Unit Number of the Data Disk, which needs to be unique within the Virtual Machine.
 #  caching            = "ReadWrite"  # Available options: "None", "ReadOnly" and "ReadWrite"
 #}
 
