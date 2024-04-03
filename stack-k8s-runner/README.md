@@ -1,6 +1,6 @@
 # stack-k8s-runner
 
-This stack is meant to be use to manage resources deployed on a Kubernetes cluster with YAML manifests and/or terraform resources.
+This stack is designed to manage resources deployed on a Kubernetes cluster using YAML manifests and/or Terraform resources.
 
 # Details
 
