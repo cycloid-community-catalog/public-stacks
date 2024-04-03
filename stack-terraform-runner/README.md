@@ -1,6 +1,6 @@
 # stack-terraform-runner
 
-This stack allow you to simply run a terraform plan/apply from a git repositiry.
+This stack enables you to execute a Terraform plan and apply it to Terraform code stored in a Git repository.
 
 # Architecture
 
