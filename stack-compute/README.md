@@ -1,6 +1,6 @@
 # Stack-compute
 
-This stack allows to deploy a configure compute instance in one of the available providers.
+This stack enables the deployment and configuration of a compute instance in one of the available providers.
 
 It allows to configure the Virtual Machine's **definitions**, **OS**, **volume**, **network** and **security**.
 
