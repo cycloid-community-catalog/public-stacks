@@ -1,8 +1,6 @@
 # Stack-getting-started
 
-Getting started stack purpose is to ovver a easy to use Cycloid stack during onboarding process.
-
-This stack offer on multi cloud provider to create a default compute instance.
+The purpose of the "Getting Started" stack is to provide an easy-to-use Cycloid stack for users during the onboarding process. This stack offers multi-cloud support for creating a default compute instance.
 
 <p align="center">
 <img src="icon.png" width="250px">
