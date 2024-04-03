@@ -2,7 +2,7 @@
 
 Service catalog Docker Build stack
 
-Build and test a docker image before pushing it to a registry
+This stack facilitates building and running tests on a Docker image before pushing it to a registry.
 
 # Requirements
 
