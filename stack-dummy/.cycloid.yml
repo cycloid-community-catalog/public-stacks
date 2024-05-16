@@ -1,5 +1,5 @@
 ---
-version: '2'
+version: '3'
 # Configuration of the Cycloid stack
 name: 'Dummy stack'
 canonical: 'stack-dummy'
@@ -27,4 +27,4 @@ config:
         path: 'pipeline/pipeline.yml'
       variables:
         path: 'pipeline/variables.sample.yml'
-        destination: '($ project $)/pipeline/variables-($ environment $).yml'
+        destination: '($ .project $)/pipeline/variables-($ .environment $).yml'

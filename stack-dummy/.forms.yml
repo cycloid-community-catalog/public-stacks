@@ -12,4 +12,4 @@ use_cases:
         key: message
         widget: simple_text
         type: string
-        default: "hello world and especially to ($ organization_canonical $)"
+        default: "hello world and especially to ($ .organization_canonical $)"
