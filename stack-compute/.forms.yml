@@ -1,17 +1,26 @@
----
-aws-ec2:
-  pipeline:
-    Terraform:
+version: 2
+use_cases:
+- name: aws-ec2
+  sections:
+  - name: Cloud provider
+    groups:
+    - name: Terraform
+      technologies: [pipeline]
+      vars:
       - name: "AWS access key"
         description: "Amazon AWS access key for Terraform."
         key: aws_access_key
         widget: cy_cred
+        widget_config:
+          cred_types: [aws]
         type: string
         default: "((aws.access_key))"
       - name: "AWS secret key"
         description: "Amazon AWS secret key for Terraform."
         key: aws_secret_key
         widget: cy_cred
+        widget_config:
+          cred_types: [aws]
         type: string
         default: "((aws.secret_key))"
       - name: "Amazon AWS region"
@@ -28,8 +37,11 @@ aws-ec2:
         type: string
         default: ($ .organization_canonical $)-terraform-remote-state
 
-  terraform:
-    os-image:
+  - name: Instance
+    groups:
+    - name: OS image
+      technologies: [terraform]
+      vars:
       - name: "AMI enable most recent"
         description: "If more than one result is returned, use the most recent AMI"
         key: module.vm.ami_most_recent
@@ -92,7 +104,9 @@ aws-ec2:
           - "099720109477"
           - "309956199498"
 
-    instance:
+    - name: Instance
+      technologies: [terraform]
+      vars:
       - name: "Cloud init file content"
         description: "The content of the file to use if cloud init is used."
         key: module.vm.file_content
@@ -110,23 +124,24 @@ aws-ec2:
         key: module.vm.instance_type
         widget: auto_complete
         type: string
-        default: "t2.micro"
+        default: "t3.micro"
         required: true
         values:
-          - "t2.nano"
-          - "t2.micro"
-          - "t2.small"
-          - "t2.medium"
-          - "t2.large"
-          - "t2.xlarge"
-          - "t2.2xlarge"
+          - "t3.nano"
+          - "t3.micro"
+          - "t3.small"
+          - "t3.medium"
+          - "t3.large"
+          - "t3.xlarge"
+          - "t3.2xlarge"
       - name: "Instance extra tags"
         description: "Dict of extra tags to add to the vm instance."
         key: module.vm.instance_extra_tags
         widget: text_area
-        type: raw
-        default: "{}"
-    network:
+        type: map
+    - name: Network
+      technologies: [terraform]
+      vars:
       - name: "Subnet ID"
         description: "VPC Subnet ID to launch in."
         key: module.vm.subnet_id
@@ -146,7 +161,9 @@ aws-ec2:
         widget: switch
         type: boolean
         default: true
-    volume:
+    - name: Volume
+      technologies: [terraform]
+      vars:
       - name: "Enable volume deletion on vm termination"
         description: "Whether the volume should be destroyed on instance termination."
         key: module.vm.enable_vm_disk_delete_on_termination
@@ -191,9 +208,10 @@ aws-ec2:
         description: "A map of tags to assign, at instance-creation time, to root and EBS volumes."
         key: module.vm.volume_extra_tags
         widget: text_area
-        type: raw
-        default: "{}"
-    security:
+        type: map
+    - name: Security
+      technologies: [terraform]
+      vars:
       - name: "Security group name"
         description: " Name of the security group."
         key: module.vm.sg_name
@@ -211,54 +229,53 @@ aws-ec2:
         description: "Configuration block for ingress rules."
         key: module.vm.sg_ingress_rules
         widget: text_area
-        type: raw
-        default: |+
-          [
-            {
-                description      = "Accept ssh traffic"
-                from_port        = 22
-                to_port          = 22
-                protocol         = "tcp"
-                cidr_blocks      = ["0.0.0.0/0"]
-                ipv6_cidr_blocks = []
-                prefix_list_ids  = []
-                security_groups  = []
-                self             = true
-              }
-            ]
+        type: array
+        default:
+          - description: "Accept ssh traffic"
+            from_port: 22
+            to_port: 22
+            protocol: "tcp"
+            cidr_blocks: ["0.0.0.0/0"]
+            ipv6_cidr_blocks: []
+            prefix_list_ids: []
+            security_groups: []
+            self: true
+
       - name: "Security group egress rules"
         description: "Configuration block for ingress rules."
         key: module.vm.sg_egress_rules
         widget: text_area
-        type: raw
-        default: |+
-          [
-            {
-                description      = "Accept all egress"
-                from_port        = 0
-                to_port          = 0
-                protocol         = "-1"
-                cidr_blocks      = ["0.0.0.0/0"]
-                ipv6_cidr_blocks = []
-                prefix_list_ids  = []
-                security_groups  = []
-                self             = true
-              }
-            ]
+        type: array
+        default:
+          - description: "Accept all egress"
+            from_port: 0
+            to_port: 0
+            protocol: "-1"
+            cidr_blocks: ["0.0.0.0/0"]
+            ipv6_cidr_blocks: []
+            prefix_list_ids: []
+            security_groups: []
+            self: true
+
       - name: "Security group extra tags"
         description: "Dict of extra tags to add to security group resources"
         key: module.vm.sg_extra_tags
         widget: text_area
-        type: raw
-        default: "{}"
+        type: map
 
-gcp-gce:
-  pipeline:
-    Terraform:
+- name: gcp-gce
+  sections:
+  - name: Cloud provider
+    groups:
+    - name: Terraform
+      technologies: [pipeline]
+      vars:
       - name: "GCP json credentials"
         description: "GCP JSON for Terraform. See value format [here](https://docs.cycloid.io/advanced-guide/integrate-and-use-cycloid-credentials-manager.html#vault-in-the-pipeline)"
         key: gcp_credentials_json
         widget: cy_cred
+        widget_config:
+          cred_types: [gcp]
         type: string
         default: "((gcp.json_key))"
       - name: "GCP Project"
@@ -288,8 +305,11 @@ gcp-gce:
         type: string
         default: ($ .organization_canonical $)-terraform-remote-state
 
-  terraform:
-    instance:
+  - name: Instance
+    groups:
+    - name: Details
+      technologies: [terraform]
+      vars:
       - name: "Instance Name"
         description: "The unique name for the instance."
         key: module.vm.instance_name
@@ -327,16 +347,18 @@ gcp-gce:
         description: "The IP protocol to which the egress deny rule applies.An otional list of IP ports to which the ingress allow rule applies."
         key: module.vm.instance_tags
         widget: text_area
-        type: raw
-        default: |+
-          ["${var.customer}-${var.project}-${var.env}-network-tag"]
+        type: array
+        default:
+          - "${var.customer}-${var.project}-${var.env}-network-tag"
       - name: "Instance extra tags"
         description: "A map of key/value label pairs to assign to the instance."
         key: module.vm.instance_extra_labels
         widget: text_area
-        type: raw
-        default: "{}"
-    network:
+        type: map
+
+    - name: Network
+      technologies: [terraform]
+      vars:
       - name: "Network ID"
         description: "The name or self_link of the network to attach this interface to."
         key: module.vm.network
@@ -350,7 +372,10 @@ gcp-gce:
         widget: simple_text
         type: string
         default: ""
-    boot-disk:
+
+    - name: Boot-disk
+      technologies: [terraform]
+      vars:
       - name: "Enables auto disk deletion"
         description: "Enables disk deletion when the instance is deleted."
         key: module.vm.boot_disk_auto_delete
@@ -385,7 +410,10 @@ gcp-gce:
           - "pd-standard"
           - "pd-balanced"
           - "pd-ssd"
-    firewall-ingress:
+
+    - name: Firewall-ingress
+      technologies: [terraform]
+      vars:
       - name: "Firewall Ingress Name"
         description: "Name of the firewall ingress resource."
         key: module.vm.ingress_firewall_name
@@ -402,16 +430,12 @@ gcp-gce:
         description: "If specified the firewall will only be applied to the source IP address in these ranges."
         key: module.vm.ingress_source_ranges
         widget: text_area
-        type: raw
-        default: |+
-          []
+        type: array
       - name: "Firewall Ingress Source Tags"
         description: "If source tags are specified, the firewall will apply only to traffic with source IP that belongs to a tag listed in source tags. "
         key: module.vm.ingress_source_tags
         widget: text_area
-        type: raw
-        default:  |+
-          []
+        type: array
       - name: "Firewall Ingress IP protocol - allow rule"
         description: "The IP protocol to which the ingress allow rule applies. Allowed values - tcp, udp, icmp, esp, ah, sctp, ipip, all or protocol number"
         key: module.vm.ingress_allow_protocol
@@ -422,11 +446,13 @@ gcp-gce:
         description: "The IP protocol to which the ingress allow rule applies.An otional list of IP ports to which the ingress allow rule applies."
         key: module.vm.ingress_allow_ports
         widget: text_area
-        type: raw
-        default: |+
-          ["22"]
+        type: array
+        default:
+          - "22"
 
-    firewall-egress:
+    - name: Firewall-egress
+      technologies: [terraform]
+      vars:
       - name: "Firewall Egress Name"
         description: "Name of the firewall egress resource."
         key: module.vm.egress_firewall_name
@@ -443,16 +469,12 @@ gcp-gce:
         description: "If specified the firewall will only be applied to the source IP address in these ranges."
         key: module.vm.egress_source_ranges
         widget: text_area
-        type: raw
-        default: |+
-          []
+        type: array
       - name: "Firewall Egress Source Tags"
         description: "If source tags are specified, the firewall will apply only to traffic with source IP that belongs to a tag listed in source tags. "
         key: module.vm.egress_source_tags
         widget: text_area
-        type: raw
-        default: |+
-          []
+        type: array
       - name: "Firewall Egress IP protocol - allow rule"
         description: "The IP protocol to which the egress allow rule applies. Allowed values - tcp, udp, icmp, esp, ah, sctp, ipip, all or protocol number"
         key: module.vm.egress_allow_protocol
@@ -463,35 +485,45 @@ gcp-gce:
         description: "The IP protocol to which the egress allow rule applies.An otional list of IP ports to which the ingress allow rule applies."
         key: module.vm.egress_allow_ports
         widget: text_area
-        type: raw
-        default: |+
-          []
+        type: array
 
-azure-linux:
-  pipeline:
-    Terraform:
+- name: azure-linux
+  sections:
+  - name: Cloud provider
+    groups:
+    - name: Terraform
+      technologies: [pipeline]
+      vars:
       - name: "Azure Subscription ID"
         description: "Azure subscription ID to use for Terraform."
         key: azure_subscription_id
         widget: cy_cred
+        widget_config:
+          cred_types: [azure]
         type: string
         default: "((azure_admin.subscription_id))"
       - name: "Azure Tenant ID"
         description: "Azure Tenant ID to use for Terraform."
         key: azure_tenant_id
         widget: cy_cred
+        widget_config:
+          cred_types: [azure]
         type: string
         default: "((azure_admin.tenant_id))"
       - name: "Azure Client ID"
         description: "Azure Client ID to use for Terraform."
         key: azure_client_id
         widget: cy_cred
+        widget_config:
+          cred_types: [azure]
         type: string
         default: "((azure_admin.client_id))"
       - name: "Azure Client Secret"
         description: "Azure Client Secret to use for Terraform."
         key: azure_client_secret
         widget: cy_cred
+        widget_config:
+          cred_types: [azure]
         type: string
         default: "((azure_admin.client_secret))"
       - name: "Azure Environment"
@@ -549,8 +581,11 @@ azure-linux:
         type: string
         required: true
 
-  terraform:
-    os-image:
+  - name: Instance
+    groups:
+    - name: OS image
+      technologies: [terraform]
+      vars:
       - name: "VM image publisher"
         description: "Specifies the publisher of the image used to create the virtual machine."
         key: module.vm.image_publisher
@@ -585,7 +620,9 @@ azure-linux:
         type: string
         default: ""
 
-    instance:
+    - name: Instance
+      technologies: [terraform]
+      vars:
       - name: "Instance Name"
         description: Specifies the name of the Virtual Machine.
         key: module.vm.instance_name
@@ -640,10 +677,11 @@ azure-linux:
         description: "A map of key/value label pairs to assign to the instance."
         key: module.vm.instance_extra_tags
         widget: text_area
-        type: raw
-        default: "{}"
+        type: map
 
-    network:
+    - name: Network
+      technologies: [terraform]
+      vars:
       - name: "Network Interface Name"
         description: "The name of the Network Interface."
         key: module.vm.network_interface_name
@@ -672,9 +710,11 @@ azure-linux:
         description: "Map of extra tags to assign to the network resources."
         key: module.vm.network_extra_tags
         widget: text_area
-        type: raw
-        default: "{}"
-    os-disk:
+        type: map
+
+    - name: OS disk
+      technologies: [terraform]
+      vars:
       - name: "OS Disk Name"
         description: "Specifies the name of the OS Disk."
         key: module.vm.disk_name
@@ -705,7 +745,9 @@ azure-linux:
         default: true
         required: true
 
-    security:
+    - name: Security
+      technologies: [terraform]
+      vars:
       - name: "Application Security Group Name"
         description: "Specifies the name of the Application Security Group."
         key: module.vm.network_security_group_name
@@ -801,5 +843,4 @@ azure-linux:
         description: " Map of extra tags to assign to the security group."
         key: module.vm.sg_extra_tags
         widget: text_area
-        type: raw
-        default: "{}"
+        type: map
