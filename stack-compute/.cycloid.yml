@@ -1,6 +1,6 @@
 # Configuration of Cycloid stack
 ---
-version: '2'
+version: '3'
 name: 'Compute'
 canonical: 'stack-compute'
 status: 'public'
@@ -35,16 +35,16 @@ config:
     # Configuration of the CI pipeline
     pipeline:
       pipeline:
-        path: 'pipeline/aws/pipeline-ec2.yml'
+        path: 'pipeline/pipeline.yml'
       variables:
-        path: 'pipeline/aws/variables.ec2.sample.yml'
-        destination: '($ project $)/pipeline/variables-($ environment $).yml'
+        path: 'pipeline/variables.sample.yml'
+        destination: '($ .project $)/pipeline/variables-($ .environment $).yml'
     # Configuration of terraform to setup the infrastructure
     terraform:
       aws-ec2:
         path: 'terraform/aws/vm.tf.sample'
-        destination: '($ project $)/terraform/($ environment $)/vm.tf'
-        
+        destination: '($ .project $)/terraform/($ .environment $)/vm.tf'
+
   # define the default environment for azure
   azure-linux:
     name: 'azure-linux'
@@ -53,15 +53,15 @@ config:
     # Configuration of the CI pipeline
     pipeline:
       pipeline:
-        path: 'pipeline/azure/pipeline-vm.yml'
+        path: 'pipeline/pipeline.yml'
       variables:
-        path: 'pipeline/azure/variables.vm.sample.yml'
-        destination: '($ project $)/pipeline/variables-($ environment $).yml'
+        path: 'pipeline/variables.sample.yml'
+        destination: '($ .project $)/pipeline/variables-($ .environment $).yml'
     # Configuration of terraform to setup the infrastructure
     terraform:
       azure-linux:
         path: 'terraform/azure/vm.tf.sample'
-        destination: '($ project $)/terraform/($ environment $)/vm.tf'
+        destination: '($ .project $)/terraform/($ .environment $)/vm.tf'
 
   # define the default environment for gcp
   gcp-gce:
@@ -71,12 +71,12 @@ config:
     # Configuration of the CI pipeline
     pipeline:
       pipeline:
-        path: 'pipeline/gcp/pipeline-gce.yml'
+        path: 'pipeline/pipeline.yml'
       variables:
-        path: 'pipeline/gcp/variables.gce.sample.yml'
-        destination: '($ project $)/pipeline/variables-($ environment $).yml'
+        path: 'pipeline/variables.sample.yml'
+        destination: '($ .project $)/pipeline/variables-($ .environment $).yml'
     # Configuration of terraform to setup the infrastructure
     terraform:
       gcp-gce:
         path: 'terraform/gcp/vm.tf.sample'
-        destination: '($ project $)/terraform/($ environment $)/vm.tf'
+        destination: '($ .project $)/terraform/($ .environment $)/vm.tf'

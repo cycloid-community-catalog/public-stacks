@@ -21,12 +21,12 @@ In order to run this task, couple elements are required :
 |`config_git_branch`|Branch of the config Git repository.|`-`|`master`|`True`|
 |`config_git_private_key`|SSH key pair to fetch the config Git repository.|`-`|`((ssh_config.ssh_key))`|`True`|
 |`config_git_repository`|Git repository URL containing the config of the stack.|`-`|`git@github.com:MyUser/config.git`|`True`|
-|`config_terraform_path`|Path of Terraform files in the config git repository|`-`|`($ project $)/terraform/($ environment $)`|`True`|
-|`customer`|Name of the Cycloid Organization, used as customer variable name.|`-`|`($ organization_canonical $)`|`True`|
-|`env`|Name of the project's environment.|`-`|`($ environment $)`|`True`|
-|`project`|Name of the project.|`-`|`($ project $)`|`True`|
+|`config_terraform_path`|Path of Terraform files in the config git repository|`-`|`($ .project $)/terraform/($ .environment $)`|`True`|
+|`customer`|Name of the Cycloid Organization, used as customer variable name.|`-`|`($ .organization_canonical $)`|`True`|
+|`env`|Name of the project's environment.|`-`|`($ .environment $)`|`True`|
+|`project`|Name of the project.|`-`|`($ .project $)`|`True`|
 |`stack_git_branch`|Branch to use on the public stack Git repository|`-`|`master`|`True`|
-|`terraform_storage_bucket_name`|AWS S3 bucket name to store terraform remote state file.|`-`|`($ organization_canonical $)-terraform-remote-state`|`True`|
+|`terraform_storage_bucket_name`|AWS S3 bucket name to store terraform remote state file.|`-`|`($ .organization_canonical $)-terraform-remote-state`|`True`|
 |`terraform_version`|terraform version used to execute your code.|`-`|`'1.0.6'`|`True`|
 
 

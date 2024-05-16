@@ -7,10 +7,10 @@ module "vm" {
   env      = var.env
   customer = var.customer
 
-  ##################################### 
+  #####################################
 
   ###
-  # FIREWALL 
+  # FIREWALL
   ###
 
   ## Firewall - ingress
@@ -28,13 +28,13 @@ module "vm" {
   ingress_source_ranges = []
 
   #. ingress_source_tags (optional, array):
-  #+ If source tags are specified, the firewall will apply only to traffic with source IP that belongs to a tag listed in source tags. 
+  #+ If source tags are specified, the firewall will apply only to traffic with source IP that belongs to a tag listed in source tags.
   ingress_source_tags = []
 
   #. ingress_allow_protocol (optional, string):
   #+ The IP protocol to which the ingress allow rule applies.
   ingress_allow_protocol = "tcp"
-  
+
   #. ingress_allow_ports (optional, map):
   #+ An otional list of IP ports to which the ingress allow rule applies.
   ingress_allow_ports = ["22"]
@@ -107,7 +107,7 @@ module "vm" {
 
   #. boot_disk_image (optional, string):
   #+ The image from which to initialize this disk.
-  boot_disk_image = "debian-cloud/debian-10"
+  boot_disk_image = "debian-cloud/debian-12"
 
   #. boot_disk_size (optional, integer):
   #+ The size of the image in gigabytes. If not specified, it will inherit the size of its base image.
@@ -143,21 +143,21 @@ module "vm" {
 ## Please copy the next section of code into a separate .tf file in the config branch of your stack
 
 #resource "google_compute_firewall" "extra" {
-#  name        = "${var.customer}-${var.project}-${var.env}-extra"  
-#  network     = var.network 
-#  description = "Firewall description" 
+#  name        = "${var.customer}-${var.project}-${var.env}-extra"
+#  network     = var.network
+#  description = "Firewall description"
 #  direction   = ...      # (Optional) "EGRESS" or "INGRESS"
 #  disabled    = false    # (Optional)Denotes whether the firewall rule is disabled
 #  target_tags = module.vm.vm_target_tags
 #
 ###  Only one of the allow or deny blocks can be used at the time
 #
-##  allow {  
+##  allow {
 ##    protocol  = ...      # (Optional)
 ##    ports     = [...]    # (Optional)
-##  } 
-# 
-##  deny { 
+##  }
+#
+##  deny {
 ##    protocol = ...       # (Optional)
 ##    ports = [...]        # (Optional) deny ports list, e.g.: ["22","80"]
 ##  }

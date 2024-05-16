@@ -26,32 +26,7 @@ aws-ec2:
         key: terraform_storage_bucket_name
         widget: simple_text
         type: string
-        default: ($ organization_canonical $)-terraform-remote-state
-
-    Repos:
-      - name: "Config repository"
-        key: config_git_repository
-        type: string
-        widget: cy_crs
-        description: "Git repository URL containing the config of the stack."
-        default: "git@github.com:MyUser/config-ec2.git"
-        required: true
-      - name: "Config git key"
-        description: "SSH key pair to fetch the config Git repository."
-        key: config_git_private_key
-        type: string
-        widget: cy_cred
-        default: "((ssh_config.ssh_key))"
-        required: true
-      - name: "Config branch"
-        description: "Branch of the config Git repository."
-        key: config_git_branch
-        widget: cy_branch
-        type: string
-        description: "The branch used by the config repository"
-        source: config_git_repository
-        default: "master"
-        required: true
+        default: ($ .organization_canonical $)-terraform-remote-state
 
   terraform:
     os-image:
@@ -97,17 +72,26 @@ aws-ec2:
           - "ebs"
           - "instance-store"
       - name: "AMI owners"
-        description: "The AMI owners, used to limit search."
+        description: |
+          The AMI owners, used to limit search.
+          ```
+          379101102735 # old debian
+          136693071363 # debian10 & debian11
+          125523088429 # centos
+          099720109477 # Ubuntu
+          309956199498 # RHEL9 ami-013d87f7217614e10
+          ```
         key: module.vm.ami_owners
-        widget: auto_complete
-        type: string
-        default: "379101102735" #debian
+        widget: text_area
+        type: array
         required: true
         values:
-          - "379101102735" #debian
-          - "amazon"
-          - "microsoft"
-          - "self"
+          - "379101102735"
+          - "136693071363"
+          - "125523088429"
+          - "099720109477"
+          - "309956199498"
+
     instance:
       - name: "Cloud init file content"
         description: "The content of the file to use if cloud init is used."
@@ -282,7 +266,7 @@ gcp-gce:
         key: gcp_project
         widget: simple_text
         type: string
-        default: ($ organization_canonical $)
+        default: ($ .organization_canonical $)
       - name: "GCP region"
         description: "Google Cloud Platform region to use for Terraform."
         key: gcp_region
@@ -302,32 +286,7 @@ gcp-gce:
         key: terraform_storage_bucket_name
         widget: simple_text
         type: string
-        default: ($ organization_canonical $)-terraform-remote-state
-
-    Repos:
-      - name: "Config repository"
-        key: config_git_repository
-        type: string
-        widget: cy_crs
-        description: "Git repository URL containing the config of the stack."
-        default: "git@github.com:MyUser/config-gke.git"
-        required: true
-      - name: "Config git key"
-        description: "SSH key pair to fetch the config Git repository."
-        key: config_git_private_key
-        type: string
-        widget: cy_cred
-        default: "((ssh_config.ssh_key))"
-        required: true
-      - name: "Config branch"
-        description: "Branch of the config Git repository."
-        key: config_git_branch
-        widget: cy_branch
-        type: string
-        description: "The branch used by the config repository"
-        source: config_git_repository
-        default: "master"
-        required: true
+        default: ($ .organization_canonical $)-terraform-remote-state
 
   terraform:
     instance:
@@ -558,7 +517,7 @@ azure-linux:
         key: terraform_resource_group_name
         widget: simple_text
         type: string
-        default: ($ organization_canonical $)-terraform
+        default: ($ .organization_canonical $)-terraform
       - name: "Azure Storage Account name"
         description: "Azure Storage Account name to use to store terraform remote state file."
         key: terraform_storage_account_name
@@ -576,13 +535,13 @@ azure-linux:
         key: terraform_storage_container_name
         widget: simple_text
         type: string
-        default: ($ organization_canonical $)
+        default: ($ .organization_canonical $)
       - name: "Azure Storage container path"
         description: "Azure Storage container path to store terraform remote state file."
         key: terraform_storage_container_path
         widget: simple_text
         type: string
-        default: ($ project $)/($ environment $)
+        default: ($ .project $)/($ .environment $)
       - name: "OS Admin Password"
         description: "The password associated with the local admin account. Must be [6-72] and contain uppercase + lowercase + number + special caracter"
         key: os_admin_password

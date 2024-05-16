@@ -17,16 +17,16 @@ In order to run this task, couple elements are required :
 |`config_git_branch`|Branch of the config Git repository.|`-`|`master`|`True`|
 |`config_git_private_key`|SSH key pair to fetch the config Git repository.|`-`|`((ssh_config.ssh_key))`|`True`|
 |`config_git_repository`|Git repository URL containing the config of the stack.|`-`|`git@github.com:MyUser/config-gke.git`|`True`|
-|`config_terraform_path`|Path of Terraform files in the config git repository|`-`|`($ project $)/terraform/($ environment $)`|`True`|
-|`customer`|Name of the Cycloid Organization, used as customer variable name.|`-`|`($ organization_canonical $)`|`True`|
-|`env`|Name of the project's environment.|`-`|`($ environment $)`|`True`|
+|`config_terraform_path`|Path of Terraform files in the config git repository|`-`|`($ .project $)/terraform/($ .environment $)`|`True`|
+|`customer`|Name of the Cycloid Organization, used as customer variable name.|`-`|`($ .organization_canonical $)`|`True`|
+|`env`|Name of the project's environment.|`-`|`($ .environment $)`|`True`|
 |`gcp_credentials_json`|Google Cloud Platform credentials JSON for Terraform. See value format [here](https://docs.cycloid.io/advanced-guide/integrate-and-use-cycloid-credentials-manager.html#vault-in-the-pipeline)|`-`|`((gcp.json_key))`|`True`|
-|`gcp_project`|Google Cloud Platform project to use for Terraform.|`-`|`($ project $)`|`True`|
+|`gcp_project`|Google Cloud Platform project to use for Terraform.|`-`|`($ .project $)`|`True`|
 |`gcp_region`|Google Cloud Platform region to use for Terraform.|`-`|`europe-west1`|`True`|
 |`gcp_zone`|Google Cloud Platform zone to use for Terraform.|`-`|`europe-west1-b`|`False`|
-|`project`|Name of the project.|`-`|`($ project $)`|`True`|
+|`project`|Name of the project.|`-`|`($ .project $)`|`True`|
 |`stack_git_branch`|Branch to use on the public stack Git repository|`-`|`master`|`True`|
-|`terraform_storage_bucket_name`|Google Cloud Storage bucket name to store terraform remote state file.|`-`|`($ organization_canonical $)-terraform-remote-state`|`True`|
+|`terraform_storage_bucket_name`|Google Cloud Storage bucket name to store terraform remote state file.|`-`|`($ .organization_canonical $)-terraform-remote-state`|`True`|
 |`terraform_version`|terraform version used to execute your code.|`-`|`'1.0.6'`|`True`|
 
 ## Terraform - inputs

@@ -146,11 +146,11 @@ module "vm" {
 
   #. image_offer (required, string):
   #+ Specifies the offer of the image used to create the virtual machine.
-  image_offer = "debian-10"
+  image_offer = "debian-12"
 
   #. image_sku (required, string):
   #+ Specifies the SKU of the image used to create the virtual machine.
-  image_sku = "10-cloudinit-gen2"
+  image_sku = "12-gen2"
 
   #. image_version (optional, string):
   #+ Specifies the version of the image used to create the virtual machine.

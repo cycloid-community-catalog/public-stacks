@@ -24,16 +24,16 @@ In order to run this task, couple elements are required :
 |`config_git_branch`|Branch of the config Git repository.|`-`|`master`|`True`|
 |`config_git_private_key`|SSH key pair to fetch the config Git repository.|`-`|`((ssh_config.ssh_key))`|`True`|
 |`config_git_repository`|Git repository URL containing the config of the stack.|`-`|`git@github.com:MyUser/config-aks.git`|`True`|
-|`config_terraform_path`|Path of Terraform files in the config git repository|`-`|`($ project $)/terraform/($ environment $)`|`True`|
-|`customer`|Name of the Cycloid Organization, used as customer variable name.|`-`|`($ organization_canonical $)`|`True`|
-|`env`|Name of the project's environment.|`-`|`($ environment $)`|`True`|
-|`project`|Name of the project.|`-`|`($ project $)`|`True`|
+|`config_terraform_path`|Path of Terraform files in the config git repository|`-`|`($ .project $)/terraform/($ .environment $)`|`True`|
+|`customer`|Name of the Cycloid Organization, used as customer variable name.|`-`|`($ .organization_canonical $)`|`True`|
+|`env`|Name of the project's environment.|`-`|`($ .environment $)`|`True`|
+|`project`|Name of the project.|`-`|`($ .project $)`|`True`|
 |`stack_git_branch`|Branch to use on the public stack Git repository|`-`|`master`|`True`|
-|`terraform_resource_group_name`|Azure Resource Group of the Storage Account to use to store terraform remote state file.|`-`|`($ organization_canonical $)-terraform`|`True`|
+|`terraform_resource_group_name`|Azure Resource Group of the Storage Account to use to store terraform remote state file.|`-`|`($ .organization_canonical $)-terraform`|`True`|
 |`terraform_storage_account_key`|Azure Storage Account key to use to store terraform remote state file.|`-`|`((azure_storage_aks.access_key))`|`True`|
 |`terraform_storage_account_name`|Azure Storage Account name to use to store terraform remote state file.|`-`|`((azure_storage_aks.account_name))`|`True`|
-|`terraform_storage_container_name`|Azure Storage container name to store terraform remote state file.|`-`|`($ organization_canonical $)`|`True`|
-|`terraform_storage_container_path`|Azure Storage container path to store terraform remote state file.|`-`|`($ project $)/($ environment $)`|`True`|
+|`terraform_storage_container_name`|Azure Storage container name to store terraform remote state file.|`-`|`($ .organization_canonical $)`|`True`|
+|`terraform_storage_container_path`|Azure Storage container path to store terraform remote state file.|`-`|`($ .project $)/($ .environment $)`|`True`|
 |`terraform_version`|terraform version used to execute your code.|`-`|`'1.0.6'`|`True`|
 
 ## Terraform - inputs
