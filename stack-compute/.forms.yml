@@ -85,7 +85,7 @@ aws-ec2:
         widget: text_area
         type: array
         required: true
-        values:
+        default:
           - "379101102735"
           - "136693071363"
           - "125523088429"
