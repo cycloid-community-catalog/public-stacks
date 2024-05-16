@@ -98,10 +98,6 @@ module "vm" {
   #+ VPC Subnet ID to launch in.
   subnet_id = ""
 
-  #. private_ip (optional, string):
-  #+ Private IP address to associate with the instance in a VPC.
-  private_ip = ""
-
   #. associate_public_ip_address (optional, boolean):
   #+ Whether to associate a public IP address with an instance in a VPC.
   associate_public_ip_address = true

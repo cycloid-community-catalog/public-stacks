@@ -53,7 +53,7 @@ use_cases:
         key: module.vm.ami_name
         widget: simple_text
         type: string
-        default: "debian-stretch-*"
+        default: "debian-12-amd64-*"
         required: true
       - name: "AMI virtualization type"
         description: "The AMI virtualization type."
@@ -142,6 +142,13 @@ use_cases:
     - name: Network
       technologies: [terraform]
       vars:
+      - name: "VPC id"
+        description: "VPC ID used to create the security group."
+        key: module.vm.vpc_id
+        widget: simple_text
+        type: string
+        default: ""
+        required: true
       - name: "Subnet ID"
         description: "VPC Subnet ID to launch in."
         key: module.vm.subnet_id
@@ -218,13 +225,6 @@ use_cases:
         widget: simple_text
         type: string
         default: ""
-      - name: "VPC id"
-        description: "VPC ID used to create the security group."
-        key: module.vm.vpc_id
-        widget: simple_text
-        type: string
-        default: ""
-        required: true
       - name: "Security group ingress rules"
         description: "Configuration block for ingress rules."
         key: module.vm.sg_ingress_rules
@@ -393,7 +393,7 @@ use_cases:
         key: module.vm.boot_disk_image
         widget: simple_text
         type: string
-        default: "debian-cloud/debian-10"
+        default: "debian-cloud/debian-12"
       - name: "Boot disk size"
         description: "The size of the image in gigabytes."
         key: module.vm.boot_disk_size

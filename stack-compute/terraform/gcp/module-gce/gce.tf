@@ -1,5 +1,5 @@
 ###
-# FIREWALL 
+# FIREWALL
 ###
 
 resource "google_compute_firewall" "ingress" {
@@ -38,7 +38,7 @@ resource "google_compute_firewall" "egress" {
 data "template_file" "user_data" {
   template = file("${path.module}/cloud-init.sh.tpl")
   vars = {
-    file_content  = var.file_content
+    file_content = var.file_content
   }
 }
 
@@ -81,8 +81,8 @@ resource "google_compute_instance" "vm" {
     }
   }
   // Required in case user attaches other disk
-  // When using google_compute_attached_disk you must use lifecycle.ignore_changes = ["attached_disk"] 
-  // on the google_compute_instance resource that has the disks attached. 
+  // When using google_compute_attached_disk you must use lifecycle.ignore_changes = ["attached_disk"]
+  // on the google_compute_instance resource that has the disks attached.
   // Otherwise the two resources will fight for control of the attached disk block.
   lifecycle {
     ignore_changes = [attached_disk]

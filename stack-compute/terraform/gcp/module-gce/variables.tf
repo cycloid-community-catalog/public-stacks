@@ -14,7 +14,7 @@ variable "customer" {
 }
 
 ###
-# FIREWALL 
+# FIREWALL
 ###
 
 # Firewall - ingress
@@ -24,7 +24,7 @@ variable "ingress_firewall_name" {
 
 variable "ingress_firewall_description" {
   description = "A brief description of the ingress firewall."
-  default = ""
+  default     = ""
 }
 
 variable "ingress_disabled" {
@@ -60,7 +60,7 @@ variable "egress_firewall_name" {
 }
 variable "egress_firewall_description" {
   description = "A brief description of the egress firewall."
-  default = ""
+  default     = ""
 }
 
 variable "egress_disabled" {
@@ -100,7 +100,7 @@ variable "instance_name" {
 
 variable "instance_description" {
   description = "A brief description of the instance."
-  default = ""
+  default     = ""
 }
 
 variable "machine_type" {
@@ -143,7 +143,7 @@ variable "boot_disk_type" {
   default     = ""
 }
 
-# VM - network 
+# VM - network
 
 variable "network" {
   description = "The name or self_link of the network to attach this interface to."
@@ -162,7 +162,7 @@ variable "instance_extra_labels" {
 
 locals {
   standard_labels = {
-    cycloidio = "true"
+    cycloidio    = "true"
     env          = var.env
     project      = var.project
     client       = var.customer
@@ -171,8 +171,8 @@ locals {
   instance_labels = merge(var.instance_extra_labels, local.standard_labels)
 
   # if names not set take by default ${var.customer}-${var.project}-${var.env}-object
-  ingress_name = var.ingress_firewall_name != "" ? var.ingress_firewall_name : "${var.customer}-${var.project}-${var.env}-ingress"
-  egress_name = var.egress_firewall_name != "" ? var.egress_firewall_name : "${var.customer}-${var.project}-${var.env}-egress"
+  ingress_name  = var.ingress_firewall_name != "" ? var.ingress_firewall_name : "${var.customer}-${var.project}-${var.env}-ingress"
+  egress_name   = var.egress_firewall_name != "" ? var.egress_firewall_name : "${var.customer}-${var.project}-${var.env}-egress"
   instance_name = var.instance_name != "" ? var.instance_name : "${var.customer}-${var.project}-${var.env}-vm"
   instance_tags = var.instance_tags != [] ? var.instance_tags : ["${var.customer}-${var.project}-${var.env}-network-tag"]
 }

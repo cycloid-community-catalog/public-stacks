@@ -25,7 +25,7 @@ data "aws_ami" "vm" {
     values = [var.ami_root_device_type]
   }
 
-  owners = [var.ami_owners]
+  owners = var.ami_owners
 }
 
 
@@ -36,7 +36,7 @@ data "aws_ami" "vm" {
 data "template_file" "user_data" {
   template = file("${path.module}/cloud-init.sh.tpl")
   vars = {
-    file_content  = var.file_content
+    file_content = var.file_content
   }
 }
 
@@ -64,7 +64,7 @@ resource "aws_instance" "vm" {
   ami           = data.aws_ami.vm.id
   instance_type = var.instance_type
 
-  // cloud init script - if enabled 
+  // cloud init script - if enabled
   user_data_base64 = base64encode(data.template_file.user_data.rendered)
 
   // keypair name - if enabled
@@ -73,7 +73,7 @@ resource "aws_instance" "vm" {
   //network
   vpc_security_group_ids      = [aws_security_group.ec2.id]
   subnet_id                   = var.subnet_id
-  private_ip                  = var.private_ip
+  private_ip                  = length(var.private_ip) > 0 ? var.private_ip : null
   associate_public_ip_address = var.associate_public_ip_address
 
   //storage

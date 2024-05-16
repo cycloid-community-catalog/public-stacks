@@ -43,7 +43,7 @@ variable "ami_root_device_type" {
 
 variable "ami_owners" {
   description = "List of AMI owners to limit search."
-  default     =   owners = [
+  default = [
     "379101102735",
     "136693071363",
     "125523088429",

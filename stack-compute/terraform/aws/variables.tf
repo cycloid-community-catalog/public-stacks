@@ -11,13 +11,15 @@ variable "customer" {
   description = "Cycloid customer name."
 }
 
-# AWS 
+# AWS
 variable "access_key" {
   description = "AWS IAM access key ID."
 }
+
 variable "secret_key" {
   description = "AWS IAM access secret key."
 }
+
 variable "aws_region" {
   description = "AWS region to launch VM."
   default     = "eu-west-1"

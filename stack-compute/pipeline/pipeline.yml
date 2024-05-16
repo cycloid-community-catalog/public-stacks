@@ -119,7 +119,7 @@ resources:
   type: git
   icon: git
   source:
-    uri: ($ .scs_url $)
+    uri: https://github.com/cycloid-community-catalog/stack-compute.git
     branch: ($ .scs_branch $)
     paths:
       - terraform/($ $stack_path $)/*
