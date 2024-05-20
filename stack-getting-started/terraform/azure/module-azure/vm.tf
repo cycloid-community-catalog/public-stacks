@@ -38,7 +38,7 @@ resource "azurerm_network_interface" "main" {
 
 // data "template_file" "user_data" {
 //   template = file("${path.module}/userdata.sh.tpl")
-// 
+//
 //   vars = {
 //     env             = var.env
 //     project         = var.project
@@ -67,8 +67,8 @@ resource "azurerm_virtual_machine" "main" {
 
   storage_image_reference {
     publisher = "debian"
-    offer     = "debian-10"
-    sku       = "10-cloudinit-gen2"
+    offer     = "debian-12"
+    sku       = "12-gen2"
     version   = "latest"
   }
 

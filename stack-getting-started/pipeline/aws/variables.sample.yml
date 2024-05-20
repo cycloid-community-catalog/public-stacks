@@ -1,5 +1,0 @@
-env: ($ environment $)
-project: ($ project $)
-org: ($ organization_canonical $)
-
-stack_git_branch: master

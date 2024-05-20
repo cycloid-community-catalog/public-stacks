@@ -1,6 +1,6 @@
 ---
 # Configuration of the Cycloid stack
-version: '2'
+version: '3'
 name: 'getting-started'
 canonical: 'stack-getting-started'
 status: 'public'
@@ -35,13 +35,13 @@ config:
     cloud_provider: aws
     pipeline:
       pipeline:
-        path: pipeline/aws/pipeline.yml
+        path: pipeline/pipeline.yml
       variables:
-        path: pipeline/aws/variables.sample.yml
-        destination: ($ project $)/pipeline/($ environment $)/variables.yml
+        path: pipeline/variables.sample.yml
+        destination: ($ .project $)/pipeline/($ .environment $)/variables.yml
     terraform:
       config:
-        destination: ($ project $)/terraform/($ environment $)/main.tf
+        destination: ($ .project $)/terraform/($ .environment $)/main.tf
         path: terraform/aws/main.tf.sample
 
   azure:
@@ -50,13 +50,13 @@ config:
     cloud_provider: azurerm
     pipeline:
       pipeline:
-        path: pipeline/azure/pipeline.yml
+        path: pipeline/pipeline.yml
       variables:
-        path: pipeline/azure/variables.sample.yml
-        destination: ($ project $)/pipeline/($ environment $)/variables.yml
+        path: pipeline/variables.sample.yml
+        destination: ($ .project $)/pipeline/($ .environment $)/variables.yml
     terraform:
       config:
-        destination: ($ project $)/terraform/($ environment $)/main.tf
+        destination: ($ .project $)/terraform/($ .environment $)/main.tf
         path: terraform/azure/main.tf.sample
 
   gcp:
@@ -65,11 +65,11 @@ config:
     cloud_provider: google
     pipeline:
       pipeline:
-        path: pipeline/gcp/pipeline.yml
+        path: pipeline/pipeline.yml
       variables:
-        path: pipeline/gcp/variables.sample.yml
-        destination: ($ project $)/pipeline/($ environment $)/variables.yml
+        path: pipeline/variables.sample.yml
+        destination: ($ .project $)/pipeline/($ .environment $)/variables.yml
     terraform:
       config:
-        destination: ($ project $)/terraform/($ environment $)/main.tf
+        destination: ($ .project $)/terraform/($ .environment $)/main.tf
         path: terraform/gcp/main.tf.sample

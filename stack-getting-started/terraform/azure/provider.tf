@@ -2,14 +2,6 @@ variable "organization" {}
 variable "project" {}
 variable "env" {}
 
-terraform {
-  required_providers {
-    azurerm = {
-      source  = "azurerm"
-      version = "~> 1.42.0"
-    }
-  }
-}
 # Azure
 provider "azurerm" {
   environment     = var.azure_env
@@ -17,6 +9,7 @@ provider "azurerm" {
   client_secret   = var.azure_cred.client_secret
   subscription_id = var.azure_cred.subscription_id
   tenant_id       = var.azure_cred.tenant_id
+  features {}
 }
 
 # Azure

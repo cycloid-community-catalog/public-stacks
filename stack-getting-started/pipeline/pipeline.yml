@@ -20,8 +20,8 @@ shared:
         - name: merged-stack
           path: "merged-stack"
     params:
-      CONFIG_PATH: ((project))/terraform/((env))
-      STACK_PATH: terraform/azure
+      CONFIG_PATH: ($ .project $)/terraform/($ .environment $)
+      STACK_PATH: terraform/($ .use_case $)
 
 groups:
 - name: overview
@@ -45,36 +45,48 @@ resources:
   icon: terraform
   source:
     backend_config:
-      address: '($ api_url $)/inventory?jwt=($ inventory_jwt $)'
+      address: '($ .api_url $)/inventory?jwt=($ .inventory_jwt $)'
       ## skip_cert_verification needs to be enabled when using self signed certificates.
       # skip_cert_verification: true
     backend_type: http
     env_name: default
     vars:
+      env: ($ .environment $)
+      project: ($ .project $)
+      organization: ($ .project $)
+($- if eq .use_case "aws" $)
+      aws_access_cred: ((aws_access_cred))
+      aws_region: ((aws_default_region))
+($- else if eq .use_case "azure" $)
       azure_resource_group_name: ((azure_resource_group_name))
       azure_location: ((azure_location))
       azure_env: ((azure_env))
       azure_cred: ((azure_cred))
-      env: ((env))
-      project: ((project))
-      organization: ((org))
+($- else if eq .use_case "gcp" $)
+      gcp_project: ((gcp_project))
+      gcp_zone: ((gcp_zone))
+    env:
+      GOOGLE_PROJECT: ((gcp_project))
+      GOOGLE_ZONE: ((gcp_zone))
+      GOOGLE_CREDENTIALS: ((gcp_credentials_json))
+($- end $)
 
 # The Terraform stack (will be merged with the config)
 - name: git_stack
   type: git
   source:
     uri: https://github.com/cycloid-community-catalog/stack-getting-started.git
-    branch: ((stack_git_branch))
+    branch: ($ .scs_branch $)
 
 # The Terraform config (will be merged with the stack)
 - name: git_config
   type: git
   source:
-    uri: ($ cr_url $)
-    branch: ($ cr_branch $)
-    private_key: ((($ cr_cred_path $).ssh_key))
+    uri: ($ .cr_url $)
+    branch: ($ .cr_branch $)
+    private_key: ((($ .cr_cred_path $).ssh_key))
     paths:
-      - ((project))/terraform/((env))/*
+      - ($ .project $)/terraform/($ .environment $)/*
 
 jobs:
   - name: terraform-plan

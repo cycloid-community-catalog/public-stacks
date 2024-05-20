@@ -4,8 +4,8 @@ variable "env" {}
 
 # Aws
 provider "aws" {
-  access_key = var.access_key
-  secret_key = var.secret_key
+  access_key = var.aws_access_cred.access_key
+  secret_key = var.aws_access_cred.secret_key
   region     = var.aws_region
   default_tags {
     tags = {
@@ -16,8 +16,8 @@ provider "aws" {
     }
   }
 }
-variable "access_key" {}
-variable "secret_key" {}
+
+variable "aws_access_cred" {}
 variable "aws_region" {
   description = "AWS region to launch servers."
   default     = "eu-west-1"
