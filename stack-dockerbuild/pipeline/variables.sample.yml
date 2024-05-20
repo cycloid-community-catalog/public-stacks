@@ -26,9 +26,9 @@ aws_secret_key: ''
 #+ AWS region if pushing to AWS ECR, otherwise leave it as a empty string.
 aws_region: ''
 
-#. registry_tag (required, string): ($ environment $)
+#. registry_tag (required, string): ($ .environment $)
 #+ tag to put on the builded image (eg latest).
-registry_tag: ($ environment $)
+registry_tag: ($ .environment $)
 
 #. registry_extra_tags (optional, string): 'tag1 tag2'
 #+ Additional tags to put on the builded image. Separate each tag with a space.
@@ -74,24 +74,3 @@ code_dockerfile_location: Dockerfile
 #. code_build_args (optional, dict):
 #+ Set build-time variables for the Docker build.
 code_build_args:
-
-
-#
-# Default variables that shouldn't be changed except if needed
-#
-
-#. env (required): ($ environment $)
-#+ Name of the project's environment.
-env: ($ environment $)
-
-#. project (required): ($ project $)
-#+ Name of the project.
-project: ($ project $)
-
-#. customer (required): ($ organization_canonical $)
-#+ Name of the Cycloid Organization, used as customer variable name.
-customer: ($ organization_canonical $)
-
-#. stack_git_branch (required): master
-#+ Branch to use on the public stack git repository
-stack_git_branch: master

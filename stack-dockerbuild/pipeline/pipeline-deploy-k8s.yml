@@ -36,7 +36,7 @@ resources:
     icon: git
     source:
       uri: https://github.com/cycloid-community-catalog/stack-dockerbuild
-      branch: ((stack_git_branch))
+      branch: ($ .scs_branch $)
       paths:
         - k8s/*
 
@@ -128,8 +128,8 @@ jobs:
         AWS_SECRET_ACCESS_KEY: ((registry_aws_secret_key))
         AWS_REGION: ((registry_aws_region))
         K8S_ENV_PATH: ((k8s_env_path))
-        CUSTOMER: ((customer))
-        PROJECT: ((project))
+        CUSTOMER: ($ .organization_canonical $)
+        PROJECT: ($ .project $)
 
     # Make sure the namespace exists
     - try:

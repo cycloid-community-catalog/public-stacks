@@ -57,7 +57,7 @@ resources:
     icon: git
     source:
       uri: https://github.com/cycloid-community-catalog/stack-dockerbuild
-      branch: ((stack_git_branch))
+      branch: ($ .scs_branch $)
       paths:
         - docker/*
 

@@ -39,7 +39,7 @@ resources:
     icon: git
     source:
       uri: https://github.com/cycloid-community-catalog/stack-dockerbuild
-      branch: ((stack_git_branch))
+      branch: ($ .scs_branch $)
       paths:
         - docker/*
 
@@ -70,7 +70,7 @@ jobs:
         context: build
         path: pull-request
         status: pending
-        target_url: 'https://console.cycloid.io/organizations/((customer))/projects/((project))/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_ID'
+        target_url: 'https://console.cycloid.io/organizations/($ .organization_canonical $)/projects/($ .project $)/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_ID'
 
     - task: merge-stack-and-config
       config:
@@ -113,7 +113,7 @@ jobs:
         context: build
         path: pull-request
         status: failure
-        target_url: 'https://console.cycloid.io/organizations/((customer))/projects/((project))/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_ID'
+        target_url: 'https://console.cycloid.io/organizations/($ .organization_canonical $)/projects/($ .project $)/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_ID'
     on_success:
       put: pull-request
       params:
@@ -121,4 +121,4 @@ jobs:
         context: build
         path: pull-request
         status: success
-        target_url: 'https://console.cycloid.io/organizations/((customer))/projects/((project))/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_ID'
+        target_url: 'https://console.cycloid.io/organizations/($ .organization_canonical $)/projects/($ .project $)/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_ID'

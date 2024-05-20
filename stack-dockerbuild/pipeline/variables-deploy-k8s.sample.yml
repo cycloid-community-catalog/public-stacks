@@ -62,21 +62,21 @@ k8s_aws_access_key: ''
 #+ AWS secret key if deploying to AWS EKS, otherwise leave it as a empty string.
 k8s_aws_secret_key: ''
 
-#. k8s_namespace (required): ($ environment $)
+#. k8s_namespace (required): ($ .environment $)
 #+ Kubernetes namespace to use for the deployment.
-k8s_namespace: ($ environment $)
+k8s_namespace: ($ .environment $)
 
-#. k8s_path (required): ($ project $)/k8s
+#. k8s_path (required): ($ .project $)/k8s
 #+ Path to the manifest(s) to apply in the config git repository, can be either a folder or a single file.
-k8s_path: ($ project $)/k8s
+k8s_path: ($ .project $)/k8s
 
 #. k8s_base_path (required): base
 #+ Path to the directory containing the base kustomization.yaml file to watch in the config git repository. Relative to k8s_path.
 k8s_base_path: base
 
-#. k8s_env_path (required): overlays/($ environment $)
+#. k8s_env_path (required): overlays/($ .environment $)
 #+ Path to the overlay directory containing the env-specific kustomization.yaml file to watch in the config git repository. Relative to k8s_path.
-k8s_env_path: overlays/($ environment $)
+k8s_env_path: overlays/($ .environment $)
 
 #. k8s_wait_ready_selector (required): ''
 #+ Used to tell the concourse kubernetes resource to wait for a certain label selector to be ready.
@@ -89,24 +89,3 @@ k8s_wait_ready_seconds: 60
 #. k8s_version (required): '1.24'
 #+ Kubernetes version for the kubernetes concourse resource.
 k8s_version: '1.24'
-
-
-#
-# Default variables that shouldn't be changed except if needed
-#
-
-#. env (required): ($ environment $)
-#+ Name of the project's environment.
-env: ($ environment $)
-
-#. project (required): ($ project $)
-#+ Name of the project.
-project: ($ project $)
-
-#. customer (required): ($ organization_canonical $)
-#+ Name of the Cycloid Organization, used as customer variable name.
-customer: ($ organization_canonical $)
-
-#. stack_git_branch (required): master
-#+ Branch to use on the public stack git repository.
-stack_git_branch: master

@@ -1,5 +1,5 @@
 ---
-version: '2'
+version: '3'
 # Configuration of the Cycloid stack
 name: 'Stack Docker build'
 canonical: 'stack-dockerbuild'
@@ -29,7 +29,7 @@ config:
         path: 'pipeline/pipeline.yml'
       variables:
         path: 'pipeline/variables.sample.yml'
-        destination: '($ project $)/pipeline/variables-($ environment $).yml'
+        destination: '($ .project $)/pipeline/variables-($ .environment $).yml'
   github-pr:
     name: 'Github PRs'
     description: 'Used to build and tests docker images from Github PRs.'
@@ -38,7 +38,7 @@ config:
         path: 'pipeline/pipeline-github-pr.yml'
       variables:
         path: 'pipeline/variables-github-pr.sample.yml'
-        destination: '($ project $)/pipeline/variables-($ environment $).yml'
+        destination: '($ .project $)/pipeline/variables-($ .environment $).yml'
   build-deploy-k8s:
     name: 'Build + Deploy to K8s'
     description: 'Used to build, tests, push docker images from branches and deploy it on a Kubernetes cluster using Kustomize.'
@@ -47,7 +47,7 @@ config:
         path: 'pipeline/pipeline-build-deploy-k8s.yml'
       variables:
         path: 'pipeline/variables-build-deploy-k8s.sample.yml'
-        destination: '($ project $)/pipeline/variables-($ environment $).yml'
+        destination: '($ .project $)/pipeline/variables-($ .environment $).yml'
   deploy-k8s:
     name: 'Deploy to K8s'
     description: 'Used to watch an existing docker image and deploy it on a Kubernetes cluster using Kustomize.'
@@ -56,4 +56,4 @@ config:
         path: 'pipeline/pipeline-deploy-k8s.yml'
       variables:
         path: 'pipeline/variables-deploy-k8s.sample.yml'
-        destination: '($ project $)/pipeline/variables-($ environment $).yml'
+        destination: '($ .project $)/pipeline/variables-($ .environment $).yml'

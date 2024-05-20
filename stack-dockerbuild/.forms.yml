@@ -1,7 +1,13 @@
 ---
-default:
-  pipeline:
-    Registry:
+version: 2
+use_cases:
+- name: default
+  sections:
+  - name: Registry
+    groups:
+    - name: Common
+      technologies: [pipeline]
+      vars:
       - name: "Image Name"
         description: "Name of the repository image. If using AWS ECR you only need the repository name, not the full URI e.g. `alpine` not `012345678910.dkr.ecr.us-east-1.amazonaws.com/alpine`. And for GCP Artifact Registry use `gcr.io/project/repo`"
         key: registry_image_name
@@ -65,7 +71,7 @@ default:
         description: "Tag to put on the builded image (eg latest)."
         key: registry_tag
         type: string
-        default: "($ environment $)"
+        default: "($ .environment $)"
         widget: simple_text
         required: true
       - name: "Extra Tags"
@@ -93,7 +99,11 @@ default:
         default: false
         widget: switch
 
-    Code:
+  - name: Code
+    groups:
+    - name: Common
+      technologies: [pipeline]
+      vars:
       - name: "Code repository"
         description: "Git repository URL containing the Dockerfile."
         key: code_git_repository
@@ -133,9 +143,13 @@ default:
         type: string
         widget: text_area
 
-github-pr:
-  pipeline:
-    Registry:
+- name: github-pr
+  sections:
+  - name: Registry
+    groups:
+    - name: Common
+      technologies: [pipeline]
+      vars:
       - name: "Image Name"
         description: "Name of the repository image. If using AWS ECR you only need the repository name, not the full URI e.g. `alpine` not `012345678910.dkr.ecr.us-east-1.amazonaws.com/alpine`."
         key: registry_image_name
@@ -147,7 +161,7 @@ github-pr:
         description: "Tag to put on the builded image (eg latest)."
         key: registry_tag
         type: string
-        default: "($ environment $)"
+        default: "($ .environment $)"
         widget: simple_text
         required: true
       - name: "Extra Tags"
@@ -163,7 +177,11 @@ github-pr:
         default: false
         widget: switch
 
-    Github:
+  - name: Github
+    groups:
+    - name: Common
+      technologies: [pipeline]
+      vars:
       - name: "Github repository"
         description: "Git repository URL containing the code of the stack."
         key: code_git_repository
@@ -196,9 +214,13 @@ github-pr:
         type: string
         widget: text_area
 
-build-deploy-k8s:
-  pipeline:
-    Registry:
+- name: build-deploy-k8s
+  sections:
+  - name: Registry
+    groups:
+    - name: Common
+      technologies: [pipeline]
+      vars:
       - name: "Image Name"
         description: "Name of the repository image. If using AWS ECR you only need the repository name, not the full URI e.g. `alpine` not `012345678910.dkr.ecr.us-east-1.amazonaws.com/alpine`."
         key: registry_image_name
@@ -266,7 +288,11 @@ build-deploy-k8s:
           - "us-west-1"
           - "us-west-2"
 
-    Code:
+  - name: Code
+    groups:
+    - name: Common
+      technologies: [pipeline]
+      vars:
       - name: "Code repository"
         description: "Git repository URL containing the Dockerfile."
         key: code_git_repository
@@ -306,7 +332,11 @@ build-deploy-k8s:
         type: string
         widget: text_area
 
-    K8s:
+  - name: K8s
+    groups:
+    - name: Common
+      technologies: [pipeline]
+      vars:
       - name: "Kubernetes config repository"
         description: "Git repository URL containing the K8s configuration (kustomize yaml)."
         key: config_git_repository
@@ -357,14 +387,14 @@ build-deploy-k8s:
         description: "Kubernetes namespace to use for the deployment."
         key: k8s_namespace
         type: string
-        default: "($ environment $)"
+        default: "($ .environment $)"
         widget: simple_text
         required: true
       - name: "Kustomize root path"
         description: "Path to the manifest(s) to apply in the config git repository, can be either a folder or a single file."
         key: k8s_path
         type: string
-        default: "($ project $)/k8s"
+        default: "($ .project $)/k8s"
         widget: simple_text
       - name: "Kustomize base path"
         description: "Path to the directory containing the base kustomization.yaml file to watch in the config git repository. Relative to the Kustomize root path."
@@ -376,7 +406,7 @@ build-deploy-k8s:
         description: "Path to the overlay directory containing the env-specific kustomization.yaml file to watch in the config git repository. Relative to the Kustomize root path."
         key: k8s_env_path
         type: string
-        default: "overlays/($ environment $)"
+        default: "overlays/($ .environment $)"
         widget: simple_text
       - name: "Wait ready label selector"
         description: "Used to tell the concourse kubernetes resource to wait for a certain label selector to be ready."
@@ -398,9 +428,13 @@ build-deploy-k8s:
         default: "1.16"
         widget: simple_text
 
-deploy-k8s:
-  pipeline:
-    Registry:
+- name: deploy-k8s
+  sections:
+  - name: Registry
+    groups:
+    - name: Common
+      technologies: [pipeline]
+      vars:
       - name: "Image Name"
         description: "Name of the repository image. If using AWS ECR you only need the repository name, not the full URI e.g. `alpine` not `012345678910.dkr.ecr.us-east-1.amazonaws.com/alpine`."
         key: registry_image_name
@@ -468,7 +502,11 @@ deploy-k8s:
           - "us-west-1"
           - "us-west-2"
 
-    K8s:
+  - name: K8s
+    groups:
+    - name: Common
+      technologies: [pipeline]
+      vars:
       - name: "Kubernetes config repository"
         description: "Git repository URL containing the K8s configuration (kustomize yaml)."
         key: config_git_repository
@@ -519,14 +557,14 @@ deploy-k8s:
         description: "Kubernetes namespace to use for the deployment."
         key: k8s_namespace
         type: string
-        default: "($ environment $)"
+        default: "($ .environment $)"
         widget: simple_text
         required: true
       - name: "Kustomize root path"
         description: "Path to the manifest(s) to apply in the config git repository, can be either a folder or a single file."
         key: k8s_path
         type: string
-        default: "($ project $)/k8s"
+        default: "($ .project $)/k8s"
         widget: simple_text
       - name: "Kustomize base path"
         description: "Path to the directory containing the base kustomization.yaml file to watch in the config git repository. Relative to the Kustomize root path."
@@ -538,7 +576,7 @@ deploy-k8s:
         description: "Path to the overlay directory containing the env-specific kustomization.yaml file to watch in the config git repository. Relative to the Kustomize root path."
         key: k8s_env_path
         type: string
-        default: "overlays/($ environment $)"
+        default: "overlays/($ .environment $)"
         widget: simple_text
       - name: "Wait ready label selector"
         description: "Used to tell the concourse kubernetes resource to wait for a certain label selector to be ready."
