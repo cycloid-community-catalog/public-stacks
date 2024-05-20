@@ -36,9 +36,9 @@ There are 4 versions of the pipeline supported in this stack:
 Currently, Cycloid console doesn't support yet switching between different pipeline variations, you will have to manually copy+paste pipeline+variables from GIT inside the Cycloid console to use them.
 
 > **Note** Don't forget to replace the following Cycloid console anchors with the proper values when using a pipeline variation (the Cycloid console does it automatically for the default one):
->   * `($ organization_canonical $)` with your Cycloid organization name.
->   * `($ project $)` with your Cycloid project name.
->   * `($ environment $)` with your target Cycloid project environment name.
+>   * `($ .organization_canonical $)` with your Cycloid organization name.
+>   * `($ .project $)` with your Cycloid project name.
+>   * `($ .environment $)` with your target Cycloid project environment name.
 
 **Params**
 
@@ -49,34 +49,34 @@ Currently, Cycloid console doesn't support yet switching between different pipel
 |`aws_access_key`|Amazon AWS access key for Terraform. See value format [here](https://docs.cycloid.io/advanced-guide/integrate-and-use-cycloid-credentials-manager.html#vault-in-the-pipeline)|`-`|`((aws.access_key))`|`True`|
 |`aws_default_region`|Amazon AWS region to use for Terraform.|`-`|`eu-west-1`|`True`|
 |`aws_secret_key`|Amazon AWS secret key for Terraform. See value format [here](https://docs.cycloid.io/advanced-guide/integrate-and-use-cycloid-credentials-manager.html#vault-in-the-pipeline)|`-`|`((aws.secret_key))`|`True`|
-|`customer`|Name of the Cycloid Organization, used as customer variable name.|`-`|`($ organization_canonical $)`|`True`|
-|`env`|Name of the project's environment.|`-`|`($ environment $)`|`True`|
+|`customer`|Name of the Cycloid Organization, used as customer variable name.|`-`|`($ .organization_canonical $)`|`True`|
+|`env`|Name of the project's environment.|`-`|`($ .environment $)`|`True`|
 |`git_branch`|Branch of the terraform source code Git repository.|`-`|`master`|`True`|
 |`git_private_key`|SSH key pair to fetch terraform source code Git repository.|`-`|`((ssh_config.ssh_key))`|`True`|
 |`git_repository`|URL to the Git repository containing terraform source code.|`-`|`git@github.com:MyUser/terraform-code.git`|`True`|
 |`git_terraform_path`|Path of Terraform files in the git repository|`-`|`./`|`True`|
-|`project`|Name of the project.|`-`|`($ project $)`|`True`|
+|`project`|Name of the project.|`-`|`($ .project $)`|`True`|
 |`terraform_s3_endpoint`|A custom endpoint for the S3 API.|`-`|`''`|`True`|
 |`terraform_s3_force_path_style`|Always use path-style S3 URLs (https://<HOST>/<BUCKET> instead of https://<BUCKET>.<HOST>).|`-`|`'true'`|`False`|
 |`terraform_s3_skip_credentials_validation`|Skip the credentials validation via the STS API.|`-`|`'true'`|`False`|
-|`terraform_storage_bucket_name`|AWS S3 bucket name to store terraform remote state file.|`-`|`($ organization_canonical $)-terraform-remote-state`|`True`|
+|`terraform_storage_bucket_name`|AWS S3 bucket name to store terraform remote state file.|`-`|`($ .organization_canonical $)-terraform-remote-state`|`True`|
 |`terraform_version`|terraform version used to execute your code.|`-`|`'latest'`|`True`|
 
 ***gcp***
 
 |Name|Description|Type|Default|Required|
 |---|---|:---:|:---:|:---:|
-|`customer`|Name of the Cycloid Organization, used as customer variable name.|`-`|`($ organization_canonical $)`|`True`|
-|`env`|Name of the project's environment.|`-`|`($ environment $)`|`True`|
+|`customer`|Name of the Cycloid Organization, used as customer variable name.|`-`|`($ .organization_canonical $)`|`True`|
+|`env`|Name of the project's environment.|`-`|`($ .environment $)`|`True`|
 |`gcp_credentials_json`|Google Cloud Platform credentials JSON for Terraform. See value format [here](https://docs.cycloid.io/advanced-guide/integrate-and-use-cycloid-credentials-manager.html#vault-in-the-pipeline)|`-`|`((gcp.json_key))`|`True`|
-|`gcp_project`|Google Cloud Platform project to use for Terraform.|`-`|`($ project $)`|`True`|
+|`gcp_project`|Google Cloud Platform project to use for Terraform.|`-`|`($ .project $)`|`True`|
 |`gcp_region`|Google Cloud Platform region to use for Terraform.|`-`|`europe-west1`|`True`|
 |`git_branch`|Branch of the terraform source code Git repository.|`-`|`master`|`True`|
 |`git_private_key`|SSH key pair to fetch terraform source code Git repository.|`-`|`((ssh_config.ssh_key))`|`True`|
 |`git_repository`|URL to the Git repository containing terraform source code.|`-`|`git@github.com:MyUser/terraform-code.git`|`True`|
 |`git_terraform_path`|Path of Terraform files in the git repository|`-`|`./`|`True`|
-|`project`|Name of the project.|`-`|`($ project $)`|`True`|
-|`terraform_storage_bucket_name`|Google Cloud Storage bucket name to store terraform remote state file.|`-`|`($ organization_canonical $)-terraform-remote-state`|`True`|
+|`project`|Name of the project.|`-`|`($ .project $)`|`True`|
+|`terraform_storage_bucket_name`|Google Cloud Storage bucket name to store terraform remote state file.|`-`|`($ .organization_canonical $)-terraform-remote-state`|`True`|
 |`terraform_version`|terraform version used to execute your code.|`-`|`'latest'`|`True`|
 
 ***azure***
@@ -89,16 +89,16 @@ Currently, Cycloid console doesn't support yet switching between different pipel
 |`azure_location`|Azure location to use for terraform. |`-`|`West Europe`|`True`|
 |`azure_subscription_id`|Azure subscription ID to use for Terraform.|`-`|`((azure.subscription_id))`|`True`|
 |`azure_tenant_id`|Azure tenant ID to use for Terraform.|`-`|`((azure.tenant_id))`|`True`|
-|`customer`|Name of the Cycloid Organization, used as customer variable name.|`-`|`($ organization_canonical $)`|`True`|
-|`env`|Name of the project's environment.|`-`|`($ environment $)`|`True`|
+|`customer`|Name of the Cycloid Organization, used as customer variable name.|`-`|`($ .organization_canonical $)`|`True`|
+|`env`|Name of the project's environment.|`-`|`($ .environment $)`|`True`|
 |`git_branch`|Branch of the terraform source code Git repository.|`-`|`master`|`True`|
 |`git_private_key`|SSH key pair to fetch terraform source code Git repository.|`-`|`((ssh_config.ssh_key))`|`True`|
 |`git_repository`|URL to the Git repository containing terraform source code.|`-`|`git@github.com:MyUser/terraform-code.git`|`True`|
 |`git_terraform_path`|Path of Terraform files in the git repository|`-`|`./`|`True`|
-|`project`|Name of the project.|`-`|`($ project $)`|`True`|
-|`terraform_resource_group_name`|Azure Resource Group of the Storage Account to use to store terraform remote state file.|`-`|`($ organization_canonical $)-terraform`|`True`|
+|`project`|Name of the project.|`-`|`($ .project $)`|`True`|
+|`terraform_resource_group_name`|Azure Resource Group of the Storage Account to use to store terraform remote state file.|`-`|`($ .organization_canonical $)-terraform`|`True`|
 |`terraform_storage_account_key`|Azure Storage Account key to use to store terraform remote state file.|`-`|`((azure_storage.access_key))`|`True`|
 |`terraform_storage_account_name`|Azure Storage Account name to use to store terraform remote state file.|`-`|`((azure_storage.account_name))`|`True`|
-|`terraform_storage_container_name`|Azure Storage container name to store terraform remote state file.|`-`|`($ organization_canonical $)`|`True`|
-|`terraform_storage_container_path`|Azure Storage container path to store terraform remote state file.|`-`|`($ project $)/($ environment $)`|`True`|
+|`terraform_storage_container_name`|Azure Storage container name to store terraform remote state file.|`-`|`($ .organization_canonical $)`|`True`|
+|`terraform_storage_container_path`|Azure Storage container path to store terraform remote state file.|`-`|`($ .project $)/($ .environment $)`|`True`|
 |`terraform_version`|terraform version used to execute your code.|`-`|`'latest'`|`True`|

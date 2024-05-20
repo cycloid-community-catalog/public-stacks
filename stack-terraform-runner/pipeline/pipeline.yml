@@ -1,5 +1,4 @@
 groups:
-
 - name: overview
   jobs:
   - terraform-plan
@@ -14,7 +13,7 @@ resource_types:
 - name: terraform
   type: docker-image
   source:
-    repository: ljfranklin/terraform-resource
+    repository: cycloid/terraform-resource
     tag: ((terraform_version))
 
 resources:
@@ -23,13 +22,14 @@ resources:
   type: terraform
   icon: terraform
   source:
-    env_name: ((env))
+    env_name: ($ .environment $)
     private_key: ((terraform_modules_private_key))
+($- if eq .use_case "aws-ec2" $)
     backend_type: s3
     backend_config:
       bucket: ((terraform_storage_bucket_name))
-      key: ((project))-((env)).tfstate
-      workspace_key_prefix: ((project))
+      key: ($ .project $)-($ .environment $).tfstate
+      workspace_key_prefix: ($ .project $)
       region: ((aws_default_region))
       access_key: ((aws_access_key))
       secret_key: ((aws_secret_key))
@@ -37,15 +37,54 @@ resources:
       skip_credentials_validation: ((terraform_s3_skip_credentials_validation))
       force_path_style: ((terraform_s3_force_path_style))
     vars:
-      env: ((env))
-      project: ((project))
-      customer: ((customer))
+      env: ($ .environment $)
+      project: ($ .project $)
+      customer: ($ .organization_canonical $)
     env:
       AWS_ACCESS_KEY_ID: ((aws_access_key))
       AWS_DEFAULT_REGION: ((aws_default_region))
       AWS_SECRET_ACCESS_KEY: ((aws_secret_key))
+($- else if eq .use_case "azure-linux" $)
+    backend_type: azurerm
+    backend_config:
+      container_name: ((terraform_storage_container_name))
+      key: ((terraform_storage_container_path))/((project))-((env)).tfstate
+      resource_group_name: ((terraform_resource_group_name))
+      storage_account_name: ((terraform_storage_account_name))
+      access_key: ((terraform_storage_access_key))
+    vars:
+      azure_location: ((azure_location))
+      azure_env: ((azure_env))
+      azure_client_id: ((azure_client_id))
+      azure_client_secret: ((azure_client_secret))
+      azure_subscription_id: ((azure_subscription_id))
+      azure_tenant_id: ((azure_tenant_id))
+      env: ($ .environment $)
+      project: ($ .project $)
+      customer: ($ .organization_canonical $)
+    env:
+      ARM_CLIENT_ID: ((azure_client_id))
+      ARM_CLIENT_SECRET: ((azure_client_secret))
+      ARM_TENANT_ID: ((azure_tenant_id))
+      ARM_SUBSCRIPTION_ID: ((azure_subscription_id))
+($- else if eq .use_case "gcp-gce" $)
+    backend_type: gcs
+    backend_config:
+      bucket: ((terraform_storage_bucket_name))
+      prefix: ((project))/((env))
+      credentials: ((gcp_credentials_json))
+    vars:
+      gcp_project: ((gcp_project))
+      gcp_region: ((gcp_region))
+      env: ($ .environment $)
+      project: ($ .project $)
+      customer: ($ .organization_canonical $)
+    env:
+      GOOGLE_PROJECT: ((gcp_project))
+      GOOGLE_REGION: ((gcp_region))
+      GOOGLE_CREDENTIALS: ((gcp_credentials_json))
+($- end $)
 
-# The Terraform config (will be merged with the stack)
 - name: git_terraform
   type: git
   icon: git
@@ -58,7 +97,6 @@ resources:
 
 jobs:
 
-# Merge and trigger a plan whenever there is a commit in Terraform stack or config
 - name: terraform-plan
   serial: True
   max_in_flight: 1
@@ -73,7 +111,6 @@ jobs:
           plan_only: true
           terraform_source: git_terraform/((git_terraform_path))/
 
-# Merge and trigger an apply manually (no autostart of this job)
 - name: terraform-apply
   serial: True
   max_in_flight: 1

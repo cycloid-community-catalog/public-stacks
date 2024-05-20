@@ -1,78 +1,7 @@
-
 #
 # Terraform
 #
 
-# Amazon access to use to run terraform. Usually admin account to be able to create Amazon services.
-
-#. aws_access_key (required): ((aws.access_key))
-#+ Amazon AWS access key for Terraform. See value format [here](https://docs.cycloid.io/advanced-guide/integrate-and-use-cycloid-credentials-manager.html#vault-in-the-pipeline)
-aws_access_key: ((aws.access_key))
-
-#. aws_secret_key (required): ((aws.secret_key))
-#+ Amazon AWS secret key for Terraform. See value format [here](https://docs.cycloid.io/advanced-guide/integrate-and-use-cycloid-credentials-manager.html#vault-in-the-pipeline)
-aws_secret_key: ((aws.secret_key))
-
-#. aws_default_region (required): eu-west-1
-#+ Amazon AWS region to use for Terraform.
-aws_default_region: eu-west-1
-
-#. terraform_storage_bucket_name (required): ($ organization_canonical $)-terraform-remote-state
-#+ AWS S3 bucket name to store terraform remote state file.
-terraform_storage_bucket_name: ($ organization_canonical $)-terraform-remote-state
-
-#. terraform_s3_endpoint (required): ''
-#+ A custom endpoint for the S3 API.
-terraform_s3_endpoint: ""
-
-#. terraform_s3_skip_credentials_validation (optional): 'false'
-#+ Skip the credentials validation via the STS API.
-terraform_s3_skip_credentials_validation: false
-
-#. terraform_s3_force_path_style (optional): 'false'
-#+ Always use path-style S3 URLs (https://<HOST>/<BUCKET> instead of https://<BUCKET>.<HOST>).
-terraform_s3_force_path_style: false
-
 #. terraform_modules_private_key (optional): ""
 #+ SSH key to use to clone private terraform modules from Git.
 terraform_modules_private_key: ""
-
-#
-# Repos
-#
-
-#. git_repository (required): git@github.com:MyUser/terraform-code.git
-#+ URL to the Git repository containing terraform source code.
-git_repository: git@github.com:MyUser/terraform-code.git
-
-#. git_branch (required): master
-#+ Branch of the terraform source code Git repository.
-git_branch: master
-
-#. git_private_key (required): ((ssh_config.ssh_key))
-#+ SSH key pair to fetch terraform source code Git repository.
-git_private_key: ((ssh_config.ssh_key))
-
-#. git_terraform_path (required): ./
-#+ Path of Terraform files in the git repository
-git_terraform_path: ./
-
-#
-# Default variables that shouldn't be changed except if needed
-#
-
-#. env (required): ($ environment $)
-#+ Name of the project's environment.
-env: ($ environment $)
-
-#. project (required): ($ project $)
-#+ Name of the project.
-project: ($ project $)
-
-#. customer (required): ($ organization_canonical $)
-#+ Name of the Cycloid Organization, used as customer variable name.
-customer: ($ organization_canonical $)
-
-#. terraform_version (required): 'latest'
-#+ terraform version used to execute your code.
-terraform_version: 'latest'

@@ -1,6 +1,6 @@
 ---
 # Configuration of the Cycloid stack
-version: '2'
+version: '3'
 name: 'terraform-runner'
 canonical: 'stack-terraform-runner'
 status: 'public'
@@ -28,23 +28,22 @@ config:
         path: 'pipeline/pipeline.yml'
       variables:
         path: 'pipeline/variables.sample.yml'
-        destination: '($ project $)/pipeline/variables-($ environment $).yml'
+        destination: '($ .project $)/pipeline/variables-($ .environment $).yml'
   gcp:
     name: 'GCP'
     description: 'Using Google GCS terraform backend.'
     pipeline:
       pipeline:
-        path: 'pipeline/pipeline-gcp.yml'
+        path: 'pipeline/pipeline.yml'
       variables:
-        path: 'pipeline/variables-gcp.sample.yml'
-        destination: '($ project $)/pipeline/variables-gcp-($ environment $).yml'
+        path: 'pipeline/variables.sample.yml'
+        destination: '($ .project $)/pipeline/variables-($ .environment $).yml'
   azure:
     name: 'Azure'
     description: 'Using AzureRM terraform backend.'
     pipeline:
       pipeline:
-        path: 'pipeline/pipeline-azure.yml'
+        path: 'pipeline/pipeline.yml'
       variables:
-        path: 'pipeline/variables-azure.sample.yml'
-        destination: '($ project $)/pipeline/variables-azure-($ environment $).yml'
-
+        path: 'pipeline/variables.sample.yml'
+        destination: '($ .project $)/pipeline/variables-($ .environment $).yml'

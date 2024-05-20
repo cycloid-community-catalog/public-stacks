@@ -26,7 +26,7 @@ default:
         key: terraform_storage_bucket_name
         widget: simple_text
         type: string
-        default: ($ organization_canonical $)-terraform-remote-state
+        default: ($ .organization_canonical $)-terraform-remote-state
       - name: "If using s3 compatible storage, set S3 endpoint (example http://10.10.10.10:9000)"
         description: "A custom endpoint for the S3 API."
         key: terraform_s3_endpoint
@@ -56,7 +56,7 @@ default:
         key: terraform_version
         widget: simple_text
         type: string
-        default: "latest"
+        default: "1.8.2"
     Repos:
       - name: "Code git URL"
         description: "URL to the Git repository containing terraform source code."
@@ -132,7 +132,7 @@ azure:
         key: terraform_resource_group_name
         widget: simple_text
         type: string
-        default: "($ organization_canonical $)-terraform"
+        default: "($ .organization_canonical $)-terraform"
       - name: "Terraform storage account name"
         description: "Azure Storage Account name to use to store terraform remote state file."
         key: terraform_storage_account_name
@@ -150,13 +150,13 @@ azure:
         key: terraform_storage_container_name
         widget: simple_text
         type: string
-        default: "($ organization_canonical $)"
+        default: "($ .organization_canonical $)"
       - name: "Terraform storage container path"
         description: "Azure Storage container path to store terraform remote state file."
         key: terraform_storage_container_path
         widget: simple_text
         type: string
-        default: "($ project $)/($ environment $)"
+        default: "($ .project $)/($ .environment $)"
       - name: "Private module SSH key"
         description: "SSH key to use to clone private terraform modules from Git."
         key: terraform_modules_private_key
@@ -196,7 +196,7 @@ gcp:
         key: gcp_project
         widget: simple_text
         type: string
-        default: "($ project $)"
+        default: "($ .project $)"
       - name: "GCP zone"
         key: gcp_region
         widget: auto_complete
@@ -214,7 +214,7 @@ gcp:
         key: terraform_storage_bucket_name
         widget: simple_text
         type: string
-        default: ($ organization_canonical $)-terraform-remote-state
+        default: ($ .organization_canonical $)-terraform-remote-state
       - name: "Private module SSH key"
         description: "SSH key to use to clone private terraform modules from Git."
         key: terraform_modules_private_key
