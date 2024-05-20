@@ -24,7 +24,8 @@ resources:
   source:
     env_name: ($ .environment $)
     private_key: ((terraform_modules_private_key))
-($- if eq .use_case "aws-ec2" $)
+# default = aws
+($- if eq .use_case "default" $)
     backend_type: s3
     backend_config:
       bucket: ((terraform_storage_bucket_name))
@@ -44,7 +45,7 @@ resources:
       AWS_ACCESS_KEY_ID: ((aws_access_key))
       AWS_DEFAULT_REGION: ((aws_default_region))
       AWS_SECRET_ACCESS_KEY: ((aws_secret_key))
-($- else if eq .use_case "azure-linux" $)
+($- else if eq .use_case "azure" $)
     backend_type: azurerm
     backend_config:
       container_name: ((terraform_storage_container_name))
@@ -67,7 +68,7 @@ resources:
       ARM_CLIENT_SECRET: ((azure_client_secret))
       ARM_TENANT_ID: ((azure_tenant_id))
       ARM_SUBSCRIPTION_ID: ((azure_subscription_id))
-($- else if eq .use_case "gcp-gce" $)
+($- else if eq .use_case "gcp" $)
     backend_type: gcs
     backend_config:
       bucket: ((terraform_storage_bucket_name))
