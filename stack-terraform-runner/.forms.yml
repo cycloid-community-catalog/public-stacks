@@ -6,12 +6,18 @@ default:
         description: "Amazon AWS access key for Terraform."
         key: aws_access_key
         widget: cy_cred
+        widget_config:
+          cred_types:
+            - aws
         type: string
         default: "((aws.access_key))"
       - name: "AWS secret key"
         description: "Amazon AWS secret key for Terraform."
         key: aws_secret_key
         widget: cy_cred
+        widget_config:
+          cred_types:
+            - aws
         type: string
         default: "((aws.secret_key))"
       - name: "Amazon AWS region"
@@ -75,6 +81,9 @@ default:
         key: git_private_key
         type: string
         widget: cy_cred
+        widget_config:
+          cred_types:
+            - ssh
         default: "((ssh_config.ssh_key))"
       - name: "Code terraform path"
         description: "Path of Terraform files in the git repository."
@@ -90,24 +99,36 @@ azure:
         description: "The Subscription ID which should be used"
         key: azure_subscription_id
         widget: cy_cred
+        widget_config:
+          cred_types:
+            - azure
         type: string
         default: "((azure.subscription_id))"
       - name: "Azure tenant id"
         description: "The Tenant ID which should be used"
         key: azure_tenant_id
         widget: cy_cred
+        widget_config:
+          cred_types:
+            - azure
         type: string
         default: "((azure.tenant_id))"
       - name: "Azure client id"
         description: "The Client ID which should be used"
         key: azure_client_id
         widget: cy_cred
+        widget_config:
+          cred_types:
+            - azure
         type: string
         default: "((azure.client_id))"
       - name: "Azure client secret"
         description: "The Client Secret which should be used"
         key: azure_client_secret
         widget: cy_cred
+        widget_config:
+          cred_types:
+            - azure
         type: string
         default: "((azure.client_secret))"
       - name: "Azure environment"
@@ -181,6 +202,9 @@ azure:
         key: git_private_key
         type: string
         widget: cy_cred
+        widget_config:
+          cred_types:
+            - ssh
         default: "((ssh_config.ssh_key))"
       - name: "Code terraform path"
         description: "Path of Terraform files in the git repository."
@@ -207,6 +231,9 @@ gcp:
         description: "GCP credentials in json format which should be used"
         key: gcp_credentials_json
         widget: cy_cred
+        widget_config:
+          cred_types:
+            - gcp
         type: string
         default: "((gcp.json_key))"
       - name: "Terraform storage bucket"
@@ -245,6 +272,9 @@ gcp:
         key: git_private_key
         type: string
         widget: cy_cred
+        widget_config:
+          cred_types:
+            - ssh
         default: "((ssh_config.ssh_key))"
       - name: "Code terraform path"
         description: "Path of Terraform files in the git repository."
