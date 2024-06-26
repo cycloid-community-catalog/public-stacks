@@ -34,9 +34,10 @@ resources:
       region: ((aws_default_region))
       access_key: ((aws_access_key))
       secret_key: ((aws_secret_key))
-      endpoint: ((terraform_s3_endpoint))
-      skip_credentials_validation: ((terraform_s3_skip_credentials_validation))
-      force_path_style: ((terraform_s3_force_path_style))
+      # endpoints:
+      #   s3: ((terraform_s3_endpoint))
+      # skip_credentials_validation: ((terraform_s3_skip_credentials_validation))
+      # force_path_style: ((terraform_s3_force_path_style))
     vars:
       env: ($ .environment $)
       project: ($ .project $)

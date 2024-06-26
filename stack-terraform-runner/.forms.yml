@@ -38,24 +38,24 @@ use_cases:
         widget: simple_text
         type: string
         default: ($ .organization_canonical $)-terraform-remote-state
-      - name: "If using s3 compatible storage, set S3 endpoint (example http://10.10.10.10:9000)"
-        description: "A custom endpoint for the S3 API."
-        key: terraform_s3_endpoint
-        widget: simple_text
-        type: string
-        default: ""
-      - name: "If using s3 compatible storage, S3 skip credentials validation"
-        description: "Skip the credentials validation via the STS API."
-        key: terraform_s3_skip_credentials_validation
-        widget: switch
-        type: boolean
-        default: false
-      - name: "If using s3 compatible storage, S3 force path style"
-        description: "Always use path-style S3 URLs (https://<HOST>/<BUCKET> instead of https://<BUCKET>.<HOST>)."
-        key: terraform_s3_force_path_style
-        widget: switch
-        type: boolean
-        default: false
+      # - name: "If using s3 compatible storage, set S3 endpoint (example http://10.10.10.10:9000)"
+      #   description: "A custom endpoint for the S3 API."
+      #   key: terraform_s3_endpoint
+      #   widget: simple_text
+      #   type: string
+      #   default: ""
+      # - name: "If using s3 compatible storage, S3 skip credentials validation"
+      #   description: "Skip the credentials validation via the STS API."
+      #   key: terraform_s3_skip_credentials_validation
+      #   widget: switch
+      #   type: boolean
+      #   default: false
+      # - name: "If using s3 compatible storage, S3 force path style"
+      #   description: "Always use path-style S3 URLs (https://<HOST>/<BUCKET> instead of https://<BUCKET>.<HOST>)."
+      #   key: terraform_s3_force_path_style
+      #   widget: switch
+      #   type: boolean
+      #   default: false
       - name: "Private module SSH key"
         description: "SSH key used to clone private terraform modules from Git."
         key: terraform_modules_private_key
