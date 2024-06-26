@@ -1,7 +1,12 @@
----
-default:
-  pipeline:
-    Terraform:
+version: "2"
+use_cases:
+- name: default
+  sections:
+  - name: Terraform
+    groups:
+    - name: "Configuration"
+      technologies: [pipeline]
+      vars:
       - name: "AWS access key"
         description: "Amazon AWS access key for Terraform."
         key: aws_access_key
@@ -63,7 +68,10 @@ default:
         widget: simple_text
         type: string
         default: "1.8.2"
-    Repos:
+
+    - name: "Repos"
+      technologies: [pipeline]
+      vars:
       - name: "Code git URL"
         description: "URL to the Git repository containing terraform source code."
         key: git_repository
@@ -92,9 +100,14 @@ default:
         type: string
         default: "./"
 
-azure:
-  pipeline:
-    Terraform:
+
+- name: azure
+  sections:
+  - name: Terraform
+    groups:
+    - name: "Configuration"
+      technologies: [pipeline]
+      vars:
       - name: "Azure subscription id"
         description: "The Subscription ID which should be used"
         key: azure_subscription_id
@@ -184,7 +197,10 @@ azure:
         widget: cy_cred
         type: string
         default: ""
-    Repos:
+
+    - name: "Repos"
+      technologies: [pipeline]
+      vars:
       - name: "Code git URL"
         description: "URL to the Git repository containing terraform source code."
         key: git_repository
@@ -212,9 +228,15 @@ azure:
         widget: simple_text
         type: string
         default: "./"
-gcp:
-  pipeline:
-    Terraform:
+
+
+- name: gcp
+  sections:
+  - name: Terraform
+    groups:
+    - name: "Configuration"
+      technologies: [pipeline]
+      vars:
       - name: "GCP project name"
         description: "The GCP project name to use"
         key: gcp_project
@@ -254,7 +276,10 @@ gcp:
         widget: simple_text
         type: string
         default: "latest"
-    Repos:
+
+    - name: "Configuration"
+      technologies: [pipeline]
+      vars:
       - name: "Code git URL"
         description: "URL to the Git repository containing terraform source code."
         key: git_repository
