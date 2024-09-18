@@ -53,7 +53,7 @@ resources:
     vars:
       env: ($ .environment $)
       project: ($ .project $)
-      organization: ($ .project $)
+      organization: ($ .organization_canonical $)
 ($- if eq .use_case "aws" $)
       aws_access_cred: ((aws_access_cred))
       aws_region: ((aws_default_region))
