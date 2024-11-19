@@ -5,7 +5,7 @@ shared:
     config:
       platform: linux
       image_resource:
-        type: docker-image
+        type: registry-image
         source:
           repository: cycloid/cycloid-toolkit
           tag: latest
@@ -34,7 +34,7 @@ groups:
 
 resource_types:
 - name: terraform
-  type: docker-image
+  type: registry-image
   source:
     repository: cycloid/terraform-resource
     tag: '1.6.3'
