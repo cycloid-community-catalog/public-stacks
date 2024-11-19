@@ -11,7 +11,7 @@ groups:
 resource_types:
 
 - name: terraform
-  type: docker-image
+  type: registry-image
   source:
     repository: cycloid/terraform-resource
     tag: ((terraform_version))
