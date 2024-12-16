@@ -91,6 +91,8 @@ use_cases:
   sections:
   - *kubernetes
   - *cloudprovider-eks
+  - name: Cloud access Region
+    groups:
     - name: Region
       technologies: [pipeline]
       vars:
@@ -110,6 +112,8 @@ use_cases:
   sections:
   - *kubernetes
   - *cloudprovider-gke
+  - name: Cloud access Region
+    groups:
     - name: Region
       technologies: [pipeline]
       vars:
