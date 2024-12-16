@@ -1,6 +1,6 @@
 ---
 # Configuration of the Cycloid stack
-version: '2'
+version: '3'
 name: 'k8s-runner'
 canonical: 'stack-k8s-runner'
 status: 'public'
@@ -32,7 +32,7 @@ config:
         path: 'pipeline/pipeline.yml'
       variables:
         path: 'pipeline/variables.sample.yml'
-        destination: '($ project $)/pipeline/variables-($ environment $).yml'
+        destination: '($ .project $)/pipeline/variables-($ .environment $).yml'
   default_terraform:
     name: 'Classic Kubernetes + Terraform'
     description: 'For on-premises style Kubernetes clusters + terraform code.'
@@ -41,45 +41,45 @@ config:
       pipeline:
         path: 'pipeline/pipeline-terraform.yml'
       variables:
-        path: 'pipeline/variables-terraform.sample.yml'
-        destination: '($ project $)/pipeline/variables-($ environment $).yml'
+        path: 'pipeline/variables.sample.yml'
+        destination: '($ .project $)/pipeline/variables-($ .environment $).yml'
   eks:
     name: 'Amazon EKS'
     description: 'For AWS Elastic Kubernetes Service clusters.'
     cloud_provider: aws
     pipeline:
       pipeline:
-        path: 'pipeline/pipeline-eks.yml'
+        path: 'pipeline/pipeline.yml'
       variables:
-        path: 'pipeline/variables-eks.sample.yml'
-        destination: '($ project $)/pipeline/variables-($ environment $).yml'
+        path: 'pipeline/variables.sample.yml'
+        destination: '($ .project $)/pipeline/variables-($ .environment $).yml'
   eks_terraform:
     name: 'Amazon EKS + Terraform'
     description: 'For AWS Elastic Kubernetes Service clusters + terraform code.'
     cloud_provider: aws
     pipeline:
       pipeline:
-        path: 'pipeline/pipeline-eks-terraform.yml'
+        path: 'pipeline/pipeline.yml'
       variables:
-        path: 'pipeline/variables-eks-terraform.sample.yml'
-        destination: '($ project $)/pipeline/variables-($ environment $).yml'
+        path: 'pipeline/variables.sample.yml'
+        destination: '($ .project $)/pipeline/variables-($ .environment $).yml'
   gke:
     name: 'Google GKE'
     description: 'For Google Kubernetes Engine clusters.'
     cloud_provider: gcp
     pipeline:
       pipeline:
-        path: 'pipeline/pipeline-gke.yml'
+        path: 'pipeline/pipeline.yml'
       variables:
-        path: 'pipeline/variables-gke.sample.yml'
-        destination: '($ project $)/pipeline/variables-($ environment $).yml'
+        path: 'pipeline/variables.sample.yml'
+        destination: '($ .project $)/pipeline/variables-($ .environment $).yml'
   gke_terraform:
     name: 'Google GKE + Terraform'
     description: 'For Google Kubernetes Engine clusters + terraform code.'
     cloud_provider: gcp
     pipeline:
       pipeline:
-        path: 'pipeline/pipeline-gke-terraform.yml'
+        path: 'pipeline/pipeline.yml'
       variables:
-        path: 'pipeline/variables-gke-terraform.sample.yml'
-        destination: '($ project $)/pipeline/variables-($ environment $).yml'
+        path: 'pipeline/variables.sample.yml'
+        destination: '($ .project $)/pipeline/variables-($ .environment $).yml'

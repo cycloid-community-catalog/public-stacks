@@ -29,7 +29,7 @@ config:
       pipeline:
         path: pipeline/pipeline.yml
       variables:
-        destination: ($ project $)/pipeline/variables-($ environment $).yml
+        destination: ($ .project $)/pipeline/variables-($ .environment $).yml
         path: pipeline/variables.sample.yml
   default_terraform:
     cloud_provider: kubernetes
@@ -39,45 +39,45 @@ config:
       pipeline:
         path: pipeline/pipeline-terraform.yml
       variables:
-        destination: ($ project $)/pipeline/variables-($ environment $).yml
-        path: pipeline/variables-terraform.sample.yml
+        destination: ($ .project $)/pipeline/variables-($ .environment $).yml
+        path: pipeline/variables.sample.yml
   eks:
     cloud_provider: aws
     description: For AWS Elastic Kubernetes Service clusters.
     name: Amazon EKS
     pipeline:
       pipeline:
-        path: pipeline/pipeline-eks.yml
+        path: pipeline/pipeline.yml
       variables:
-        destination: ($ project $)/pipeline/variables-($ environment $).yml
-        path: pipeline/variables-eks.sample.yml
+        destination: ($ .project $)/pipeline/variables-($ .environment $).yml
+        path: pipeline/variables.sample.yml
   eks_terraform:
     cloud_provider: aws
     description: For AWS Elastic Kubernetes Service clusters + terraform code.
     name: Amazon EKS + Terraform
     pipeline:
       pipeline:
-        path: pipeline/pipeline-eks-terraform.yml
+        path: pipeline/pipeline.yml
       variables:
-        destination: ($ project $)/pipeline/variables-($ environment $).yml
-        path: pipeline/variables-eks-terraform.sample.yml
+        destination: ($ .project $)/pipeline/variables-($ .environment $).yml
+        path: pipeline/variables.sample.yml
   gke:
     cloud_provider: google
     description: For Google Kubernetes Engine clusters.
     name: Google GKE
     pipeline:
       pipeline:
-        path: pipeline/pipeline-gke.yml
+        path: pipeline/pipeline.yml
       variables:
-        destination: ($ project $)/pipeline/variables-($ environment $).yml
-        path: pipeline/variables-gke.sample.yml
+        destination: ($ .project $)/pipeline/variables-($ .environment $).yml
+        path: pipeline/variables.sample.yml
   gke_terraform:
     cloud_provider: google
     description: For Google Kubernetes Engine clusters + terraform code.
     name: Google GKE + Terraform
     pipeline:
       pipeline:
-        path: pipeline/pipeline-gke-terraform.yml
+        path: pipeline/pipeline.yml
       variables:
-        destination: ($ project $)/pipeline/variables-($ environment $).yml
-        path: pipeline/variables-gke-terraform.sample.yml
+        destination: ($ .project $)/pipeline/variables-($ .environment $).yml
+        path: pipeline/variables.sample.yml

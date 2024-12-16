@@ -4,10 +4,27 @@ groups:
   jobs:
   - kubernetes-plan
   - kubernetes-apply
+($- if or (eq .use_case "gke_terraform") (eq .use_case "eks_terraform") (eq .use_case "default_terraform") $)
+  - terraform-plan
+  - terraform-apply
+
+- name: kubernetes
+  jobs:
+  - kubernetes-plan
+  - kubernetes-apply
+
+- name: terraform
+  jobs:
+  - terraform-plan
+  - terraform-apply
+($- end $)
 
 - name: destroy
   jobs:
   - kubernetes-delete
+($- if or (eq .use_case "gke_terraform") (eq .use_case "eks_terraform") (eq .use_case "default_terraform") $)
+  - terraform-destroy
+($- end $)
 
 resource_types:
 
@@ -17,26 +34,80 @@ resource_types:
     repository: cycloid/kubernetes-resource
     tag: ((k8s_version))
 
+($- if or (eq .use_case "gke_terraform") (eq .use_case "eks_terraform") (eq .use_case "default_terraform") $)
+- name: terraform
+  type: registry-image
+  source:
+    repository: ljfranklin/terraform-resource
+    tag: ((terraform_version))
+($- end $)
+
 resources:
 
 - name: git_config-k8s
   type: git
   icon: git
   source:
-    uri: ((config_git_repository))
-    branch: ((config_git_branch))
-    private_key: ((config_git_private_key))
+    uri: ($ .cr_url $)
+    branch: ($ .cr_branch $)
+    ($- if eq .cr_cred_type "basic_auth" $)
+    username: ((($ .cr_cred_path $).username))
+    password: ((($ .cr_cred_path $).password))
+    ($- end $)
+    ($- if eq .cr_cred_type "ssh" $)
+    private_key: ((($ .cr_cred_path $).ssh_key))
+    ($- end $)
     paths:
-      - ((k8s_path))/*
+      - ($ .project $)/k8s/($ .environment $)/*
 
 - name: k8s
   type: kubernetes
   icon: kubernetes
   source:
     kubeconfig: ((k8s_kubeconfig))
+($- if or (eq .use_case "eks") (eq .use_case "eks_terraform") $)
+    aws_access_key_id: ((aws_access_key))
+    aws_secret_access_key: ((aws_secret_key))
+($- end $)
+($- if or (eq .use_case "gke") (eq .use_case "gke_terraform") $)
+    gcp_credentials_json: ((gcp_credentials_json))
+($- end $)
+
+($- if or (eq .use_case "gke_terraform") (eq .use_case "eks_terraform") (eq .use_case "default_terraform") $)
+- name: tfstate
+  type: terraform
+  icon: terraform
+  source:
+    backend_config:
+      address: '($ .api_url $)/inventory?jwt=($ .inventory_jwt $)'
+      ## skip_cert_verification needs to be enabled when using self signed certificates.
+      # skip_cert_verification: true
+    backend_type: http
+    env_name: default
+    vars:
+      env: ($ .environment $)
+      project: ($ .project $)
+      organization: ($ .organization_canonical $)
+      kubeconfig: ((k8s_kubeconfig))
+      ($- if eq .use_case "eks_terraform" $)
+      aws_access_key: ((aws_access_key))
+      aws_secret_key: ((aws_secret_key))
+      aws_region: ((aws_default_region))
+      ($- else if eq .use_case "gke_terraform" $)
+      gcp_project: ((gcp_project))
+      gcp_zone: ((gcp_zone))
+    env:
+      GOOGLE_PROJECT: ((gcp_project))
+      GOOGLE_ZONE: ((gcp_zone))
+      GOOGLE_CREDENTIALS: ((gcp_credentials_json))
+     ($- end $)
+($- end $)
 
 jobs:
 
+#
+# Kubernetes
+#
 - name: kubernetes-plan
   serial: true
   max_in_flight: 1
@@ -46,18 +117,61 @@ jobs:
       - get: git_config-k8s
         trigger: true
 
+($- if or (eq .use_case "eks") (eq .use_case "eks_terraform") $)
+      - task: download aws-iam-authenticator
+        config:
+          platform: linux
+          image_resource:
+            type: registry-image
+            source:
+              repository: alpine
+              tag: latest
+          run:
+            path: sh
+            args:
+              - '-exc'
+              - |
+                apk add -q --no-cache --no-progress curl
+                mkdir -p ./aws/bin/
+                curl -sSLo ./aws/bin/aws-iam-authenticator "https://github.com/kubernetes-sigs/aws-iam-authenticator/releases/download/v0.4.0/aws-iam-authenticator_0.4.0_linux_amd64"
+                chmod +x ./aws/bin/aws-iam-authenticator
+          outputs:
+            - name: aws
+($- end $)
+
+($- if or (eq .use_case "gke") (eq .use_case "gke_terraform") $)
+      - task: download gcloud
+        config:
+          platform: linux
+          image_resource:
+            type: registry-image
+            source:
+              repository: alpine
+              tag: latest
+          run:
+            path: sh
+            args:
+              - '-exc'
+              - |
+                apk add -q --no-cache --no-progress bash curl python which
+                curl -sSL https://sdk.cloud.google.com > install.sh
+                bash install.sh --disable-prompts --install-dir=./gcloud
+          outputs:
+            - name: gcloud
+($- end $)
+
       - try:
           put: kubectl diff
           resource: k8s
           params:
             kubectl: |
-              diff $(grep -rnw git_config-k8s/((k8s_path)) -e 'apiVersion:' --include='*.yaml' --include='*.yml' --files-with-matches | xargs -I % sh -c "echo -f %" )
+              diff $(grep -rnw git_config-k8s/($ .project $)/k8s/($ .environment $) -e 'apiVersion:' --include='*.yaml' --include='*.yml' --files-with-matches | xargs -I % sh -c "echo -f %" )
 
       - put: kubectl apply dry-run
         resource: k8s
         params:
           kubectl: |
-            apply --dry-run=server $(grep -rnw git_config-k8s/((k8s_path)) -e 'apiVersion:' --include='*.yaml' --include='*.yml' --files-with-matches | xargs -I % sh -c "echo -f %" )
+            apply --dry-run=server $(grep -rnw git_config-k8s/($ .project $)/k8s/($ .environment $) -e 'apiVersion:' --include='*.yaml' --include='*.yml' --files-with-matches | xargs -I % sh -c "echo -f %" )
           wait_until_ready_selector: ((k8s_wait_ready_selector))
 
 - name: kubernetes-apply
@@ -75,7 +189,7 @@ jobs:
         resource: k8s
         params:
           kubectl: |
-            apply $(grep -rnw git_config-k8s/((k8s_path)) -e 'apiVersion:' --include='*.yaml' --include='*.yml' --files-with-matches | xargs -I % sh -c "echo -f %" )
+            apply $(grep -rnw git_config-k8s/($ .project $)/k8s/($ .environment $) -e 'apiVersion:' --include='*.yaml' --include='*.yml' --files-with-matches | xargs -I % sh -c "echo -f %" )
           wait_until_ready_selector: ((k8s_wait_ready_selector))
 
 - name: kubernetes-delete
@@ -91,5 +205,59 @@ jobs:
         resource: k8s
         params:
           kubectl: |
-            delete $(grep -rnw git_config-k8s/((k8s_path)) -e 'apiVersion:' --include='*.yaml' --include='*.yml' --files-with-matches | xargs -I % sh -c "echo -f %" )
+            delete $(grep -rnw git_config-k8s/($ .project $)/k8s/($ .environment $) -e 'apiVersion:' --include='*.yaml' --include='*.yml' --files-with-matches | xargs -I % sh -c "echo -f %" )
           wait_until_ready_selector: ((k8s_wait_ready_selector))
+
+($- if or (eq .use_case "gke_terraform") (eq .use_case "eks_terraform") (eq .use_case "default_terraform") $)
+#
+# Terraform
+#
+- name: terraform-plan
+  serial: True
+  max_in_flight: 1
+  build_logs_to_retain: 10
+  plan:
+    - do:
+      - get: git_config-terraform
+        trigger: true
+
+      - put: tfstate
+        params:
+          plan_only: true
+          terraform_source: git_config-terraform/($ .project $)/terraform/($ .environment $)/
+
+- name: terraform-apply
+  serial: True
+  max_in_flight: 1
+  build_logs_to_retain: 10
+  plan:
+    - in_parallel:
+      - get: git_config-terraform
+        trigger: false
+        passed:
+          - terraform-plan
+      - get: tfstate
+        trigger: false
+        passed:
+          - terraform-plan
+
+    - put: tfstate
+      params:
+        plan_run: true
+        terraform_source: git_config-terraform/($ .project $)/terraform/($ .environment $)/
+
+- name: terraform-destroy
+  max_in_flight: 1
+  build_logs_to_retain: 10
+  plan:
+    - do:
+        - get: git_config-terraform
+          trigger: false
+
+        - put: tfstate
+          params:
+            action: destroy
+            terraform_source: git_config-terraform/($ .project $)/terraform/($ .environment $)/
+          get_params:
+            action: destroy
+($- end $)
