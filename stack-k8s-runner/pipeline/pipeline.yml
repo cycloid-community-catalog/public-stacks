@@ -60,6 +60,24 @@ resources:
     paths:
       - ($ .project $)/k8s/($ .environment $)/*
 
+($- if or (eq .use_case "gke_terraform") (eq .use_case "eks_terraform") (eq .use_case "default_terraform") $)
+- name: git_config-terraform
+  type: git
+  icon: git
+  source:
+    uri: ($ .cr_url $)
+    branch: ($ .cr_branch $)
+    ($- if eq .cr_cred_type "basic_auth" $)
+    username: ((($ .cr_cred_path $).username))
+    password: ((($ .cr_cred_path $).password))
+    ($- end $)
+    ($- if eq .cr_cred_type "ssh" $)
+    private_key: ((($ .cr_cred_path $).ssh_key))
+    ($- end $)
+    paths:
+      - ($ .project $)/terraform/($ .environment $)/*
+($- end $)
+
 - name: k8s
   type: kubernetes
   icon: kubernetes
