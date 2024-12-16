@@ -37,7 +37,7 @@ config:
     name: Classic Kubernetes + Terraform
     pipeline:
       pipeline:
-        path: pipeline/pipeline-terraform.yml
+        path: pipeline/pipeline.yml
       variables:
         destination: ($ .project $)/pipeline/variables-($ .environment $).yml
         path: pipeline/variables.sample.yml
