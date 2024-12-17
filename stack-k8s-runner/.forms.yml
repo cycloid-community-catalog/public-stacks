@@ -29,6 +29,18 @@ shared:
       type: string
       default: ""
 
+- &terraform
+  name: Terraform
+  groups:
+  - name: Variables
+    technologies: [pipeline]
+    vars:
+    - name: "Terraform Extra Variables"
+      description: "Specify any extra variables that should be passed to the Terraform execution."
+      key: terraform_extra_vars
+      widget: text_area
+      type: map
+
 - &cloudprovider-eks
   name: Cloud access
   groups:
@@ -81,6 +93,7 @@ use_cases:
 - name: default_terraform
   sections:
   - *kubernetes
+  - *terraform
 
 - name: eks
   sections:
@@ -90,6 +103,7 @@ use_cases:
 - name: eks_terraform
   sections:
   - *kubernetes
+  - *terraform
   - *cloudprovider-eks
   - name: Cloud access Region
     groups:
@@ -111,6 +125,7 @@ use_cases:
 - name: gke_terraform
   sections:
   - *kubernetes
+  - *terraform
   - *cloudprovider-gke
   - name: Cloud access Region
     groups:

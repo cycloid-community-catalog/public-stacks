@@ -107,18 +107,19 @@ resources:
       project: ($ .project $)
       organization: ($ .organization_canonical $)
       kubeconfig: ((k8s_kubeconfig))
-      ($- if eq .use_case "eks_terraform" $)
+      extra_vars: ((terraform_extra_vars))
+    ($- if eq .use_case "eks_terraform" $)
       aws_access_key: ((aws_access_key))
       aws_secret_key: ((aws_secret_key))
       aws_region: ((aws_default_region))
-      ($- else if eq .use_case "gke_terraform" $)
+    ($- else if eq .use_case "gke_terraform" $)
       gcp_project: ((gcp_project))
       gcp_zone: ((gcp_zone))
     env:
       GOOGLE_PROJECT: ((gcp_project))
       GOOGLE_ZONE: ((gcp_zone))
       GOOGLE_CREDENTIALS: ((gcp_credentials_json))
-     ($- end $)
+    ($- end $)
 ($- end $)
 
 jobs:
