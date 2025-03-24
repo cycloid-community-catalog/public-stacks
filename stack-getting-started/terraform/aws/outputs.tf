@@ -10,3 +10,7 @@ output "ip_address" {
   value       = module.instance.ip_address
   description = "IP of the server"
 }
+output "id" {
+  value       = module.instance.id
+  description = "ID of the server"
+}
