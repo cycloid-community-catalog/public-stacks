@@ -1,7 +1,7 @@
 ---
 # Configuration of the Cycloid stack
 version: '3'
-name: 'k8s-runner'
+name: 'K8s runner'
 canonical: 'stack-k8s-runner'
 status: 'public'
 description: |
