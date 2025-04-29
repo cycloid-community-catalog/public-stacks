@@ -1,7 +1,7 @@
 ---
 # Configuration of the Cycloid stack
 version: '3'
-name: 'terraform-runner'
+name: 'Terraform runner'
 canonical: 'stack-terraform-runner'
 status: 'public'
 description: |
