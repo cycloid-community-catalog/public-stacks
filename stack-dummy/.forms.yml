@@ -1,4 +1,3 @@
-version: "2"
 use_cases:
 - name: default
   sections:
@@ -12,4 +11,4 @@ use_cases:
         key: message
         widget: simple_text
         type: string
-        default: "hello world and especially to ($ .organization_canonical $)"
+        default: "hello world and especially to ($ .organization $)"

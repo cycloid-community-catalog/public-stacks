@@ -1,9 +1,8 @@
 ---
-version: '3'
+version: '4'
 # Configuration of the Cycloid stack
 name: 'Dummy stack'
 canonical: 'stack-dummy'
-status: 'public'
 description: |
   This stack is a dummy stack which contain only a hello world pipeline.
 keywords:
@@ -27,4 +26,4 @@ config:
         path: 'pipeline/pipeline.yml'
       variables:
         path: 'pipeline/variables.sample.yml'
-        destination: '($ .project $)/pipeline/variables-($ .environment $).yml'
+        destination: '($ .config_root $)/pipeline/variables.yml'
