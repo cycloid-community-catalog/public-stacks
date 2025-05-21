@@ -1,7 +1,6 @@
 ---
-version: 2
 use_cases:
-- name: default
+- name: cycloid-common
   sections:
   - name: Registry
     groups:
@@ -15,6 +14,84 @@ use_cases:
         default: "myuser/imagename"
         widget: simple_text
         required: true
+      - name: "Image Tag"
+        description: "Tag to put on the builded image (eg latest)."
+        key: registry_tag
+        type: string
+        default: "($ .environment $)"
+        widget: simple_text
+        required: true
+      - name: "Extra Tags"
+        description: "Additional tags to put on the builded image. Separate each tag with a space."
+        key: registry_extra_tags
+        type: string
+        default: ""
+        widget: simple_text
+      - name: "Git commit ID as tag"
+        description: "Add additionnal tag using short commit ID"
+        key: registry_tag_commit_id
+        type: boolean
+        default: false
+        widget: switch
+      - name: "Git describe ref as tag"
+        description: "Add additional tag using git describe ref: `<latest annoted git tag>-<the number of commit since the tag>-g<short_ref>` (eg. `v1.6.2-1-g13dfd7b`)."
+        key: registry_tag_describe_ref
+        type: boolean
+        default: false
+        widget: switch
+      - name: "Extra tags from script"
+        description: "Add additional tags using a `.ci/tag_custom_script.sh` shell script."
+        key: registry_tag_custom_script
+        type: boolean
+        default: false
+        widget: switch
+
+  - name: Code
+    groups:
+    - name: Build
+      technologies: [pipeline]
+      vars:
+      - name: "Docker build context path"
+        description: "Path from the repository root to the files to build. The Dockerfile location is relative to this path."
+        key: code_build_context
+        type: string
+        default: "."
+        widget: simple_text
+      - name: "Dockerfile location"
+        description: "Dockerfile location relative to the Docker build context path."
+        key: code_dockerfile_location
+        type: string
+        default: "Dockerfile"
+        widget: simple_text
+      - name: "Docker build args"
+        description: "Set build-time variables for the Docker build defined in json. e.g. `{\"DO_THING\": \"false\"}`"
+        key: code_build_args
+        type: map
+        widget: text_area
+        default: {}
+
+
+- name: default
+  sections:
+  - name: Registry
+    groups:
+    - name: Type
+      technologies: [pipeline]
+      vars:
+      - name: "Push to Docker Hub"
+        key: docker_hub
+        type: boolean
+        widget: switch
+        default: false
+      - name: "Push to AWS ECR"
+        key: aws_ecr
+        type: boolean
+        widget: switch
+        default: false
+    - name: Docker Hub
+      technologies: [pipeline]
+      condition: '$docker_hub'
+      vars:
       - name: "Username"
         description: "Username for regular image repository, otherwise leave it as a empty string. (For GCP Artifact Registry use '_json_key'"
         key: registry_username
@@ -27,6 +104,10 @@ use_cases:
         type: string
         default: ""
         widget: cy_cred
+    - name: AWS ECR
+      technologies: [pipeline]
+      condition: '$aws_ecr'
+      vars:
       - name: "AWS Access Key ID"
         description: "AWS access key ID if pushing to AWS ECR, otherwise leave it as a empty string."
         key: aws_access_key
@@ -67,41 +148,10 @@ use_cases:
           - "us-east-2"
           - "us-west-1"
           - "us-west-2"
-      - name: "Image Tag"
-        description: "Tag to put on the builded image (eg latest)."
-        key: registry_tag
-        type: string
-        default: "($ .environment $)"
-        widget: simple_text
-        required: true
-      - name: "Extra Tags"
-        description: "Additional tags to put on the builded image. Separate each tag with a space."
-        key: registry_extra_tags
-        type: string
-        default: ""
-        widget: simple_text
-      - name: "Git commit ID as tag"
-        description: "Add additionnal tag using short commit ID"
-        key: registry_tag_commit_id
-        type: boolean
-        default: false
-        widget: switch
-      - name: "Git describe ref as tag"
-        description: "Add additional tag using git describe ref: `<latest annoted git tag>-<the number of commit since the tag>-g<short_ref>` (eg. `v1.6.2-1-g13dfd7b`)."
-        key: registry_tag_describe_ref
-        type: boolean
-        default: false
-        widget: switch
-      - name: "Extra tags from script"
-        description: "Add additional tags using a `.ci/tag_custom_script.sh` shell script."
-        key: registry_tag_custom_script
-        type: boolean
-        default: false
-        widget: switch
 
   - name: Code
     groups:
-    - name: Common
+    - name: Access
       technologies: [pipeline]
       vars:
       - name: "Code repository"
@@ -125,475 +175,26 @@ use_cases:
         default: "master"
         widget: simple_text
         required: true
-      - name: "Docker build context path"
-        description: "Path from the repository root to the files to build. The Dockerfile location is relative to this path."
-        key: code_build_context
-        type: string
-        default: "."
-        widget: simple_text
-      - name: "Dockerfile location"
-        description: "Dockerfile location relative to the Docker build context path."
-        key: code_dockerfile_location
-        type: string
-        default: "Dockerfile"
-        widget: simple_text
-      - name: "Docker build args"
-        description: "Set build-time variables for the Docker build defined in json. e.g. `{\"DO_THING\": \"false\"}`"
-        key: code_build_args
-        type: string
-        widget: text_area
+
 
 - name: github-pr
   sections:
-  - name: Registry
+  - name: Code
     groups:
-    - name: Common
-      technologies: [pipeline]
-      vars:
-      - name: "Image Name"
-        description: "Name of the repository image. If using AWS ECR you only need the repository name, not the full URI e.g. `alpine` not `012345678910.dkr.ecr.us-east-1.amazonaws.com/alpine`."
-        key: registry_image_name
-        type: string
-        default: "myuser/imagename"
-        widget: simple_text
-        required: true
-      - name: "Image Tag"
-        description: "Tag to put on the builded image (eg latest)."
-        key: registry_tag
-        type: string
-        default: "($ .environment $)"
-        widget: simple_text
-        required: true
-      - name: "Extra Tags"
-        description: "Additional tags to put on the builded image. Separate each tag with a space."
-        key: registry_extra_tags
-        type: string
-        default: ""
-        widget: simple_text
-      - name: "Git commit ID as tag"
-        description: "Add additionnal tag using short commit ID"
-        key: registry_tag_commit_id
-        type: boolean
-        default: false
-        widget: switch
-
-  - name: Github
-    groups:
-    - name: Common
+    - name: Access
       technologies: [pipeline]
       vars:
       - name: "Github repository"
-        description: "Git repository URL containing the code of the stack."
+        description: "The github repository to target eg itsdalmo/test-repository."
         key: code_git_repository
         type: string
-        default: "git@github.com:..."
-        widget: cy_crs
+        default: "organization/repo"
+        widget: simple_text
         required: true
       - name: "Github Access Token"
-        description: "Github access token for Github PRs."
+        description: "Github access token with repository access."
         key: code_github_access_token
         type: string
         default: "(((custom_github.access_token))"
         widget: cy_cred
         required: true
-      - name: "Docker build context path"
-        description: "Path from the repository root to the files to build. The Dockerfile location is relative to this path."
-        key: code_build_context
-        type: string
-        default: "."
-        widget: simple_text
-      - name: "Dockerfile location"
-        description: "Dockerfile location relative to the Docker build context path."
-        key: code_dockerfile_location
-        type: string
-        default: "Dockerfile"
-        widget: simple_text
-      - name: "Docker build args"
-        description: "Set build-time variables for the Docker build defined in json. e.g. `{\"DO_THING\": \"false\"}`"
-        key: code_build_args
-        type: string
-        widget: text_area
-
-- name: build-deploy-k8s
-  sections:
-  - name: Registry
-    groups:
-    - name: Common
-      technologies: [pipeline]
-      vars:
-      - name: "Image Name"
-        description: "Name of the repository image. If using AWS ECR you only need the repository name, not the full URI e.g. `alpine` not `012345678910.dkr.ecr.us-east-1.amazonaws.com/alpine`."
-        key: registry_image_name
-        type: string
-        default: "myuser/imagename"
-        widget: simple_text
-        required: true
-      - name: "Image Tag"
-        description: "Tag to put on the builded image (eg latest)."
-        key: registry_tag
-        type: string
-        default: "latest"
-        widget: simple_text
-        required: true
-      - name: "Username"
-        description: "Username for regular image repository, otherwise leave it as a empty string."
-        key: registry_username
-        type: string
-        default: ""
-        widget: cy_cred
-      - name: "Password"
-        description: "Password for regular image repository, otherwise leave it as a empty string."
-        key: registry_password
-        type: string
-        default: ""
-        widget: cy_cred
-      - name: "AWS Access Key ID"
-        description: "AWS access key ID if pushing to AWS ECR, otherwise leave it as a empty string."
-        key: registry_aws_access_key
-        type: string
-        default: ""
-        widget: cy_cred
-      - name: "AWS Secret Access Key"
-        description: "AWS secret access key if pushing to AWS ECR, otherwise leave it as a empty string."
-        key: registry_aws_secret_key
-        type: string
-        default: ""
-        widget: cy_cred
-      - name: "AWS Region"
-        description: "AWS region if pushing to AWS ECR, otherwise leave it as a empty string."
-        key: registry_aws_region
-        type: string
-        default: ""
-        widget: auto_complete
-        values:
-          - "af-south-1"
-          - "ap-east-1"
-          - "ap-northeast-1"
-          - "ap-northeast-2"
-          - "ap-northeast-3"
-          - "ap-south-1"
-          - "ap-southeast-1"
-          - "ap-southeast-2"
-          - "ca-central-1"
-          - "eu-central-1"
-          - "eu-north-1"
-          - "eu-south-1"
-          - "eu-west-1"
-          - "eu-west-2"
-          - "eu-west-3"
-          - "me-south-1"
-          - "sa-east-1"
-          - "us-east-1"
-          - "us-east-2"
-          - "us-west-1"
-          - "us-west-2"
-
-  - name: Code
-    groups:
-    - name: Common
-      technologies: [pipeline]
-      vars:
-      - name: "Code repository"
-        description: "Git repository URL containing the Dockerfile."
-        key: code_git_repository
-        type: string
-        default: "git@github.com:MyUser/config-dockerbuild.git"
-        widget: simple_text
-        required: true
-      - name: "Code repository key"
-        description: "SSH key pair to fetch the code git repository."
-        key: code_git_private_key
-        type: string
-        default: "((ssh_code.ssh_key))"
-        widget: cy_cred
-        required: true
-      - name: "Code repository branch"
-        description: "Branch of the code git repository."
-        key: code_git_branch
-        type: string
-        default: "master"
-        widget: simple_text
-        required: true
-      - name: "Docker build context path"
-        description: "Path from the repository root to the files to build. The Dockerfile location is relative to this path."
-        key: code_build_context
-        type: string
-        default: "."
-        widget: simple_text
-      - name: "Dockerfile location"
-        description: "Dockerfile location relative to the Docker build context path."
-        key: code_dockerfile_location
-        type: string
-        default: "Dockerfile"
-        widget: simple_text
-      - name: "Docker build args"
-        description: "Set build-time variables for the Docker build defined in json. e.g. `{\"DO_THING\": \"false\"}`"
-        key: code_build_args
-        type: string
-        widget: text_area
-
-  - name: K8s
-    groups:
-    - name: Common
-      technologies: [pipeline]
-      vars:
-      - name: "Kubernetes config repository"
-        description: "Git repository URL containing the K8s configuration (kustomize yaml)."
-        key: config_git_repository
-        type: string
-        default: "git@github.com:MyUser/config-dockerbuild.git"
-        widget: simple_text
-        required: true
-      - name: "Kubernetes config repository key"
-        description: "SSH key pair to fetch the config Git repository."
-        key: config_git_private_key
-        type: string
-        default: "((ssh_config.ssh_key))"
-        widget: cy_cred
-        required: true
-      - name: "Kubernetes config repository branch"
-        description: "Branch of the config Git repository."
-        key: config_git_branch
-        type: string
-        default: "master"
-        widget: simple_text
-        required: true
-      - name: "Auto deploy"
-        description: "If the K8s deployment should be trigger automaticaly if an updated docker image is detected."
-        key: k8s_continuous_deployment
-        type: boolean
-        default: true
-        widget: switch
-      - name: "Kubeconfig"
-        description: "Kubernetes config used to connect to the cluster."
-        key: k8s_kubeconfig
-        type: string
-        default: "((custom_kubeconfig))"
-        widget: cy_cred
-        required: true
-      - name: "AWS Access Key ID"
-        description: "AWS access key ID if deploying to AWS EKS, otherwise leave it as a empty string."
-        key: k8s_aws_access_key
-        type: string
-        default: ""
-        widget: cy_cred
-      - name: "AWS Secret Access Key"
-        description: "AWS secret access key if deploying to AWS EKS, otherwise leave it as a empty string."
-        key: k8s_aws_secret_key
-        type: string
-        default: ""
-        widget: cy_cred
-      - name: "Namespace"
-        description: "Kubernetes namespace to use for the deployment."
-        key: k8s_namespace
-        type: string
-        default: "($ .environment $)"
-        widget: simple_text
-        required: true
-      - name: "Kustomize root path"
-        description: "Path to the manifest(s) to apply in the config git repository, can be either a folder or a single file."
-        key: k8s_path
-        type: string
-        default: "($ .project $)/k8s"
-        widget: simple_text
-      - name: "Kustomize base path"
-        description: "Path to the directory containing the base kustomization.yaml file to watch in the config git repository. Relative to the Kustomize root path."
-        key: k8s_base_path
-        type: string
-        default: "base"
-        widget: simple_text
-      - name: "Kustomize env path"
-        description: "Path to the overlay directory containing the env-specific kustomization.yaml file to watch in the config git repository. Relative to the Kustomize root path."
-        key: k8s_env_path
-        type: string
-        default: "overlays/($ .environment $)"
-        widget: simple_text
-      - name: "Wait ready label selector"
-        description: "Used to tell the concourse kubernetes resource to wait for a certain label selector to be ready."
-        key: k8s_wait_ready_selector
-        type: string
-        default: ""
-        widget: text_area
-      - name: "Wait seconds"
-        description: "How many seconds should the concourse kubernetes resource wait for the label selector."
-        key: k8s_wait_ready_seconds
-        type: integer
-        unit: seconds
-        default: 60
-        widget: number
-      - name: "Kubernetes version"
-        description: "Kubernetes version for the kubernetes concourse resource."
-        key: k8s_version
-        type: string
-        default: "1.16"
-        widget: simple_text
-
-- name: deploy-k8s
-  sections:
-  - name: Registry
-    groups:
-    - name: Common
-      technologies: [pipeline]
-      vars:
-      - name: "Image Name"
-        description: "Name of the repository image. If using AWS ECR you only need the repository name, not the full URI e.g. `alpine` not `012345678910.dkr.ecr.us-east-1.amazonaws.com/alpine`."
-        key: registry_image_name
-        type: string
-        default: "myuser/imagename"
-        widget: simple_text
-        required: true
-      - name: "Image Tag"
-        description: "Tag of the repository image to deploy (eg latest)."
-        key: registry_tag
-        type: string
-        default: "latest"
-        widget: simple_text
-        required: true
-      - name: "Username"
-        description: "Username for regular image repository, otherwise leave it as a empty string."
-        key: registry_username
-        type: string
-        default: ""
-        widget: cy_cred
-      - name: "Password"
-        description: "Password for regular image repository, otherwise leave it as a empty string."
-        key: registry_password
-        type: string
-        default: ""
-        widget: cy_cred
-      - name: "AWS Access Key ID"
-        description: "AWS access key ID if pulling from AWS ECR, otherwise leave it as a empty string."
-        key: registry_aws_access_key
-        type: string
-        default: ""
-        widget: cy_cred
-      - name: "AWS Secret Access Key"
-        description: "AWS secret access key if pulling from AWS ECR, otherwise leave it as a empty string."
-        key: registry_aws_secret_key
-        type: string
-        default: ""
-        widget: cy_cred
-      - name: "AWS Region"
-        description: "AWS region if pulling from AWS ECR, otherwise leave it as a empty string."
-        key: registry_aws_region
-        type: string
-        default: ""
-        widget: auto_complete
-        values:
-          - "af-south-1"
-          - "ap-east-1"
-          - "ap-northeast-1"
-          - "ap-northeast-2"
-          - "ap-northeast-3"
-          - "ap-south-1"
-          - "ap-southeast-1"
-          - "ap-southeast-2"
-          - "ca-central-1"
-          - "eu-central-1"
-          - "eu-north-1"
-          - "eu-south-1"
-          - "eu-west-1"
-          - "eu-west-2"
-          - "eu-west-3"
-          - "me-south-1"
-          - "sa-east-1"
-          - "us-east-1"
-          - "us-east-2"
-          - "us-west-1"
-          - "us-west-2"
-
-  - name: K8s
-    groups:
-    - name: Common
-      technologies: [pipeline]
-      vars:
-      - name: "Kubernetes config repository"
-        description: "Git repository URL containing the K8s configuration (kustomize yaml)."
-        key: config_git_repository
-        type: string
-        default: "git@github.com:MyUser/config-dockerbuild.git"
-        widget: simple_text
-        required: true
-      - name: "Kubernetes config repository key"
-        description: "SSH key pair to fetch the config Git repository."
-        key: config_git_private_key
-        type: string
-        default: "((ssh_config.ssh_key))"
-        widget: cy_cred
-        required: true
-      - name: "Kubernetes config repository branch"
-        description: "Branch of the config Git repository."
-        key: config_git_branch
-        type: string
-        default: "master"
-        widget: simple_text
-        required: true
-      - name: "Auto deploy"
-        description: "If the K8s deployment should be trigger automaticaly if an updated docker image is detected."
-        key: k8s_continuous_deployment
-        type: boolean
-        default: true
-        widget: switch
-      - name: "Kubeconfig"
-        description: "Kubernetes config used to connect to the cluster."
-        key: k8s_kubeconfig
-        type: string
-        default: "((custom_kubeconfig))"
-        widget: cy_cred
-        required: true
-      - name: "AWS Access Key ID"
-        description: "AWS access key ID if deploying to AWS EKS, otherwise leave it as a empty string."
-        key: k8s_aws_access_key
-        type: string
-        default: ""
-        widget: cy_cred
-      - name: "AWS Secret Access Key"
-        description: "AWS secret access key if deploying to AWS EKS, otherwise leave it as a empty string."
-        key: k8s_aws_secret_key
-        type: string
-        default: ""
-        widget: cy_cred
-      - name: "Namespace"
-        description: "Kubernetes namespace to use for the deployment."
-        key: k8s_namespace
-        type: string
-        default: "($ .environment $)"
-        widget: simple_text
-        required: true
-      - name: "Kustomize root path"
-        description: "Path to the manifest(s) to apply in the config git repository, can be either a folder or a single file."
-        key: k8s_path
-        type: string
-        default: "($ .project $)/k8s"
-        widget: simple_text
-      - name: "Kustomize base path"
-        description: "Path to the directory containing the base kustomization.yaml file to watch in the config git repository. Relative to the Kustomize root path."
-        key: k8s_base_path
-        type: string
-        default: "base"
-        widget: simple_text
-      - name: "Kustomize env path"
-        description: "Path to the overlay directory containing the env-specific kustomization.yaml file to watch in the config git repository. Relative to the Kustomize root path."
-        key: k8s_env_path
-        type: string
-        default: "overlays/($ .environment $)"
-        widget: simple_text
-      - name: "Wait ready label selector"
-        description: "Used to tell the concourse kubernetes resource to wait for a certain label selector to be ready."
-        key: k8s_wait_ready_selector
-        type: string
-        default: ""
-        widget: text_area
-      - name: "Wait seconds"
-        description: "How many seconds should the concourse kubernetes resource wait for the label selector."
-        key: k8s_wait_ready_seconds
-        type: integer
-        unit: seconds
-        default: 60
-        widget: number
-      - name: "Kubernetes version"
-        description: "Kubernetes version for the kubernetes concourse resource."
-        key: k8s_version
-        type: string
-        default: "1.16"
-        widget: simple_text

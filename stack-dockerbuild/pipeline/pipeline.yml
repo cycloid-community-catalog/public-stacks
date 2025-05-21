@@ -32,35 +32,38 @@ shared:
         path: "merged-stack"
 
 resource_types:
+# Enforce upgrade of registry image due to  https://github.com/concourse/registry-image-resource/issues/356
+  - name: registry-image
+    type: registry-image
+    source:
+      repository: concourse/registry-image-resource
+      tag: 1.11
+
+($- if eq .use_case "default" $)
   - name: git
-    type: docker-image
+    type: registry-image
     source:
       repository: concourse/git-resource
       tag: latest
+($- else if eq .use_case "github-pr" $)
+  - name: pull-request
+    type: registry-image
+    source:
+      repository: teliaoss/github-pr-resource
+      tag: v0.15.0
+($- end $)
 
 resources:
-  - name: image
-    type: registry-image
-    icon: docker
-    source:
-      #version: every
-      repository: ((registry_image_name))
-      tag: ((registry_tag))
-      username: ((registry_username))
-      password: ((registry_password))
-      aws_access_key_id: ((aws_access_key))
-      aws_secret_access_key: ((aws_secret_key))
-      aws_region: ((aws_region))
-
   - name: git_stack
     type: git
     icon: git
     source:
       uri: https://github.com/cycloid-community-catalog/stack-dockerbuild
-      branch: ($ .scs_branch $)
+      branch: ($ .catalog_repository_branch $)
       paths:
         - docker/*
 
+($- if eq .use_case "default" $)
   - name: git_code
     type: git
     icon: git
@@ -71,8 +74,37 @@ resources:
       paths:
         - ((code_build_context))/*
 
-jobs:
+  - name: image-docker
+    type: registry-image
+    icon: docker
+    source:
+      #version: every
+      repository: ((registry_image_name))
+      tag: ((registry_tag))
+      username: ((registry_username))
+      password: ((registry_password))
 
+  - name: image-aws-ecr
+    type: registry-image
+    icon: docker
+    source:
+      #version: every
+      repository: ((registry_image_name))
+      tag: ((registry_tag))
+      aws_access_key_id: ((aws_access_key))
+      aws_secret_access_key: ((aws_secret_key))
+      aws_region: ((aws_region))
+
+($- else if eq .use_case "github-pr" $)
+  - name: pull-request
+    type: pull-request
+    icon: github-circle
+    source:
+      repository: ((code_git_repository))
+      access_token: ((code_github_access_token))
+($- end $)
+
+jobs:
   - name: build
     max_in_flight: 1
     build_logs_to_retain: 3
@@ -80,10 +112,19 @@ jobs:
     - in_parallel:
       - get: git_stack
         trigger: true
+($- if eq .use_case "default" $)
       - get: git_code
         params:
           describe_ref_options: --always --tags
         trigger: true
+($- else if eq .use_case "github-pr" $)
+      - get: git_code
+        resource: pull-request
+        trigger: true
+        version: every
+        params:
+          integration_tool: checkout
+($- end $)
 
     - task: merge-stack-and-config
       config:
@@ -121,7 +162,34 @@ jobs:
         TAG: ((registry_tag))
         REPOSITORY: ((registry_image_name))
 
-    - put: image
+($- if eq .use_case "default" $)
+    - in_parallel:
+      - try:
+          put: image-docker
+          params:
+            additional_tags: merged-stack/.ci/TAGS
+            image: image/image.tar
+
+      - try:
+          put: image-aws-ecr
+          params:
+            additional_tags: merged-stack/.ci/TAGS
+            image: image/image.tar
+($- else if eq .use_case "github-pr" $)
+    on_failure:
+      put: pull-request
       params:
-        additional_tags: merged-stack/.ci/TAGS
-        image: image/image.tar
+        base_context: cycloid-ci
+        context: build
+        path: git_code
+        status: failure
+        target_url: '($ .console_url $)/organizations/($ .organization $)/projects/($ .project $)/environments/($ .env $)/components/($ .component $)/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_ID'
+    on_success:
+      put: pull-request
+      params:
+        base_context: cycloid-ci
+        context: build
+        path: git_code
+        status: success
+        target_url: '($ .console_url $)/organizations/($ .organization $)/projects/($ .project $)/environments/($ .env $)/components/($ .component $)/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_ID'
+($- end $)
