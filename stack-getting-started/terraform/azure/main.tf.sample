@@ -1,8 +1,12 @@
 module "instance" {
   source       = "./module-azure"
-  env          = var.env
-  organization = var.organization
-  project      = var.project
+
+  # Vars automatically defined in provider.tf for best practices.
+  # They are usually used to tag cloud resources with Cycloid information
+  component          = var.component
+  env                = var.env
+  project            = var.project
+  organization       = var.organization
 
   resource_group_name = var.azure_resource_group_name
   azure_location      = var.azure_location

@@ -1,9 +1,8 @@
 ---
 # Configuration of the Cycloid stack
-version: '3'
+version: '4'
 name: 'Getting started'
 canonical: 'stack-getting-started'
-status: 'public'
 keywords:
   - 'aws'
   - 'azure'
@@ -16,7 +15,7 @@ keywords:
   - 'provider:azure'
   - 'provider:gcp'
 description: |
-  Getting started stack purpose is to ovver a easy to use Cycloid stack during onboarding process.
+  Getting started stack purpose is to offer a easy to use Cycloid stack during onboarding process.
   This stack offer on multi cloud provider to create a default compute instance.
 author: 'Cycloid'
 image: 'https://raw.githubusercontent.com/cycloid-community-catalog/stack-getting-started/master/icon.png'
@@ -38,10 +37,10 @@ config:
         path: pipeline/pipeline.yml
       variables:
         path: pipeline/variables.sample.yml
-        destination: ($ .project $)/pipeline/($ .environment $)/variables.yml
+        destination: '($ .config_root $)/pipeline/variables.yml'
     terraform:
       config:
-        destination: ($ .project $)/terraform/($ .environment $)/main.tf
+        destination: '($ .config_root $)/terraform/main.tf'
         path: terraform/aws/main.tf.sample
 
   azure:
@@ -53,10 +52,10 @@ config:
         path: pipeline/pipeline.yml
       variables:
         path: pipeline/variables.sample.yml
-        destination: ($ .project $)/pipeline/($ .environment $)/variables.yml
+        destination: '($ .config_root $)/pipeline/variables.yml'
     terraform:
       config:
-        destination: ($ .project $)/terraform/($ .environment $)/main.tf
+        destination: '($ .config_root $)/terraform/main.tf'
         path: terraform/azure/main.tf.sample
 
   gcp:
@@ -68,8 +67,8 @@ config:
         path: pipeline/pipeline.yml
       variables:
         path: pipeline/variables.sample.yml
-        destination: ($ .project $)/pipeline/($ .environment $)/variables.yml
+        destination: '($ .config_root $)/pipeline/variables.yml'
     terraform:
       config:
-        destination: ($ .project $)/terraform/($ .environment $)/main.tf
+        destination: '($ .config_root $)/terraform/main.tf'
         path: terraform/gcp/main.tf.sample

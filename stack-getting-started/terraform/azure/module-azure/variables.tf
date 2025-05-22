@@ -11,6 +11,14 @@ variable "organization" {
   default = "cycloid"
 }
 
+variable "component" {
+  default = "default"
+}
+
+locals {
+  name_prefix = "${var.organization}-${var.project}-${var.env}-${var.component}"
+}
+
 variable "azure_location" {
   default = "francecentral"
 }

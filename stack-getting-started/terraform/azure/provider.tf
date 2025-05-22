@@ -1,6 +1,7 @@
 variable "organization" {}
 variable "project" {}
 variable "env" {}
+variable "component" {}
 
 # Azure
 provider "azurerm" {

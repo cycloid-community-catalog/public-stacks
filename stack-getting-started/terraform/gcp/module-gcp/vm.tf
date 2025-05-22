@@ -13,28 +13,26 @@ data "template_file" "user_data" {
 
   vars = {
     password = random_string.password.result
-    env      = var.env
-    project  = var.project
   }
 }
 
 resource "google_compute_firewall" "default" {
-  name    = "${var.organization}-${var.project}-front-${var.env}-http"
+  name    = local.name_prefix
   network = "default"
   allow {
     protocol = "tcp"
     ports    = ["22"]
   }
 
-  target_tags = ["${var.organization}-${var.project}-front-${var.env}-http"]
+  target_tags = [local.name_prefix]
 }
 
 resource "google_compute_instance" "main" {
-  name         = "${var.organization}-${var.project}-front-${var.env}"
+  name         = local.name_prefix
   machine_type = var.instance_type
   zone         = var.gcp_zone
 
-  tags = ["${var.organization}-${var.project}-front-${var.env}-http"]
+  tags = [local.name_prefix]
 
   boot_disk {
     initialize_params {
@@ -55,6 +53,7 @@ resource "google_compute_instance" "main" {
     env          = var.env
     project      = var.project
     organization = var.organization
+    component    = var.component
   }
 
 

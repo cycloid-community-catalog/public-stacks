@@ -1,6 +1,5 @@
 resource "aws_security_group" "front" {
-  name        = "${var.organization}-${var.project}-${var.env}"
-  description = "Front ${var.env} for ${var.project}"
+  name        = local.name_prefix
 
   egress {
     from_port   = 0
@@ -47,7 +46,7 @@ data "aws_iam_policy_document" "assume_role" {
 
 # Create IAM Role for instance
 resource "aws_iam_role" "instance" {
-  name               = "instance-${var.project}-${var.env}"
+  name               = local.name_prefix
   assume_role_policy = data.aws_iam_policy_document.assume_role.json
   path               = "/${var.project}/"
 }
@@ -58,7 +57,7 @@ resource "aws_iam_role_policy_attachment" "instance-ssm" {
 }
 
 resource "aws_iam_instance_profile" "instance" {
-  name = "profile-${var.project}-${var.env}"
+  name = local.name_prefix
   role = aws_iam_role.instance.name
 }
 
@@ -73,6 +72,6 @@ resource "aws_instance" "front" {
   vpc_security_group_ids      = [aws_security_group.front.id]
 
   tags = {
-    Name = "${var.organization}-${var.project}-front-${var.env}"
+    Name = local.name_prefix
   }
 }

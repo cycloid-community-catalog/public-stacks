@@ -1,5 +1,5 @@
 resource "azurerm_public_ip" "main" {
-  name                = "${var.organization}-${var.project}-${var.env}-ip"
+  name                = "${local.name_prefix}-ip"
   resource_group_name = var.resource_group_name
   location            = var.azure_location
   allocation_method   = "Static"
@@ -10,17 +10,18 @@ resource "azurerm_public_ip" "main" {
     env          = var.env
     project      = var.project
     organization = var.organization
+    component    = var.component
   }
 
 }
 
 resource "azurerm_network_interface" "main" {
-  name                = "${var.organization}-${var.project}-${var.env}-nic"
+  name                = "${local.name_prefix}-nic"
   location            = var.azure_location
   resource_group_name = var.resource_group_name
 
   ip_configuration {
-    name                          = "${var.organization}-${var.project}-front-${var.env}"
+    name                          = local.name_prefix
     subnet_id                     = var.subnet_id
     private_ip_address_allocation = "Dynamic"
     public_ip_address_id          = azurerm_public_ip.main.id
@@ -32,6 +33,7 @@ resource "azurerm_network_interface" "main" {
     env          = var.env
     project      = var.project
     organization = var.organization
+    component    = var.component
   }
 
 }
@@ -56,7 +58,7 @@ resource "random_string" "password" {
 }
 
 resource "azurerm_virtual_machine" "main" {
-  name                  = "${var.organization}-${var.project}-${var.env}"
+  name                  = local.name_prefix
   location              = var.azure_location
   resource_group_name   = var.resource_group_name
   network_interface_ids = [azurerm_network_interface.main.id]
@@ -73,7 +75,7 @@ resource "azurerm_virtual_machine" "main" {
   }
 
   storage_os_disk {
-    name              = "${var.organization}-${var.project}-${var.env}-os-disk"
+    name              = "${local.name_prefix}-os-disk"
     caching           = "ReadWrite"
     create_option     = "FromImage"
     managed_disk_type = "Standard_LRS"
@@ -93,5 +95,6 @@ resource "azurerm_virtual_machine" "main" {
     env          = var.env
     project      = var.project
     organization = var.organization
+    component    = var.component
   }
 }

@@ -1,8 +1,12 @@
 module "instance" {
   source       = "./module-gcp"
-  env          = var.env
-  organization = var.organization
-  project      = var.project
+
+  # Vars automatically defined in provider.tf for best practices.
+  # They are usually used to tag cloud resources with Cycloid information
+  component          = var.component
+  env                = var.env
+  project            = var.project
+  organization       = var.organization
 
   // Gcp
   gcp_zone      = var.gcp_zone
