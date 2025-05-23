@@ -1,9 +1,8 @@
 ---
 # Configuration of the Cycloid stack
-version: '3'
+version: '4'
 name: 'Terraform runner'
 canonical: 'stack-terraform-runner'
-status: 'public'
 description: |
   Allow you to do simple terraform actions: plan, create, destroy.
 keywords:
@@ -28,7 +27,7 @@ config:
         path: 'pipeline/pipeline.yml'
       variables:
         path: 'pipeline/variables.sample.yml'
-        destination: '($ .project $)/pipeline/variables-($ .environment $).yml'
+        destination: '($ .config_root $)/pipeline/variables.yml'
   gcp:
     name: 'GCP'
     description: 'Using Google GCS terraform backend.'
@@ -37,7 +36,7 @@ config:
         path: 'pipeline/pipeline.yml'
       variables:
         path: 'pipeline/variables.sample.yml'
-        destination: '($ .project $)/pipeline/variables-($ .environment $).yml'
+        destination: '($ .config_root $)/pipeline/variables.yml'
   azure:
     name: 'Azure'
     description: 'Using AzureRM terraform backend.'
@@ -46,4 +45,4 @@ config:
         path: 'pipeline/pipeline.yml'
       variables:
         path: 'pipeline/variables.sample.yml'
-        destination: '($ .project $)/pipeline/variables-($ .environment $).yml'
+        destination: '($ .config_root $)/pipeline/variables.yml'

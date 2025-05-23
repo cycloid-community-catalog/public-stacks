@@ -1,7 +1,1 @@
-#
-# Terraform
-#
-
-#. terraform_modules_private_key (optional): ""
-#+ SSH key to use to clone private terraform modules from Git.
-terraform_modules_private_key: ""
+# Expose variables to the pipeline.

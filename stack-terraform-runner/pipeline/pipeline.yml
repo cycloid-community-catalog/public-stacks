@@ -22,68 +22,32 @@ resources:
   type: terraform
   icon: terraform
   source:
+    backend_type: http
+    backend_config:
+      address: '($ .api_url $)/inventory?jwt=($ .inventory_jwt $)'
+      skip_cert_verification: true
     env_name: ($ .environment $)
     private_key: ((terraform_modules_private_key))
-# default = aws
+    vars:
+      env: ($ .environment $)
+      project: ($ .project $)
+      organization: ($ .organization $)
+      component: ($ .component $)
 ($- if eq .use_case "default" $)
-    backend_type: s3
-    backend_config:
-      bucket: ((terraform_storage_bucket_name))
-      key: ($ .project $)-($ .environment $).tfstate
-      workspace_key_prefix: ($ .project $)
-      region: ((aws_default_region))
-      access_key: ((aws_access_key))
-      secret_key: ((aws_secret_key))
-      # endpoints:
-      #   s3: ((terraform_s3_endpoint))
-      # skip_credentials_validation: ((terraform_s3_skip_credentials_validation))
-      # force_path_style: ((terraform_s3_force_path_style))
-    vars:
-      env: ($ .environment $)
-      project: ($ .project $)
-      customer: ($ .organization_canonical $)
-    env:
-      AWS_ACCESS_KEY_ID: ((aws_access_key))
-      AWS_DEFAULT_REGION: ((aws_default_region))
-      AWS_SECRET_ACCESS_KEY: ((aws_secret_key))
+      aws_cred: ((aws_cred))
+      aws_region: ((aws_default_region))
 ($- else if eq .use_case "azure" $)
-    backend_type: azurerm
-    backend_config:
-      container_name: ((terraform_storage_container_name))
-      key: ((terraform_storage_container_path))/((project))-((env)).tfstate
-      resource_group_name: ((terraform_resource_group_name))
-      storage_account_name: ((terraform_storage_account_name))
-      access_key: ((terraform_storage_access_key))
     vars:
-      azure_location: ((azure_location))
       azure_env: ((azure_env))
-      azure_client_id: ((azure_client_id))
-      azure_client_secret: ((azure_client_secret))
-      azure_subscription_id: ((azure_subscription_id))
-      azure_tenant_id: ((azure_tenant_id))
-      env: ($ .environment $)
-      project: ($ .project $)
-      customer: ($ .organization_canonical $)
-    env:
-      ARM_CLIENT_ID: ((azure_client_id))
-      ARM_CLIENT_SECRET: ((azure_client_secret))
-      ARM_TENANT_ID: ((azure_tenant_id))
-      ARM_SUBSCRIPTION_ID: ((azure_subscription_id))
+      azure_cred: ((azure_cred))
+      azure_location: ((azure_location))
 ($- else if eq .use_case "gcp" $)
-    backend_type: gcs
-    backend_config:
-      bucket: ((terraform_storage_bucket_name))
-      prefix: ((project))/((env))
-      credentials: ((gcp_credentials_json))
     vars:
       gcp_project: ((gcp_project))
-      gcp_region: ((gcp_region))
-      env: ($ .environment $)
-      project: ($ .project $)
-      customer: ($ .organization_canonical $)
+      gcp_zone: ((gcp_zone))
     env:
       GOOGLE_PROJECT: ((gcp_project))
-      GOOGLE_REGION: ((gcp_region))
+      GOOGLE_ZONE: ((gcp_zone))
       GOOGLE_CREDENTIALS: ((gcp_credentials_json))
 ($- end $)
 

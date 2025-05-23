@@ -1,61 +1,43 @@
-version: "2"
 use_cases:
-- name: default
+
+- name: cycloid-common
   sections:
   - name: Terraform
     groups:
+    - name: "Source code"
+      technologies: [pipeline]
+      vars:
+      - name: "Code git URL"
+        description: "URL to the Git repository containing terraform source code."
+        key: git_repository
+        widget: simple_text
+        type: string
+        default: "git@github.com:MyUser/code.git"
+      - name: "Code git branch"
+        description: "Branch of the terraform source code Git repository."
+        key: git_branch
+        widget: simple_text
+        type: string
+        default: "master"
+      - name: "Code git key"
+        description: "SSH key pair to fetch terraform source code Git repository."
+        key: git_private_key
+        type: string
+        widget: cy_cred
+        widget_config:
+          cred_types:
+            - ssh
+        default: "((($ .config_repository_credential_path $).ssh_key))"
+      - name: "Code terraform path"
+        description: "Path of Terraform files in the git repository."
+        key: git_terraform_path
+        widget: simple_text
+        type: string
+        default: "./"
+
     - name: "Configuration"
       technologies: [pipeline]
       vars:
-      - name: "AWS access key"
-        description: "Amazon AWS access key for Terraform."
-        key: aws_access_key
-        widget: cy_cred
-        widget_config:
-          cred_types:
-            - aws
-        type: string
-        default: "((aws.access_key))"
-      - name: "AWS secret key"
-        description: "Amazon AWS secret key for Terraform."
-        key: aws_secret_key
-        widget: cy_cred
-        widget_config:
-          cred_types:
-            - aws
-        type: string
-        default: "((aws.secret_key))"
-      - name: "Amazon AWS region"
-        description: "Amazon AWS region to use for Terraform."
-        key: aws_default_region
-        widget: auto_complete
-        type: string
-        values: ["eu-north-1","ap-south-1","eu-west-3","eu-west-2","eu-west-1","ap-northeast-2","ap-northeast-1","sa-east-1","ca-central-1","ap-southeast-1","ap-southeast-2","eu-central-1","us-east-1","us-east-2","us-west-1","us-west-2"]
-        default: eu-west-1
-      - name: "Terraform storage bucket"
-        description: "AWS S3 bucket name to store terraform remote state file."
-        key: terraform_storage_bucket_name
-        widget: simple_text
-        type: string
-        default: ($ .organization_canonical $)-terraform-remote-state
-      # - name: "If using s3 compatible storage, set S3 endpoint (example http://10.10.10.10:9000)"
-      #   description: "A custom endpoint for the S3 API."
-      #   key: terraform_s3_endpoint
-      #   widget: simple_text
-      #   type: string
-      #   default: ""
-      # - name: "If using s3 compatible storage, S3 skip credentials validation"
-      #   description: "Skip the credentials validation via the STS API."
-      #   key: terraform_s3_skip_credentials_validation
-      #   widget: switch
-      #   type: boolean
-      #   default: false
-      # - name: "If using s3 compatible storage, S3 force path style"
-      #   description: "Always use path-style S3 URLs (https://<HOST>/<BUCKET> instead of https://<BUCKET>.<HOST>)."
-      #   key: terraform_s3_force_path_style
-      #   widget: switch
-      #   type: boolean
-      #   default: false
       - name: "Private module SSH key"
         description: "SSH key used to clone private terraform modules from Git."
         key: terraform_modules_private_key
@@ -67,243 +49,81 @@ use_cases:
         key: terraform_version
         widget: simple_text
         type: string
-        default: "1.8.2"
+        default: "1.10.5"
 
-    - name: "Repos"
+- name: default
+  sections:
+  - name: Terraform
+    groups:
+    - name: "Cloud access"
       technologies: [pipeline]
       vars:
-      - name: "Code git URL"
-        description: "URL to the Git repository containing terraform source code."
-        key: git_repository
-        widget: simple_text
+
+      - name: "Aws region"
+        key: aws_default_region
         type: string
-        default: "git@github.com:MyUser/code.git"
-      - name: "Code git branch"
-        description: "Branch of the terraform source code Git repository."
-        key: git_branch
-        widget: simple_text
-        type: string
-        default: "master"
-      - name: "Code git key"
-        description: "SSH key pair to fetch terraform source code Git repository."
-        key: git_private_key
+        widget: auto_complete
+        values: ["eu-north-1", "ap-south-1", "eu-west-3", "eu-west-2", "eu-west-1", "ap-northeast-2", "ap-northeast-1", "sa-east-1", "ca-central-1", "ap-southeast-1", "ap-southeast-2", "eu-central-1", "us-east-1", "us-east-2", "us-west-1", "us-west-2"]
+        default: "eu-west-1"
+      - name: "AWS access key"
+        description: "AWS access key which should be used"
+        key: aws_cred
         type: string
         widget: cy_cred
         widget_config:
-          cred_types:
-            - ssh
-        default: "((ssh_config.ssh_key))"
-      - name: "Code terraform path"
-        description: "Path of Terraform files in the git repository."
-        key: git_terraform_path
-        widget: simple_text
-        type: string
-        default: "./"
+          display_keys: false
+          cred_types: [aws]
+        default: "((aws))"
 
 
 - name: azure
   sections:
   - name: Terraform
     groups:
-    - name: "Configuration"
+    - name: "Cloud access"
       technologies: [pipeline]
       vars:
-      - name: "Azure subscription id"
-        description: "The Subscription ID which should be used"
-        key: azure_subscription_id
-        widget: cy_cred
-        widget_config:
-          cred_types:
-            - azure
-        type: string
-        default: "((azure.subscription_id))"
-      - name: "Azure tenant id"
-        description: "The Tenant ID which should be used"
-        key: azure_tenant_id
-        widget: cy_cred
-        widget_config:
-          cred_types:
-            - azure
-        type: string
-        default: "((azure.tenant_id))"
-      - name: "Azure client id"
-        description: "The Client ID which should be used"
-        key: azure_client_id
-        widget: cy_cred
-        widget_config:
-          cred_types:
-            - azure
-        type: string
-        default: "((azure.client_id))"
-      - name: "Azure client secret"
-        description: "The Client Secret which should be used"
-        key: azure_client_secret
-        widget: cy_cred
-        widget_config:
-          cred_types:
-            - azure
-        type: string
-        default: "((azure.client_secret))"
       - name: "Azure environment"
         description: "The Cloud Environment which should be used"
         key: azure_env
+        type: string
         widget: radios
-        type: string
-        values:
-        - public
-        - china
-        - german
-        - usgovernment
-        default: public
-      - name: "Azure location"
-        key: azure_location
-        widget: auto_complete
-        type: string
-        values: [eastasia,southeastasia,centralus,eastus,eastus2,westus,northcentralus,southcentralus,northeurope,westeurope,japanwest,japaneast,brazilsouth,australiaeast,australiasoutheast,southindia,centralindia,westindia,canadacentral,canadaeast,uksouth,ukwest,westcentralus,westus2,koreacentral,koreasouth,francecentral,francesouth,australiacentral,australiacentral2,uaecentral,uaenorth,southafricanorth,southafricawest,switzerlandnorth,switzerlandwest,germanynorth,germanywestcentral,norwaywest,norwayeast]
-        default: westeurope
-      - name: "Terraform resource group name"
-        description: "Azure Resource Group of the Storage Account to use to store terraform remote state file."
-        key: terraform_resource_group_name
-        widget: simple_text
-        type: string
-        default: "($ .organization_canonical $)-terraform"
-      - name: "Terraform storage account name"
-        description: "Azure Storage Account name to use to store terraform remote state file."
-        key: terraform_storage_account_name
-        widget: cy_cred
-        type: string
-        default: "((azure_storage.account_name))"
-      - name: "Terraform storage access key"
-        description: "Azure Storage Account key to use to store terraform remote state file."
-        key: terraform_storage_access_key
-        widget: cy_cred
-        type: string
-        default: "((azure_storage.access_key))"
-      - name: "Terraform storage container name"
-        description: "Azure Storage container name to store terraform remote state file."
-        key: terraform_storage_container_name
-        widget: simple_text
-        type: string
-        default: "($ .organization_canonical $)"
-      - name: "Terraform storage container path"
-        description: "Azure Storage container path to store terraform remote state file."
-        key: terraform_storage_container_path
-        widget: simple_text
-        type: string
-        default: "($ .project $)/($ .environment $)"
-      - name: "Private module SSH key"
-        description: "SSH key to use to clone private terraform modules from Git."
-        key: terraform_modules_private_key
-        widget: cy_cred
-        type: string
-        default: ""
-
-    - name: "Repos"
-      technologies: [pipeline]
-      vars:
-      - name: "Code git URL"
-        description: "URL to the Git repository containing terraform source code."
-        key: git_repository
-        widget: simple_text
-        type: string
-        default: "git@github.com:MyUser/code.git"
-      - name: "Code git branch"
-        description: "Branch of the terraform source code Git repository."
-        key: git_branch
-        widget: simple_text
-        type: string
-        default: "master"
-      - name: "Code git key"
-        description: "SSH key pair to fetch terraform source code Git repository."
-        key: git_private_key
+        values: ["public", "china", "german", "stack", "usgovernment"]
+        default: "public"
+      - name: "Azure credential"
+        description: "The azure credential containing subscription_id, tenant_id, client_id, client_secret"
+        key: azure_cred
         type: string
         widget: cy_cred
         widget_config:
-          cred_types:
-            - ssh
-        default: "((ssh_config.ssh_key))"
-      - name: "Code terraform path"
-        description: "Path of Terraform files in the git repository."
-        key: git_terraform_path
-        widget: simple_text
-        type: string
-        default: "./"
-
+          display_keys: false
+          cred_types: [azure]
+        default: "((azure))"
 
 - name: gcp
   sections:
   - name: Terraform
     groups:
-    - name: "Configuration"
+    - name: "Cloud access"
       technologies: [pipeline]
       vars:
       - name: "GCP project name"
         description: "The GCP project name to use"
         key: gcp_project
+        type: string
         widget: simple_text
-        type: string
-        default: "($ .project $)"
+        default: ($ .project $)
       - name: "GCP zone"
-        key: gcp_region
-        widget: auto_complete
+        key: gcp_zone
         type: string
-        values: [asia-east1,asia-east2,asia-northeast1,asia-northeast2,asia-northeast3,asia-south1,asia-southeast1,australia-southeast1,europe-north1,europe-west1,europe-west2,europe-west3,europe-west4,europe-west6,northamerica-northeast1,southamerica-east1,us-central1,us-east1,us-east4,us-west1,us-west2,us-west3,us-west4]
-        default: "europe-west1"
+        widget: auto_complete
+        values: ["asia-east1-a", "asia-east1-b", "asia-east1-c", "asia-east2-a", "asia-east2-b", "asia-east2-c", "asia-northeast1-a", "asia-northeast1-b", "asia-northeast1-c", "asia-northeast2-a", "asia-northeast2-b", "asia-northeast2-c", "asia-northeast3-a", "asia-northeast3-b", "asia-northeast3-c", "asia-south1-a", "asia-south1-b", "asia-south1-c", "asia-southeast1-a", "asia-southeast1-b", "asia-southeast1-c", "australia-southeast1-a", "australia-southeast1-b", "australia-southeast1-c", "europe-north1-a", "europe-north1-b", "europe-north1-c", "europe-west1-b", "europe-west1-c", "europe-west1-d", "europe-west2-a", "europe-west2-b", "europe-west2-c", "europe-west3-a", "europe-west3-b", "europe-west3-c", "europe-west4-a", "europe-west4-b", "europe-west4-c", "europe-west6-a", "europe-west6-b", "europe-west6-c", "northamerica-northeast1-a", "northamerica-northeast1-b", "northamerica-northeast1-c", "southamerica-east1-a", "southamerica-east1-b", "southamerica-east1-c", "us-central1-a", "us-central1-b", "us-central1-c", "us-central1-f", "us-east1-b", "us-east1-c", "us-east1-d", "us-east4-a", "us-east4-b", "us-east4-c", "us-west1-a", "us-west1-b", "us-west1-c", "us-west2-a", "us-west2-b", "us-west2-c", "us-west3-a", "us-west3-b", "us-west3-c", "us-west4-a", "us-west4-b", "us-west4-c"]
+        default: "europe-west1-b"
       - name: "GCP json credentials"
         description: "GCP credentials in json format which should be used"
         key: gcp_credentials_json
+        type: string
         widget: cy_cred
         widget_config:
-          cred_types:
-            - gcp
-        type: string
+          cred_types: [gcp]
         default: "((gcp.json_key))"
-      - name: "Terraform storage bucket"
-        description: "Google Cloud Storage bucket name to store terraform remote state file."
-        key: terraform_storage_bucket_name
-        widget: simple_text
-        type: string
-        default: ($ .organization_canonical $)-terraform-remote-state
-      - name: "Private module SSH key"
-        description: "SSH key to use to clone private terraform modules from Git."
-        key: terraform_modules_private_key
-        widget: cy_cred
-        type: string
-        default: ""
-      - name: "Terraform version"
-        description: "terraform version used to execute your code."
-        key: terraform_version
-        widget: simple_text
-        type: string
-        default: "latest"
-
-    - name: "Configuration"
-      technologies: [pipeline]
-      vars:
-      - name: "Code git URL"
-        description: "URL to the Git repository containing terraform source code."
-        key: git_repository
-        widget: simple_text
-        type: string
-        default: "git@github.com:MyUser/code.git"
-      - name: "Code git branch"
-        description: "Branch of the terraform source code Git repository."
-        key: git_branch
-        widget: simple_text
-        type: string
-        default: "master"
-      - name: "Code git key"
-        description: "SSH key pair to fetch terraform source code Git repository."
-        key: git_private_key
-        type: string
-        widget: cy_cred
-        widget_config:
-          cred_types:
-            - ssh
-        default: "((ssh_config.ssh_key))"
-      - name: "Code terraform path"
-        description: "Path of Terraform files in the git repository."
-        key: git_terraform_path
-        widget: simple_text
-        type: string
-        default: "./"
