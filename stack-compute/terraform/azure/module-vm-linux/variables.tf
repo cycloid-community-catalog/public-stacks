@@ -1,16 +1,20 @@
 ###
 # Cycloid requirements
 ###
+variable "component" {
+  description = "Cycloid component canonical."
+}
+
 variable "env" {
-  description = "Cycloid project name."
+  description = "Cycloid environment canonical."
 }
 
 variable "project" {
-  description = "Cycloid environment name."
+  description = "Cycloid project canonical."
 }
 
-variable "customer" {
-  description = "Cycloid customer name."
+variable "org" {
+  description = "Cycloid org canonical."
 }
 
 ###
@@ -210,20 +214,21 @@ variable "disk_size" {
 locals {
   standard_tags = {
     "cycloid.io" = "true"
+    component    = var.component
     env          = var.env
     project      = var.project
-    client       = var.customer
-    organization = var.customer
+    client       = var.org
+    organization = var.org
   }
   network_tags  = merge(var.network_extra_tags, local.standard_tags)
   sg_tags       = merge(var.sg_extra_tags, local.standard_tags)
   instance_tags = merge(var.instance_extra_tags, local.standard_tags)
 
-  # if names not set take by default ${var.customer}-${var.project}-${var.env}-object
-  public_ip_name              = var.public_ip_name != "" ? var.public_ip_name : "${var.customer}-${var.project}-${var.env}-public_ip"
-  network_interface_name      = var.network_interface_name != "" ? var.network_interface_name : "${var.customer}-${var.project}-${var.env}-nic"
-  ip_config_name              = var.ip_config_name != "" ? var.ip_config_name : "${var.customer}-${var.project}-${var.env}-ip_config"
-  network_security_group_name = var.network_security_group_name != "" ? var.network_security_group_name : "${var.customer}-${var.project}-${var.env}-sg"
-  instance_name               = var.instance_name != "" ? var.instance_name : "${var.customer}-${var.project}-${var.env}-vm"
-  disk_name                   = var.disk_name != "" ? var.disk_name : "${var.customer}-${var.project}-${var.env}-disk"
+  # if names not set take by default ${var.org}-${var.project}-${var.env}-${var.component}-object
+  public_ip_name              = var.public_ip_name != "" ? var.public_ip_name : "${var.org}-${var.project}-${var.env}-${var.component}-public_ip"
+  network_interface_name      = var.network_interface_name != "" ? var.network_interface_name : "${var.org}-${var.project}-${var.env}-${var.component}-nic"
+  ip_config_name              = var.ip_config_name != "" ? var.ip_config_name : "${var.org}-${var.project}-${var.env}-${var.component}-ip_config"
+  network_security_group_name = var.network_security_group_name != "" ? var.network_security_group_name : "${var.org}-${var.project}-${var.env}-${var.component}-sg"
+  instance_name               = var.instance_name != "" ? var.instance_name : "${var.org}-${var.project}-${var.env}-${var.component}-vm"
+  disk_name                   = var.disk_name != "" ? var.disk_name : "${var.org}-${var.project}-${var.env}-${var.component}-disk"
 }

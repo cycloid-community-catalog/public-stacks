@@ -1,16 +1,20 @@
 ###
 # Cycloid Requirements
 ###
+variable "component" {
+  description = "Cycloid component canonical."
+}
+
 variable "env" {
-  description = "Cycloid project name."
+  description = "Cycloid project canonical."
 }
 
 variable "project" {
-  description = "Cycloid environment name."
+  description = "Cycloid environment canonical."
 }
 
-variable "customer" {
-  description = "Cycloid customer name."
+variable "org" {
+  description = "Cycloid org canonical."
 }
 
 ###
@@ -163,16 +167,17 @@ variable "instance_extra_labels" {
 locals {
   standard_labels = {
     cycloidio    = "true"
+    component    = var.component
     env          = var.env
     project      = var.project
-    client       = var.customer
-    organization = var.customer
+    client       = var.org
+    organization = var.org
   }
   instance_labels = merge(var.instance_extra_labels, local.standard_labels)
 
-  # if names not set take by default ${var.customer}-${var.project}-${var.env}-object
-  ingress_name  = var.ingress_firewall_name != "" ? var.ingress_firewall_name : "${var.customer}-${var.project}-${var.env}-ingress"
-  egress_name   = var.egress_firewall_name != "" ? var.egress_firewall_name : "${var.customer}-${var.project}-${var.env}-egress"
-  instance_name = var.instance_name != "" ? var.instance_name : "${var.customer}-${var.project}-${var.env}-vm"
-  instance_tags = var.instance_tags != [] ? var.instance_tags : ["${var.customer}-${var.project}-${var.env}-network-tag"]
+  # if names not set take by default ${var.org}-${var.project}-${var.env}-${var.component}-object
+  ingress_name  = var.ingress_firewall_name != "" ? var.ingress_firewall_name : "${var.org}-${var.project}-${var.env}-${var.component}-ingress"
+  egress_name   = var.egress_firewall_name != "" ? var.egress_firewall_name : "${var.org}-${var.project}-${var.env}-${var.component}-egress"
+  instance_name = var.instance_name != "" ? var.instance_name : "${var.org}-${var.project}-${var.env}-${var.component}-vm"
+  instance_tags = var.instance_tags != [] ? var.instance_tags : ["${var.org}-${var.project}-${var.env}-${var.component}-network-tag"]
 }

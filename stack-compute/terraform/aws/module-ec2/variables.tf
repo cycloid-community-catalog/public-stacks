@@ -1,16 +1,20 @@
 ###
 # CYCLOID REQUIREMENTS
 ###
+variable "component" {
+  description = "Cycloid component canonical."
+}
+
 variable "env" {
-  description = "Cycloid project name."
+  description = "Cycloid project canonical."
 }
 
 variable "project" {
-  description = "Cycloid environment name."
+  description = "Cycloid environment canonical."
 }
 
-variable "customer" {
-  description = "Cycloid customer name."
+variable "org" {
+  description = "Cycloid org canonical."
 }
 
 ###
@@ -186,14 +190,15 @@ variable "volume_extra_tags" {
 locals {
   standard_tags = {
     "cycloid.io" = "true"
+    component    = var.component
     env          = var.env
     project      = var.project
-    client       = var.customer
-    organization = var.customer
+    client       = var.org
+    organization = var.org
   }
   sg_tags        = merge(var.sg_extra_tags, local.standard_tags)
   vm_volume_tags = merge(var.volume_extra_tags, local.standard_tags)
   instance_tags  = merge(var.instance_extra_tags, local.standard_tags)
-  //if security group name not set take by default ${var.customer}-${var.project}-vm-${var.env}
-  security_group_name = var.sg_name != "" ? var.sg_name : "${var.customer}-${var.project}-vm-${var.env}"
+  //if security group name not set take by default ${var.org}-${var.project}-${var.env}-vm-${var.component}
+  security_group_name = var.sg_name != "" ? var.sg_name : "${var.org}-${var.project}-${var.env}-vm-${var.component}"
 }

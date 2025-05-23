@@ -1,9 +1,7 @@
-# Configuration of Cycloid stack
 ---
-version: '3'
+version: '4'
 name: 'Compute'
 canonical: 'stack-compute'
-status: 'public'
 description: |
   This stack allows to deploy a configure compute instance in one of the available providers.
 keywords:
@@ -38,12 +36,12 @@ config:
         path: 'pipeline/pipeline.yml'
       variables:
         path: 'pipeline/variables.sample.yml'
-        destination: '($ .project $)/pipeline/variables-($ .environment $).yml'
+        destination: '($ .config_root $)/pipeline/variables.yml'
     # Configuration of terraform to setup the infrastructure
     terraform:
       aws-ec2:
         path: 'terraform/aws/vm.tf.sample'
-        destination: '($ .project $)/terraform/($ .environment $)/vm.tf'
+        destination: '($ .config_root $)/terraform/vm.tf'
 
   # define the default environment for azure
   azure-linux:
@@ -56,12 +54,12 @@ config:
         path: 'pipeline/pipeline.yml'
       variables:
         path: 'pipeline/variables.sample.yml'
-        destination: '($ .project $)/pipeline/variables-($ .environment $).yml'
+        destination: '($ .config_root $)/pipeline/variables.yml'
     # Configuration of terraform to setup the infrastructure
     terraform:
       azure-linux:
         path: 'terraform/azure/vm.tf.sample'
-        destination: '($ .project $)/terraform/($ .environment $)/vm.tf'
+        destination: '($ .config_root $)/terraform/vm.tf'
 
   # define the default environment for gcp
   gcp-gce:
@@ -74,9 +72,9 @@ config:
         path: 'pipeline/pipeline.yml'
       variables:
         path: 'pipeline/variables.sample.yml'
-        destination: '($ .project $)/pipeline/variables-($ .environment $).yml'
+        destination: '($ .config_root $)/pipeline/variables.yml'
     # Configuration of terraform to setup the infrastructure
     terraform:
       gcp-gce:
         path: 'terraform/gcp/vm.tf.sample'
-        destination: '($ .project $)/terraform/($ .environment $)/vm.tf'
+        destination: '($ .config_root $)/terraform/vm.tf'
