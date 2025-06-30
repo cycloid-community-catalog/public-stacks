@@ -48,14 +48,14 @@ resources:
   type: git
   icon: git
   source:
-    uri: ($ .catalog_repository_url $)
-    branch: ($ .catalog_repository_branch $)
-    ($- if eq .catalog_repository_credential_type "basic_auth" $)
-    username: ((($ .catalog_repository_credential_path $).username))
-    password: ((($ .catalog_repository_credential_path $).password))
+    uri: ($ .config_repository_url $)
+    branch: ($ .config_repository_branch $)
+    ($- if eq .config_repository_credential_type "basic_auth" $)
+    username: ((($ .config_repository_credential_path $).username))
+    password: ((($ .config_repository_credential_path $).password))
     ($- end $)
-    ($- if eq .catalog_repository_credential_type "ssh" $)
-    private_key: ((($ .catalog_repository_credential_path $).ssh_key))
+    ($- if eq .config_repository_credential_type "ssh" $)
+    private_key: ((($ .config_repository_credential_path $).ssh_key))
     ($- end $)
     paths:
       - ($ .project $)/k8s/($ .environment $)/*
@@ -65,14 +65,14 @@ resources:
   type: git
   icon: git
   source:
-    uri: ($ .catalog_repository_url $)
-    branch: ($ .catalog_repository_branch $)
-    ($- if eq .catalog_repository_credential_type "basic_auth" $)
-    username: ((($ .catalog_repository_credential_path $).username))
-    password: ((($ .catalog_repository_credential_path $).password))
+    uri: ($ .config_repository_url $)
+    branch: ($ .config_repository_branch $)
+    ($- if eq .config_repository_credential_type "basic_auth" $)
+    username: ((($ .config_repository_credential_path $).username))
+    password: ((($ .config_repository_credential_path $).password))
     ($- end $)
-    ($- if eq .catalog_repository_credential_type "ssh" $)
-    private_key: ((($ .catalog_repository_credential_path $).ssh_key))
+    ($- if eq .config_repository_credential_type "ssh" $)
+    private_key: ((($ .config_repository_credential_path $).ssh_key))
     ($- end $)
     paths:
       - ($ .project $)/terraform/($ .environment $)/*
