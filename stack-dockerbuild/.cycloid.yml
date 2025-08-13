@@ -2,7 +2,7 @@
 version: '4'
 # Configuration of the Cycloid stack
 name: 'Stack Docker build'
-canonical: 'stack-dockerbuild-v4'
+canonical: 'stack-dockerbuild'
 description: |
   Build and test a docker image before pushing it to a registry.
 keywords:
