@@ -18,7 +18,7 @@ use_cases:
         description: "Tag to put on the builded image (eg latest)."
         key: registry_tag
         type: string
-        default: "($ .environment $)"
+        default: "($ .component $)"
         widget: simple_text
         required: true
       - name: "Extra Tags"
