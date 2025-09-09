@@ -1,9 +1,8 @@
 ---
 # Configuration of the Cycloid stack
-version: '3'
+version: '4'
 name: 'K8s runner'
 canonical: 'stack-k8s-runner'
-status: 'public'
 description: |
   Used to manage resources deployed on a Kubernetes cluster with plain YAML manifests and/or terraform resources.
 keywords:
@@ -32,7 +31,7 @@ config:
         path: 'pipeline/pipeline.yml'
       variables:
         path: 'pipeline/variables.sample.yml'
-        destination: '($ .project $)/pipeline/variables-($ .environment $).yml'
+        destination: "($ .project $)/($ .env $)/($ .component $)/pipeline/variables.yml"
   default_terraform:
     name: 'Classic Kubernetes + Terraform'
     description: 'For on-premises style Kubernetes clusters + terraform code.'
@@ -42,7 +41,7 @@ config:
         path: 'pipeline/pipeline.yml'
       variables:
         path: 'pipeline/variables.sample.yml'
-        destination: '($ .project $)/pipeline/variables-($ .environment $).yml'
+        destination: "($ .project $)/($ .env $)/($ .component $)/pipeline/variables.yml"
   eks:
     name: 'Amazon EKS'
     description: 'For AWS Elastic Kubernetes Service clusters.'
@@ -52,7 +51,7 @@ config:
         path: 'pipeline/pipeline.yml'
       variables:
         path: 'pipeline/variables.sample.yml'
-        destination: '($ .project $)/pipeline/variables-($ .environment $).yml'
+        destination: "($ .project $)/($ .env $)/($ .component $)/pipeline/variables.yml"
   eks_terraform:
     name: 'Amazon EKS + Terraform'
     description: 'For AWS Elastic Kubernetes Service clusters + terraform code.'
@@ -62,7 +61,7 @@ config:
         path: 'pipeline/pipeline.yml'
       variables:
         path: 'pipeline/variables.sample.yml'
-        destination: '($ .project $)/pipeline/variables-($ .environment $).yml'
+        destination: "($ .project $)/($ .env $)/($ .component $)/pipeline/variables.yml"
   gke:
     name: 'Google GKE'
     description: 'For Google Kubernetes Engine clusters.'
@@ -72,7 +71,7 @@ config:
         path: 'pipeline/pipeline.yml'
       variables:
         path: 'pipeline/variables.sample.yml'
-        destination: '($ .project $)/pipeline/variables-($ .environment $).yml'
+        destination: "($ .project $)/($ .env $)/($ .component $)/pipeline/variables.yml"
   gke_terraform:
     name: 'Google GKE + Terraform'
     description: 'For Google Kubernetes Engine clusters + terraform code.'
@@ -82,4 +81,4 @@ config:
         path: 'pipeline/pipeline.yml'
       variables:
         path: 'pipeline/variables.sample.yml'
-        destination: '($ .project $)/pipeline/variables-($ .environment $).yml'
+        destination: "($ .project $)/($ .env $)/($ .component $)/pipeline/variables.yml"

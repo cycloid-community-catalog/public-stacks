@@ -40,6 +40,11 @@ shared:
       key: terraform_extra_vars
       widget: text_area
       type: map
+    - name: "Terraform version"
+      key: terraform_version
+      widget: simple_text
+      type: string
+      default: '1.10.0'
 
 - &cloudprovider-eks
   name: Cloud access
@@ -78,7 +83,6 @@ shared:
     - name: "GCP json credentials"
       description: "GCP credentials in json format which should be used"
       key: gcp_credentials_json
-      widget: cy_cred
       widget_config:
         cred_types:
           - gcp

@@ -58,7 +58,7 @@ resources:
     private_key: ((($ .config_repository_credential_path $).ssh_key))
     ($- end $)
     paths:
-      - ($ .project $)/k8s/($ .environment $)/*
+      - ($ .project $)/($ .env $)/($ .component $)/k8s/*
 
 ($- if or (eq .use_case "gke_terraform") (eq .use_case "eks_terraform") (eq .use_case "default_terraform") $)
 - name: git_config-terraform
@@ -75,7 +75,7 @@ resources:
     private_key: ((($ .config_repository_credential_path $).ssh_key))
     ($- end $)
     paths:
-      - ($ .project $)/terraform/($ .environment $)/*
+      - ($ .project $)/($ .env $)/($ .component $)/terraform/*
 ($- end $)
 
 - name: k8s
@@ -106,6 +106,7 @@ resources:
       env: ($ .environment $)
       project: ($ .project $)
       organization: ($ .organization_canonical $)
+      component: ($ .component $)
       kubeconfig: ((k8s_kubeconfig))
       extra_vars: ((terraform_extra_vars))
     ($- if eq .use_case "eks_terraform" $)
@@ -184,13 +185,13 @@ jobs:
           resource: k8s
           params:
             kubectl: |
-              diff $(grep -rnw git_config-k8s/($ .project $)/k8s/($ .environment $) -e 'apiVersion:' --include='*.yaml' --include='*.yml' --files-with-matches | xargs -I % sh -c "echo -f %" )
+              diff $(grep -rnw git_config-k8s/($ .project $)/($ .env $)/($ .component $)/k8s -e 'apiVersion:' --include='*.yaml' --include='*.yml' --files-with-matches | xargs -I % sh -c "echo -f %" )
 
       - put: kubectl apply dry-run
         resource: k8s
         params:
           kubectl: |
-            apply --dry-run=server $(grep -rnw git_config-k8s/($ .project $)/k8s/($ .environment $) -e 'apiVersion:' --include='*.yaml' --include='*.yml' --files-with-matches | xargs -I % sh -c "echo -f %" )
+            apply --dry-run=server $(grep -rnw git_config-k8s/($ .project $)/($ .env $)/($ .component $)/k8s -e 'apiVersion:' --include='*.yaml' --include='*.yml' --files-with-matches | xargs -I % sh -c "echo -f %" )
           wait_until_ready_selector: ((k8s_wait_ready_selector))
 
 - name: kubernetes-apply
@@ -208,7 +209,7 @@ jobs:
         resource: k8s
         params:
           kubectl: |
-            apply $(grep -rnw git_config-k8s/($ .project $)/k8s/($ .environment $) -e 'apiVersion:' --include='*.yaml' --include='*.yml' --files-with-matches | xargs -I % sh -c "echo -f %" )
+            apply $(grep -rnw git_config-k8s/($ .project $)/($ .env $)/($ .component $)/k8s -e 'apiVersion:' --include='*.yaml' --include='*.yml' --files-with-matches | xargs -I % sh -c "echo -f %" )
           wait_until_ready_selector: ((k8s_wait_ready_selector))
 
 - name: kubernetes-delete
@@ -224,7 +225,7 @@ jobs:
         resource: k8s
         params:
           kubectl: |
-            delete $(grep -rnw git_config-k8s/($ .project $)/k8s/($ .environment $) -e 'apiVersion:' --include='*.yaml' --include='*.yml' --files-with-matches | xargs -I % sh -c "echo -f %" )
+            delete $(grep -rnw git_config-k8s/($ .project $)/($ .env $)/($ .component $)/k8s -e 'apiVersion:' --include='*.yaml' --include='*.yml' --files-with-matches | xargs -I % sh -c "echo -f %" )
           wait_until_ready_selector: ((k8s_wait_ready_selector))
 
 ($- if or (eq .use_case "gke_terraform") (eq .use_case "eks_terraform") (eq .use_case "default_terraform") $)
@@ -243,7 +244,7 @@ jobs:
       - put: tfstate
         params:
           plan_only: true
-          terraform_source: git_config-terraform/($ .project $)/terraform/($ .environment $)/
+          terraform_source: git_config-terraform/($ .project $)/($ .env $)/($ .component $)/terraform/
 
 - name: terraform-apply
   serial: True
@@ -263,7 +264,7 @@ jobs:
     - put: tfstate
       params:
         plan_run: true
-        terraform_source: git_config-terraform/($ .project $)/terraform/($ .environment $)/
+        terraform_source: git_config-terraform/($ .project $)/($ .env $)/($ .component $)/terraform/
 
 - name: terraform-destroy
   max_in_flight: 1
@@ -276,7 +277,7 @@ jobs:
         - put: tfstate
           params:
             action: destroy
-            terraform_source: git_config-terraform/($ .project $)/terraform/($ .environment $)/
+            terraform_source: git_config-terraform/($ .project $)/($ .env $)/($ .component $)/terraform/
           get_params:
             action: destroy
 ($- end $)
