@@ -87,6 +87,7 @@ shared:
         cred_types:
           - gcp
       type: string
+      widget: cy_cred
       default: "((gcp_step-by-step.json_key))"
 
 use_cases:
