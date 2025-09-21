@@ -1,0 +1,20 @@
+#
+# Cloud Provider
+#
+
+#. aws_cred (required): ((aws))
+#+ Amazon credentials containing access key and secret key for Terraform. See value format [here](https://docs.cycloid.io/advanced-guide/integrate-and-use-cycloid-credentials-manager.html#vault-in-the-pipeline)
+aws_cred: ((aws))
+
+#. aws_default_region (required): eu-west-1
+#+ AWS region to use for Terraform.
+aws_region: eu-west-1
+
+
+#
+# Default variables
+#
+
+#. terraform_version (required): '1.8.3'
+#+ terraform version used to execute your code.
+terraform_version: '1.8.3'

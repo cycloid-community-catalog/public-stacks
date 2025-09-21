@@ -1,0 +1,57 @@
+---
+version: "2"
+use_cases:
+- name: default
+  sections:
+  - name: Compute Instance
+    groups:
+    - name: Access Configuration
+      technologies: [pipeline]
+      vars:
+      - name: "AWS Account"
+        description: "The AWS account where to deploy the infrastructure. It contains access key and secret key."
+        key: aws_cred
+        widget: cy_cred
+        widget_config:
+          display_keys: false
+          cred_types:
+            - aws
+        type: string
+        default: "((aws))"
+        required: true
+
+      - name: "AWS Region"
+        description: "AWS region to use for Terraform."
+        key: aws_region
+        widget: auto_complete
+        type: string
+        default: "eu-west-1"
+        values_ref: https://cycloid-demo-stackforms-values.s3.eu-west-1.amazonaws.com/aws-regions.json
+        required: true
+
+    - name: VM Specs
+      technologies: [terraform]
+      vars:
+      - name: "Instance type"
+        description: "Instance type for the VM."
+        key: vm_instance_type
+        widget: slider_list
+        type: string
+        default: "t3a.small"
+        values:
+            - "t3a.small"
+            - "t3a.medium"
+            - "t3a.large"
+        required: true
+
+      - name: "Disk size"
+        unit: Go
+        description: "Disk size for the VM."
+        key: vm_disk_size
+        widget: slider_range
+        type: integer
+        default: 20
+        values:
+            - 20
+            - 250
+        required: true

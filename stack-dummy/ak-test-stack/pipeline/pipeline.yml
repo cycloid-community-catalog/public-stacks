@@ -1,0 +1,150 @@
+resource_types:
+- name: terraform
+  type: registry-image
+  source:
+    repository: cycloid/terraform-resource
+    tag: ((terraform_version))
+
+
+resources:
+- name: tfstate
+  type: terraform
+  icon: terraform
+  source:
+    env_name: ($ .environment $)
+    backend_type: http
+    backend_config:
+      address: '($ .api_url $)/inventory?jwt=($ .inventory_jwt $)'
+    vars:
+      aws_cred: ((aws_cred))
+      aws_region: ((aws_region))
+      cyorg: ($ .organization_canonical $)
+      cypro: ($ .project $)
+      cyenv: ($ .environment $)
+      cycom: ($ .component $)
+
+
+# The Terraform stack (will be merged with the config)
+- name: git_stack-terraform
+  type: git
+  icon: github-circle
+  source:
+    uri: ($ .scs_url $)
+    branch: ($ .scs_branch $)
+    ($- if eq .scs_cred_type "basic_auth" $)
+    username: ((($ .scs_cred_path $).username))
+    password: ((($ .scs_cred_path $).password))
+    ($- end $)
+    ($- if eq .scs_cred_type "ssh" $)
+    private_key: ((($ .scs_cred_path $).ssh_key))
+    ($- end $)
+    paths:
+      - ($ .stack_path $)/terraform/*
+
+# The Terraform config (will be merged with the stack)
+- name: git_config-terraform
+  type: git
+  icon: github-circle
+  source:
+    uri: ($ .cr_url $)
+    branch: ($ .cr_branch $)
+    ($- if eq .cr_cred_type "basic_auth" $)
+    username: ((($ .cr_cred_path $).username))
+    password: ((($ .cr_cred_path $).password))
+    ($- end $)
+    ($- if eq .cr_cred_type "ssh" $)
+    private_key: ((($ .cr_cred_path $).ssh_key))
+    ($- end $)
+    paths:
+      - ($ .organization_canonical $)/($ .project $)/($ .environment $)/($ .component $)/terraform/*
+
+
+groups:
+- name: overview
+  jobs:
+    - deploy
+
+- name: destroy
+  jobs:
+    - destroy
+
+
+jobs:
+  - name: deploy
+    serial: true
+    max_in_flight: 1
+    build_logs_to_retain: 10
+    plan:
+      - in_parallel:
+        - get: git_stack-terraform
+          trigger: true
+        - get: git_config-terraform
+          trigger: true
+
+      - task: merge-stack-and-config
+        config:
+          platform: linux
+          image_resource:
+            type: registry-image
+            source:
+              repository: cycloid/cycloid-toolkit
+              tag: latest
+          run:
+            path: /usr/bin/merge-stack-and-config
+          inputs:
+          - name: git_config-terraform
+            path: "config"
+          - name: git_stack-terraform
+            path: "stack"
+          outputs:
+          - name: merged-stack
+            path: "merged-stack"
+        params:
+          CONFIG_PATH: ($ .organization_canonical $)/($ .project $)/($ .environment $)/($ .component $)/terraform
+          STACK_PATH: ($ .stack_path $)/terraform
+
+      - put: tfstate
+        params:
+          terraform_source: merged-stack/
+
+
+  - name: destroy
+    max_in_flight: 1
+    build_logs_to_retain: 10
+    plan:
+      - in_parallel:
+        - get: git_stack-terraform
+          trigger: false
+        - get: git_config-terraform
+          trigger: false
+        - get: tfstate
+          trigger: false
+
+      - task: merge-stack-and-config
+        config:
+          platform: linux
+          image_resource:
+            type: registry-image
+            source:
+              repository: cycloid/cycloid-toolkit
+              tag: latest
+          run:
+            path: /usr/bin/merge-stack-and-config
+          inputs:
+          - name: git_config-terraform
+            path: "config"
+          - name: git_stack-terraform
+            path: "stack"
+          outputs:
+          - name: merged-stack
+            path: "merged-stack"
+        params:
+          CONFIG_PATH: ($ .organization_canonical $)/($ .project $)/($ .environment $)/($ .component $)/terraform
+          STACK_PATH: ($ .stack_path $)/terraform
+
+      - put: tfstate
+        params:
+          action: destroy
+          terraform_source: merged-stack/
+        get_params:
+          action: destroy

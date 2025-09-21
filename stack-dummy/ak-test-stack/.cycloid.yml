@@ -1,0 +1,25 @@
+version: '4'
+name: 'ak-test-stack'
+canonical: 'ak-test-stack'
+description: 'Deploys one AWS EC2 instance using Terraform.'
+author: 'alan_king'
+image: 'https://github.com/cycloidio/bootstrap-stacks/blob/master/blank-sample/thumbnail.png'
+template: false
+keywords:
+  - terraform
+  - provider:aws
+technologies:
+  - technology: terraform
+    version: 1.8.3
+config:
+  default:
+    pipeline:
+      pipeline:
+        path: pipeline/pipeline.yml
+      variables:
+        path: pipeline/variables.sample.yml
+        destination: '($ .organization_canonical $)/($ .project $)/($ .environment $)/($ .component $)/pipeline/variables.yml'
+    terraform:
+      main:
+        path: 'terraform/main.tf'
+        destination: '($ .organization_canonical $)/($ .project $)/($ .environment $)/($ .component $)/terraform/main.tf'
