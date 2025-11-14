@@ -1,0 +1,16 @@
+# Define the stack configuration form and organize inputs of various types into sections and groups.
+# See: https://docs.staging.cycloid.io/deploy/stackforms/file-format.html
+use_cases:
+- name: default
+  sections:
+  - name: Example section
+    groups:
+    - name: Example group
+      technologies: [pipeline]
+      vars:
+      - name: "Message"
+        description: "A message echoed during pipeline runs."
+        key: message
+        type: string
+        widget: simple_text
+        default: "hello world"

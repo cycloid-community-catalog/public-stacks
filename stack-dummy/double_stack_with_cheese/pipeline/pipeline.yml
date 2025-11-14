@@ -1,0 +1,19 @@
+# Define jobs that form the pipeline
+jobs:
+- name: example-job
+  build_logs_to_retain: 12
+  plan:
+  - task: example-task
+    config:
+      platform: linux
+      image_resource:
+        type: registry-image
+        source: { repository: busybox }
+      params:
+        MESSAGE: ((message))
+      run:
+        path: sh
+        args:
+        - -ec
+        - |
+          echo $MESSAGE
