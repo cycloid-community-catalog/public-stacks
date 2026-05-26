@@ -59,7 +59,13 @@ resources:
     icon: git
     source:
       uri: https://github.com/cycloid-community-catalog/stack-dockerbuild
-      branch: ($ .catalog_repository_branch $)
+      # Allow stack versioning by tag or branch
+      ($- if eq .stack_version_type "tag" $)
+      tag_filter: ($ .stack_version_ref $)
+      fetch_tags: true
+      ($- else $)
+      branch: ($ coalesce .stack_version_ref .catalog_repository_branch $)
+      ($- end $)
       paths:
         - docker/*
 
