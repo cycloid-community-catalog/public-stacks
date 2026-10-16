@@ -183,12 +183,14 @@ jobs:
       - try:
           put: kubectl diff
           resource: k8s
+          inputs: [git_config-k8s]
           params:
             kubectl: |
               diff $(grep -rnw git_config-k8s/($ .project $)/($ .env $)/($ .component $)/k8s -e 'apiVersion:' --include='*.yaml' --include='*.yml' --files-with-matches | xargs -I % sh -c "echo -f %" )
 
       - put: kubectl apply dry-run
         resource: k8s
+        inputs: [git_config-k8s]
         params:
           kubectl: |
             apply --dry-run=server $(grep -rnw git_config-k8s/($ .project $)/($ .env $)/($ .component $)/k8s -e 'apiVersion:' --include='*.yaml' --include='*.yml' --files-with-matches | xargs -I % sh -c "echo -f %" )
@@ -207,6 +209,7 @@ jobs:
 
       - put: kubectl apply
         resource: k8s
+        inputs: [git_config-k8s]
         params:
           kubectl: |
             apply $(grep -rnw git_config-k8s/($ .project $)/($ .env $)/($ .component $)/k8s -e 'apiVersion:' --include='*.yaml' --include='*.yml' --files-with-matches | xargs -I % sh -c "echo -f %" )
@@ -223,6 +226,7 @@ jobs:
 
       - put: kubectl delete
         resource: k8s
+        inputs: [git_config-k8s]
         params:
           kubectl: |
             delete $(grep -rnw git_config-k8s/($ .project $)/($ .env $)/($ .component $)/k8s -e 'apiVersion:' --include='*.yaml' --include='*.yml' --files-with-matches | xargs -I % sh -c "echo -f %" )
